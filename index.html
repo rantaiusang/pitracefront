@@ -216,6 +216,13 @@
         border-radius: 8px;
     }
 
+    .btn-disabled {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: rgba(255, 255, 255, 0.5) !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+    }
+
     /* User Welcome */
     .user-welcome {
         display: flex;
@@ -424,6 +431,12 @@
     .product-meta {
         color: var(--light-gray);
         font-size: 0.8rem;
+    }
+
+    .product-owner {
+        color: var(--light-gray);
+        font-size: 0.7rem;
+        margin-top: 3px;
     }
 
     .product-actions {
@@ -722,6 +735,13 @@
     .history-product {
         color: var(--light-gray);
         font-size: 0.8rem;
+        margin-bottom: 5px;
+    }
+
+    .history-user {
+        color: var(--light-gray);
+        font-size: 0.7rem;
+        font-style: italic;
     }
 
     /* Product Detail Modal */
@@ -1246,7 +1266,7 @@
                             <option value="Indonesia">Indonesia</option>
                             <option value="Malaysia">Malaysia</option>
                             <option value="Singapore">Singapore</option>
-                            <option valueThailand">Thailand</option>
+                            <option value="Thailand">Thailand</option>
                             <option value="Vietnam">Vietnam</option>
                             <option value="Filipina">Filipina</option>
                             <option value="China">China</option>
@@ -1274,6 +1294,10 @@
                     <div class="info-row">
                         <span class="info-label-preview">Asal Barang:</span>
                         <span class="info-value-preview" id="originDisplay">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label-preview">Ditambahkan Oleh:</span>
+                        <span class="info-value-preview" id="ownerDisplay">-</span>
                     </div>
                 </div>
             </div>
@@ -1354,7 +1378,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('productDetailModal')">Tutup</button>
-                <button class="btn btn-danger" onclick="deleteCurrentProduct()">
+                <button class="btn btn-danger" id="deleteProductDetailBtn" onclick="deleteCurrentProduct()">
                     <i class="fas fa-trash"></i> Hapus Produk
                 </button>
             </div>
@@ -1373,6 +1397,7 @@
                     <i class="fas fa-exclamation-triangle"></i>
                     <h3>Apakah Anda yakin?</h3>
                     <p>Anda akan menghapus produk: <strong id="deleteProductName">Nama Produk</strong></p>
+                    <p>Ditambahkan oleh: <strong id="deleteProductOwner">-</strong></p>
                     <p class="warning-text">Tindakan ini tidak dapat dibatalkan!</p>
                 </div>
             </div>
@@ -1452,12 +1477,15 @@
         }
 
         // Tambah riwayat aktivitas
-        addActivity(action, productName, productId = null) {
+        addActivity(action, productName, productId = null, additionalInfo = '') {
             const activity = {
                 id: 'act_' + Date.now(),
                 action: action,
                 productName: productName,
                 productId: productId,
+                user: this.state.currentUser.username,
+                userId: this.state.currentUser.uid,
+                additionalInfo: additionalInfo,
                 timestamp: new Date().toISOString(),
                 dateDisplay: new Date().toLocaleString('id-ID')
             };
@@ -1613,7 +1641,7 @@
 
         guestLogin() {
             const guestUser = {
-                username: 'Pengguna Tamu',
+                username: 'Pengguna Tamu_' + Math.floor(Math.random() * 1000),
                 uid: 'guest_' + Date.now()
             };
             
@@ -1670,6 +1698,7 @@
             
             document.getElementById('uploadDateDisplay').textContent = now.toLocaleString('id-ID');
             document.getElementById('hashCodeDisplay').textContent = this.generateShortHash();
+            document.getElementById('ownerDisplay').textContent = this.state.currentUser.username;
             
             // Update asal barang preview
             if (country && city) {
@@ -1695,6 +1724,8 @@
                 originCity: document.getElementById('originCity').value,
                 id: 'prod_' + Date.now(),
                 hash: document.getElementById('hashCodeDisplay').textContent,
+                owner: this.state.currentUser.username,
+                ownerId: this.state.currentUser.uid,
                 timestamp: new Date().toISOString(),
                 dateDisplay: new Date().toLocaleString('id-ID'),
                 status: 'active'
@@ -1736,15 +1767,23 @@
                     </div>
                 `;
             } else {
-                productList.innerHTML = this.state.products.map(product => `
+                productList.innerHTML = this.state.products.map(product => {
+                    const isOwner = product.ownerId === this.state.currentUser.uid;
+                    const canDelete = isOwner;
+                    
+                    return `
                     <div class="product-card" onclick="app.showProductDetail('${product.id}')">
                         <div class="product-header">
                             <div>
                                 <div class="product-name">${product.name}</div>
                                 <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${product.unit}</div>
+                                <div class="product-owner">Ditambahkan oleh: ${product.owner}</div>
                             </div>
                             <div class="product-actions">
-                                <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); app.confirmDelete('${product.id}', '${product.name}')">
+                                <button class="btn btn-danger btn-small ${!canDelete ? 'btn-disabled' : ''}" 
+                                    onclick="event.stopPropagation(); ${canDelete ? `app.confirmDelete('${product.id}', '${product.name}', '${product.owner}')` : ''}"
+                                    ${!canDelete ? 'disabled' : ''}
+                                    title="${!canDelete ? 'Hanya pemilik produk yang dapat menghapus' : 'Hapus produk'}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -1774,7 +1813,8 @@
                             ` : ''}
                         </div>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
             }
             
             if (productCount) {
@@ -1788,6 +1828,19 @@
             if (!product) return;
 
             this.state.currentProduct = product;
+            const isOwner = product.ownerId === this.state.currentUser.uid;
+            
+            // Update tombol hapus di detail modal
+            const deleteBtn = document.getElementById('deleteProductDetailBtn');
+            if (isOwner) {
+                deleteBtn.classList.remove('btn-disabled');
+                deleteBtn.disabled = false;
+                deleteBtn.title = 'Hapus produk';
+            } else {
+                deleteBtn.classList.add('btn-disabled');
+                deleteBtn.disabled = true;
+                deleteBtn.title = 'Hanya pemilik produk yang dapat menghapus';
+            }
             
             const detailBody = document.getElementById('productDetailBody');
             detailBody.innerHTML = `
@@ -1807,6 +1860,7 @@
                         <div class="detail-value"><strong>Kuantitas:</strong> ${product.quantity} ${product.unit}</div>
                         <div class="detail-value"><strong>Kategori:</strong> ${this.getCategoryDisplay(product.category)}</div>
                         <div class="detail-value"><strong>Status:</strong> <span style="color: #4cc9a7;">Aktif</span></div>
+                        <div class="detail-value"><strong>Ditambahkan oleh:</strong> ${product.owner}</div>
                     </div>
                     
                     <div class="detail-card">
@@ -1844,9 +1898,11 @@
 
         // Hapus produk dari detail modal
         deleteCurrentProduct() {
-            if (this.state.currentProduct) {
+            if (this.state.currentProduct && this.state.currentProduct.ownerId === this.state.currentUser.uid) {
                 this.closeModal('productDetailModal');
-                this.confirmDelete(this.state.currentProduct.id, this.state.currentProduct.name);
+                this.confirmDelete(this.state.currentProduct.id, this.state.currentProduct.name, this.state.currentProduct.owner);
+            } else {
+                this.showStatus('Anda tidak memiliki izin untuk menghapus produk ini', 'error');
             }
         }
 
@@ -1860,9 +1916,10 @@
             return categories[category] || category;
         }
 
-        confirmDelete(productId, productName) {
-            this.state.currentProduct = { id: productId, name: productName };
+        confirmDelete(productId, productName, productOwner) {
+            this.state.currentProduct = { id: productId, name: productName, owner: productOwner };
             document.getElementById('deleteProductName').textContent = productName;
+            document.getElementById('deleteProductOwner').textContent = productOwner;
             
             // Setup delete confirmation
             const confirmBtn = document.getElementById('confirmDeleteBtn');
@@ -1876,14 +1933,25 @@
             if (productIndex !== -1) {
                 const deletedProduct = this.state.products.splice(productIndex, 1)[0];
                 
-                // Simpan ke riwayat hapus
-                this.state.deletedProducts.unshift({
+                // Simpan ke riwayat hapus dengan informasi lengkap
+                const deleteInfo = {
                     ...deletedProduct,
+                    deletedBy: this.state.currentUser.username,
+                    deletedById: this.state.currentUser.uid,
                     deletedAt: new Date().toISOString(),
                     deletedAtDisplay: new Date().toLocaleString('id-ID')
-                });
+                };
                 
-                this.addActivity('Produk dihapus', deletedProduct.name, deletedProduct.id);
+                this.state.deletedProducts.unshift(deleteInfo);
+                
+                // Tambah riwayat aktivitas dengan informasi hapus
+                this.addActivity(
+                    'Produk dihapus', 
+                    deletedProduct.name, 
+                    deletedProduct.id,
+                    `Dihapus oleh: ${this.state.currentUser.username} | Asal produk: ${deletedProduct.originCity}, ${deletedProduct.originCountry}`
+                );
+                
                 this.loadUserProducts();
                 this.closeModal('deleteConfirmModal');
                 this.showStatus('Produk berhasil dihapus!', 'success');
@@ -1911,6 +1979,7 @@
                             <span class="history-date">${activity.dateDisplay}</span>
                         </div>
                         <div class="history-product">${activity.productName}</div>
+                        <div class="history-user">Oleh: ${activity.user} ${activity.additionalInfo ? `| ${activity.additionalInfo}` : ''}</div>
                     </div>
                 `).join('');
             }
@@ -1993,7 +2062,8 @@
                 product.description.toLowerCase().includes(searchTerm) ||
                 product.hash.toLowerCase().includes(searchTerm) ||
                 product.originCity.toLowerCase().includes(searchTerm) ||
-                product.originCountry.toLowerCase().includes(searchTerm)
+                product.originCountry.toLowerCase().includes(searchTerm) ||
+                product.owner.toLowerCase().includes(searchTerm)
             );
             
             const productList = document.getElementById('productList');
@@ -2005,15 +2075,23 @@
                     </div>
                 `;
             } else {
-                productList.innerHTML = filteredProducts.map(product => `
+                productList.innerHTML = filteredProducts.map(product => {
+                    const isOwner = product.ownerId === this.state.currentUser.uid;
+                    const canDelete = isOwner;
+                    
+                    return `
                     <div class="product-card" onclick="app.showProductDetail('${product.id}')">
                         <div class="product-header">
                             <div>
                                 <div class="product-name">${product.name}</div>
                                 <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${product.unit}</div>
+                                <div class="product-owner">Ditambahkan oleh: ${product.owner}</div>
                             </div>
                             <div class="product-actions">
-                                <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); app.confirmDelete('${product.id}', '${product.name}')">
+                                <button class="btn btn-danger btn-small ${!canDelete ? 'btn-disabled' : ''}" 
+                                    onclick="event.stopPropagation(); ${canDelete ? `app.confirmDelete('${product.id}', '${product.name}', '${product.owner}')` : ''}"
+                                    ${!canDelete ? 'disabled' : ''}
+                                    title="${!canDelete ? 'Hanya pemilik produk yang dapat menghapus' : 'Hapus produk'}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -2031,7 +2109,8 @@
                             </div>
                         </div>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
             }
             
             this.showStatus(`Menampilkan ${filteredProducts.length} hasil untuk "${searchTerm}"`, 'info');
