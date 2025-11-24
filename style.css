@@ -824,3 +824,417 @@ body {
         max-width: none;
     }
 }
+/* ============================================= */
+/* MOBILE FIXES - URGENT */
+/* ============================================= */
+
+/* Fix untuk tampilan mobile yang berantakan */
+@media (max-width: 480px) {
+    body {
+        padding: 10px !important;
+        font-size: 14px !important;
+    }
+    
+    .container {
+        max-width: 100% !important;
+        min-height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .glass-card {
+        padding: 25px 15px !important;
+        margin: 0 !important;
+        border-radius: 15px !important;
+        min-height: auto !important;
+    }
+    
+    /* Header Mobile Fix */
+    .header {
+        margin-bottom: 20px !important;
+    }
+    
+    .logo {
+        width: 60px !important;
+        height: 60px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .logo i {
+        font-size: 1.5rem !important;
+    }
+    
+    .title {
+        font-size: 1.8rem !important;
+        margin-bottom: 5px !important;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem !important;
+    }
+    
+    /* Welcome Message Mobile */
+    .welcome-message {
+        margin-bottom: 25px !important;
+    }
+    
+    .welcome-message h2 {
+        font-size: 1.3rem !important;
+    }
+    
+    .welcome-message p {
+        font-size: 0.9rem !important;
+    }
+    
+    /* Button Mobile Fix - SANGAT PENTING */
+    .btn {
+        padding: 16px 20px !important;
+        font-size: 16px !important; /* Prevent zoom on iOS */
+        min-height: 54px !important; /* Touch friendly */
+        margin-bottom: 10px !important;
+    }
+    
+    .btn-large {
+        padding: 18px 20px !important;
+        font-size: 17px !important;
+    }
+    
+    /* Login Actions Mobile */
+    .login-actions {
+        margin: 25px 0 !important;
+        gap: 12px !important;
+    }
+    
+    /* User Welcome Mobile */
+    .user-welcome {
+        padding: 15px !important;
+        margin-bottom: 20px !important;
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 10px !important;
+    }
+    
+    .avatar {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .avatar i {
+        font-size: 1.2rem !important;
+    }
+    
+    .user-info h2 {
+        font-size: 1.2rem !important;
+    }
+    
+    /* Search Bar Mobile */
+    .search-container {
+        margin: 15px 0 !important;
+    }
+    
+    .search-input {
+        padding: 14px 45px 14px 15px !important;
+        font-size: 16px !important; /* Prevent zoom */
+    }
+    
+    .search-btn {
+        width: 35px !important;
+        height: 35px !important;
+        right: 8px !important;
+    }
+    
+    /* Features Grid Mobile - FIX PENTING */
+    .features-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+        margin: 20px 0 !important;
+    }
+    
+    .feature-card {
+        padding: 12px 8px !important;
+        border-radius: 12px !important;
+    }
+    
+    .feature-icon {
+        width: 40px !important;
+        height: 40px !important;
+        margin-bottom: 8px !important;
+        border-radius: 10px !important;
+    }
+    
+    .feature-icon i {
+        font-size: 1.1rem !important;
+    }
+    
+    .feature-card h3 {
+        font-size: 0.8rem !important;
+        margin-bottom: 3px !important;
+    }
+    
+    .feature-card p {
+        font-size: 0.7rem !important;
+    }
+    
+    /* Action Buttons Mobile */
+    .action-buttons {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        margin: 20px 0 !important;
+    }
+    
+    .action-buttons .btn {
+        margin-bottom: 0 !important;
+    }
+    
+    /* Product Section Mobile */
+    .product-section {
+        margin: 25px 0 !important;
+    }
+    
+    .section-header {
+        margin-bottom: 15px !important;
+    }
+    
+    .section-header h3 {
+        font-size: 1.1rem !important;
+    }
+    
+    .product-count {
+        font-size: 0.7rem !important;
+        padding: 3px 8px !important;
+    }
+    
+    .product-list {
+        gap: 10px !important;
+    }
+    
+    .product-card {
+        padding: 15px !important;
+        border-radius: 12px !important;
+    }
+    
+    .product-header {
+        margin-bottom: 8px !important;
+    }
+    
+    .product-name {
+        font-size: 1rem !important;
+    }
+    
+    .product-meta {
+        font-size: 0.75rem !important;
+    }
+    
+    /* Modal Mobile Fix */
+    .modal {
+        padding: 10px !important;
+        align-items: flex-start !important;
+        padding-top: 20px !important;
+    }
+    
+    .modal-content {
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 15px !important;
+        max-height: 95vh !important;
+    }
+    
+    .modal-header {
+        padding: 20px 20px 15px !important;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.3rem !important;
+    }
+    
+    .modal-body {
+        padding: 15px 20px !important;
+    }
+    
+    .modal-footer {
+        padding: 15px 20px !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    
+    .modal-footer .btn {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    
+    /* Form Mobile Fix */
+    .form-group {
+        margin-bottom: 12px !important;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 14px 12px !important;
+        font-size: 16px !important; /* Prevent zoom */
+    }
+    
+    /* QR Scanner Mobile */
+    .scanner-placeholder {
+        padding: 15px 0 !important;
+    }
+    
+    .scanner-placeholder i {
+        font-size: 2.5rem !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .scanner-placeholder h3 {
+        font-size: 1.1rem !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .scanner-frame {
+        width: 180px !important;
+        height: 180px !important;
+    }
+    
+    /* Supply Chain Stats Mobile */
+    .supply-chain-stats {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 10px !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .stat-item {
+        padding: 12px 8px !important;
+    }
+    
+    .stat-item h3 {
+        font-size: 1.4rem !important;
+    }
+    
+    .stat-item p {
+        font-size: 0.7rem !important;
+    }
+    
+    /* Status Container Mobile */
+    .status-container {
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+        max-width: none !important;
+        z-index: 10000 !important;
+    }
+    
+    .status {
+        padding: 12px 15px !important;
+        font-size: 14px !important;
+    }
+    
+    /* Debug Panel Mobile */
+    .debug-panel {
+        padding: 12px !important;
+        margin-top: 20px !important;
+        max-height: 120px !important;
+    }
+    
+    .debug-item {
+        padding: 6px 8px !important;
+        font-size: 0.75rem !important;
+    }
+    
+    /* Logout Section Mobile */
+    .logout-section {
+        margin-top: 25px !important;
+        padding-top: 15px !important;
+    }
+}
+
+/* Extra Small Phones */
+@media (max-width: 360px) {
+    .glass-card {
+        padding: 20px 12px !important;
+    }
+    
+    .title {
+        font-size: 1.6rem !important;
+    }
+    
+    .features-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+    }
+    
+    .feature-card {
+        padding: 10px 6px !important;
+    }
+    
+    .feature-icon {
+        width: 35px !important;
+        height: 35px !important;
+    }
+    
+    .feature-icon i {
+        font-size: 1rem !important;
+    }
+    
+    .feature-card h3 {
+        font-size: 0.75rem !important;
+    }
+    
+    .feature-card p {
+        font-size: 0.65rem !important;
+    }
+    
+    .btn {
+        padding: 14px 16px !important;
+        font-size: 15px !important;
+    }
+}
+
+/* Fix untuk iOS Safari */
+@supports (-webkit-touch-callout: none) {
+    .glass-card {
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+    }
+    
+    .btn {
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* Pastikan section management bekerja */
+#login-section.section-active,
+#app-section.section-active {
+    display: block !important;
+}
+
+#login-section.section-hidden,
+#app-section.section-hidden {
+    display: none !important;
+}
+
+/* Loading state improvement */
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+}
+
+/* Touch improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn:hover {
+        transform: none !important;
+    }
+    
+    .feature-card:hover {
+        transform: none !important;
+    }
+    
+    .product-card:hover {
+        transform: none !important;
+    }
+}
+
