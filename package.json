@@ -1,12 +1,1 @@
-{
-  "name": "pi-trace-frontend",
-  "version": "1.0.0",
-  "description": "PI TRACE Frontend - Blockchain Supply Chain Tracking",
-  "scripts": {
-    "dev": "python -m http.server 3000",
-    "start": "python -m http.server 3000"
-  },
-  "keywords": ["blockchain", "supply-chain", "pi-network"],
-  "author": "Your Name",
-  "license": "MIT"
-}
+
