@@ -210,6 +210,12 @@
         margin: 0;
     }
 
+    .btn-small {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+    }
+
     /* User Welcome */
     .user-welcome {
         display: flex;
@@ -423,12 +429,6 @@
     .product-actions {
         display: flex;
         gap: 8px;
-    }
-
-    .btn-small {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-        border-radius: 8px;
     }
 
     .status-badge {
@@ -724,6 +724,99 @@
         font-size: 0.8rem;
     }
 
+    /* Product Detail Modal */
+    .product-detail-modal .modal-content {
+        max-width: 600px;
+    }
+
+    .product-detail-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .product-detail-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary), #764ba2);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .product-detail-icon i {
+        font-size: 1.5rem;
+        color: var(--white);
+    }
+
+    .product-detail-title h2 {
+        color: var(--white);
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+
+    .product-detail-category {
+        color: var(--light-gray);
+        font-size: 0.9rem;
+    }
+
+    .product-detail-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .detail-card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 15px;
+    }
+
+    .detail-card h4 {
+        color: var(--white);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .detail-value {
+        color: var(--light-gray);
+        font-size: 0.8rem;
+        word-break: break-all;
+    }
+
+    .detail-price {
+        color: var(--success) !important;
+        font-weight: 600;
+        font-size: 1rem !important;
+    }
+
+    .product-description-card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .product-description-card h4 {
+        color: var(--white);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .product-description-text {
+        color: var(--light-gray);
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
     /* Delete Warning */
     .delete-warning {
         text-align: center;
@@ -886,6 +979,10 @@
         .product-info {
             grid-template-columns: 1fr;
         }
+        
+        .product-detail-info {
+            grid-template-columns: 1fr;
+        }
     }
 
     /* Tambahan responsive fixes untuk mobile */
@@ -917,6 +1014,11 @@
         .btn-small {
             padding: 8px 12px !important;
             font-size: 0.7rem !important;
+        }
+        
+        .product-detail-header {
+            flex-direction: column;
+            text-align: center;
         }
     }
 
@@ -1132,6 +1234,21 @@
                     <label>Harga (π)</label>
                     <input type="number" id="productPrice" placeholder="0.00" step="0.01">
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Negara Asal</label>
+                        <select id="originCountry">
+                            <option value="Indonesia">Indonesia</option>
+                            <option value="Malaysia">Malaysia</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="Other">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Kota Asal</label>
+                        <input type="text" id="originCity" placeholder="Nama kota">
+                    </div>
+                </div>
                 
                 <!-- Preview Info -->
                 <div class="preview-info">
@@ -1174,7 +1291,7 @@
                     <h4>Atau Masukkan Kode Manual</h4>
                     <input type="text" id="manualQRInput" class="search-input" placeholder="Masukkan kode QR">
                     <button class="btn btn-primary" onclick="processManualQR()" style="margin-top: 10px; width: 100%">
-                        Lacak Produk
+                        <i class="fas fa-search"></i> Lacak Produk
                     </button>
                 </div>
             </div>
@@ -1206,6 +1323,25 @@
                 <div id="supplyChainList">
                     <!-- Supply chain items -->
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="productDetailModal" class="modal product-detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detail Produk</h2>
+                <span class="close-modal" onclick="closeModal('productDetailModal')">&times;</span>
+            </div>
+            <div class="modal-body" id="productDetailBody">
+                <!-- Product detail will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('productDetailModal')">Tutup</button>
+                <button class="btn btn-danger" onclick="deleteCurrentProduct()">
+                    <i class="fas fa-trash"></i> Hapus Produk
+                </button>
             </div>
         </div>
     </div>
@@ -1497,10 +1633,14 @@
         // Product Management
         showProductModal() {
             // Reset form
-            ['productName', 'productCategory', 'productDescription', 'productQuantity', 'productPrice'].forEach(id => {
+            ['productName', 'productCategory', 'productDescription', 'productQuantity', 'productPrice', 'originCity'].forEach(id => {
                 const element = document.getElementById(id);
                 if (element) element.value = id === 'productQuantity' ? '1' : '';
             });
+            
+            // Set default values
+            document.getElementById('originCountry').value = 'Indonesia';
+            document.getElementById('productUnit').value = 'pcs';
             
             // Generate preview info
             this.updateProductPreview();
@@ -1522,6 +1662,8 @@
                 quantity: parseInt(document.getElementById('productQuantity').value) || 1,
                 unit: document.getElementById('productUnit').value,
                 price: parseFloat(document.getElementById('productPrice').value) || 0,
+                originCountry: document.getElementById('originCountry').value,
+                originCity: document.getElementById('originCity').value,
                 id: 'prod_' + Date.now(),
                 hash: document.getElementById('hashCodeDisplay').textContent,
                 timestamp: new Date().toISOString(),
@@ -1560,14 +1702,14 @@
                 `;
             } else {
                 productList.innerHTML = this.state.products.map(product => `
-                    <div class="product-card">
+                    <div class="product-card" onclick="app.showProductDetail('${product.id}')">
                         <div class="product-header">
                             <div>
                                 <div class="product-name">${product.name}</div>
                                 <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${product.unit}</div>
                             </div>
                             <div class="product-actions">
-                                <button class="btn btn-danger btn-small" onclick="app.confirmDelete('${product.id}', '${product.name}')">
+                                <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); app.confirmDelete('${product.id}', '${product.name}')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -1579,8 +1721,8 @@
                                     <span class="info-value">${product.hash}</span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="info-label">Tanggal:</span>
-                                    <span class="info-value">${product.dateDisplay}</span>
+                                    <span class="info-label">Asal:</span>
+                                    <span class="info-value">${product.originCity}, ${product.originCountry}</span>
                                 </div>
                             </div>
                             ${product.description ? `
@@ -1602,6 +1744,74 @@
             
             if (productCount) {
                 productCount.textContent = `${this.state.products.length} produk`;
+            }
+        }
+
+        // Tampilkan detail produk
+        showProductDetail(productId) {
+            const product = this.state.products.find(p => p.id === productId);
+            if (!product) return;
+
+            this.state.currentProduct = product;
+            
+            const detailBody = document.getElementById('productDetailBody');
+            detailBody.innerHTML = `
+                <div class="product-detail-header">
+                    <div class="product-detail-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="product-detail-title">
+                        <h2>${product.name}</h2>
+                        <div class="product-detail-category">${this.getCategoryDisplay(product.category)}</div>
+                    </div>
+                </div>
+                
+                <div class="product-detail-info">
+                    <div class="detail-card">
+                        <h4>Informasi Produk</h4>
+                        <div class="detail-value"><strong>Kuantitas:</strong> ${product.quantity} ${product.unit}</div>
+                        <div class="detail-value"><strong>Kategori:</strong> ${this.getCategoryDisplay(product.category)}</div>
+                        <div class="detail-value"><strong>Status:</strong> <span style="color: #4cc9a7;">Aktif</span></div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h4>Asal Produk</h4>
+                        <div class="detail-value"><strong>Kota:</strong> ${product.originCity}</div>
+                        <div class="detail-value"><strong>Negara:</strong> ${product.originCountry}</div>
+                        <div class="detail-value"><strong>Tanggal Upload:</strong> ${product.dateDisplay}</div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h4>Kode Identifikasi</h4>
+                        <div class="detail-value"><strong>Kode Unik:</strong> ${product.hash}</div>
+                        <div class="detail-value"><strong>ID Produk:</strong> ${product.id}</div>
+                    </div>
+                    
+                    ${product.price > 0 ? `
+                    <div class="detail-card">
+                        <h4>Informasi Harga</h4>
+                        <div class="detail-value detail-price"><strong>Harga:</strong> ${product.price} π</div>
+                        <div class="detail-value"><strong>Mata Uang:</strong> Pi Coin</div>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                ${product.description ? `
+                <div class="product-description-card">
+                    <h4>Deskripsi Produk</h4>
+                    <div class="product-description-text">${product.description}</div>
+                </div>
+                ` : ''}
+            `;
+            
+            this.showModal('productDetailModal');
+        }
+
+        // Hapus produk dari detail modal
+        deleteCurrentProduct() {
+            if (this.state.currentProduct) {
+                this.closeModal('productDetailModal');
+                this.confirmDelete(this.state.currentProduct.id, this.state.currentProduct.name);
             }
         }
 
@@ -1694,7 +1904,7 @@
             }
         }
 
-        // QR Scanner
+        // QR Scanner - FIXED
         openQRScanner() {
             this.showModal('qrScannerModal');
         }
@@ -1706,13 +1916,23 @@
                 return;
             }
             
-            this.showStatus(`Melacak produk: ${qrCode}`);
-            this.closeModal('qrScannerModal');
+            this.showStatus(`Melacak produk dengan kode: ${qrCode}`);
             
-            // Simulate finding product
+            // Simulate QR code processing
             setTimeout(() => {
-                this.showStatus('Produk ditemukan dalam rantai pasok!', 'success');
-            }, 1500);
+                // Cek apakah kode QR sesuai dengan format produk kita
+                const matchedProduct = this.state.products.find(product => 
+                    product.hash === qrCode || product.id === qrCode
+                );
+                
+                if (matchedProduct) {
+                    this.closeModal('qrScannerModal');
+                    this.showProductDetail(matchedProduct.id);
+                    this.showStatus('Produk ditemukan! Menampilkan detail...', 'success');
+                } else {
+                    this.showStatus('Produk tidak ditemukan. Pastikan kode QR benar.', 'warning');
+                }
+            }, 1000);
         }
 
         // Supply Chain
@@ -1727,8 +1947,57 @@
         // Search
         searchProducts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            this.showStatus(`Mencari: ${searchTerm || 'semua produk'}`);
-            // Search logic would go here
+            if (!searchTerm) {
+                this.loadUserProducts();
+                return;
+            }
+            
+            const filteredProducts = this.state.products.filter(product => 
+                product.name.toLowerCase().includes(searchTerm) ||
+                product.category.toLowerCase().includes(searchTerm) ||
+                product.description.toLowerCase().includes(searchTerm) ||
+                product.hash.toLowerCase().includes(searchTerm)
+            );
+            
+            const productList = document.getElementById('productList');
+            if (filteredProducts.length === 0) {
+                productList.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.7)">
+                        <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p style="margin-bottom: 15px;">Tidak ada produk yang cocok dengan "${searchTerm}"</p>
+                    </div>
+                `;
+            } else {
+                productList.innerHTML = filteredProducts.map(product => `
+                    <div class="product-card" onclick="app.showProductDetail('${product.id}')">
+                        <div class="product-header">
+                            <div>
+                                <div class="product-name">${product.name}</div>
+                                <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${product.unit}</div>
+                            </div>
+                            <div class="product-actions">
+                                <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); app.confirmDelete('${product.id}', '${product.name}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="product-details">
+                            <div class="product-info">
+                                <div class="info-item">
+                                    <span class="info-label">Kode Unik:</span>
+                                    <span class="info-value">${product.hash}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Asal:</span>
+                                    <span class="info-value">${product.originCity}, ${product.originCountry}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            this.showStatus(`Menampilkan ${filteredProducts.length} hasil untuk "${searchTerm}"`, 'info');
         }
 
         handleSearchEnter(event) {
@@ -1780,6 +2049,7 @@
     function createPayment() { app.createPayment(); }
     function closeModal(modalId) { app.closeModal(modalId); }
     function updateProductPreview() { app.updateProductPreview(); }
+    function deleteCurrentProduct() { app.deleteCurrentProduct(); }
     </script>
 </body>
 </html>
