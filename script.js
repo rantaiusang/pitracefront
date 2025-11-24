@@ -12,7 +12,7 @@ let payments = [];
 // API Configuration - GUNAKAN URL BACKEND ANDA YANG SEBENARNYA
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:3000/api'
-  : 'https://pi-trace-backend.vercel.app/api'; // GANTI DENGAN DOMAIN BACKEND ANDA
+  : 'https://back-git-main-tesnet.vercel.app/api'; // GANTI DENGAN DOMAIN BACKEND ANDA
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
