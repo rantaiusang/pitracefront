@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "pi-trace-frontend",
   "builds": [
     {
       "src": "index.html",
