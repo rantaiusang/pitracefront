@@ -1,0 +1,12 @@
+{
+  "name": "pi-trace",
+  "version": "1.0.0",
+  "description": "Blockchain Supply Chain Tracking",
+  "scripts": {
+    "dev": "python -m http.server 3000",
+    "start": "python -m http.server 3000"
+  },
+  "keywords": ["blockchain", "supply-chain", "pi-network"],
+  "author": "Your Name",
+  "license": "MIT"
+}
