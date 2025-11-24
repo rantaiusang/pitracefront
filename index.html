@@ -26,7 +26,6 @@
                     <p>Track your products through supply chain using blockchain</p>
                 </div>
                 
-                <!-- HANYA 2 TOMBOL LOGIN -->
                 <div class="login-actions">
                     <button class="btn btn-primary btn-large" onclick="loginWithPi()">
                         <i class="fab fa-raspberry-pi"></i>
@@ -113,7 +112,11 @@
                         <span class="product-count" id="productCount">0 products</span>
                     </div>
                     <div class="product-list" id="productList">
-                        <!-- Products will be loaded here -->
+                        <div class="empty-state">
+                            <i class="fas fa-box-open"></i>
+                            <p>No products yet</p>
+                            <button class="btn btn-primary" onclick="showProductModal()">Add Your First Product</button>
+                        </div>
                     </div>
                 </div>
 
@@ -142,12 +145,12 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="productName">Product Name *</label>
-                    <input type="text" id="productName" placeholder="Enter product name" oninput="updateProductPreview()">
+                    <input type="text" id="productName" placeholder="Enter product name">
                 </div>
                 
                 <div class="form-group">
                     <label for="productCategory">Category *</label>
-                    <select id="productCategory" onchange="updateProductPreview()">
+                    <select id="productCategory">
                         <option value="">Select category</option>
                         <option value="electronics">Electronics</option>
                         <option value="clothing">Clothing</option>
@@ -195,7 +198,6 @@
                     </div>
                 </div>
 
-                <!-- Preview Info -->
                 <div class="preview-info">
                     <div class="info-item">
                         <label>Upload Date</label>
@@ -278,7 +280,10 @@
                 <div class="supply-chain-list">
                     <h3>Product Journey</h3>
                     <div id="supplyChainList">
-                        <!-- Supply chain items will be loaded here -->
+                        <div class="empty-state">
+                            <i class="fas fa-shipping-fast"></i>
+                            <p>No supply chain data available</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -286,37 +291,6 @@
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="closeModal('supplyChainModal')">
                     <i class="fas fa-times"></i> Close
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Product Detail Modal -->
-    <div id="productDetailModal" class="modal">
-        <!-- Content will be loaded dynamically by JavaScript -->
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteConfirmModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Confirm Delete</h2>
-                <span class="close-modal" onclick="closeModal('deleteConfirmModal')">&times;</span>
-            </div>
-            
-            <div class="modal-body">
-                <div class="delete-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Are you sure?</h3>
-                    <p>You are about to delete the product: <strong id="deleteProductName">Product Name</strong></p>
-                    <p class="warning-text">This action cannot be undone!</p>
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('deleteConfirmModal')">Cancel</button>
-                <button class="btn btn-danger" id="confirmDeleteBtn">
-                    <i class="fas fa-trash"></i> Delete Product
                 </button>
             </div>
         </div>
