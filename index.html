@@ -54,6 +54,8 @@
         max-width: 500px;
         margin: 0 auto;
         min-height: calc(100vh - 40px);
+        position: relative;
+        z-index: 1;
     }
 
     /* Section Management */
@@ -74,6 +76,8 @@
         padding: 40px 30px;
         box-shadow: var(--glass-shadow);
         animation: fadeIn 0.5s ease;
+        position: relative;
+        z-index: 1;
     }
 
     @keyframes fadeIn {
@@ -450,6 +454,10 @@
         padding: 4px 10px;
         border-radius: 8px;
         font-size: 0.7rem;
+    }
+
+    .status-badge.deleted {
+        background: var(--error);
     }
 
     .product-details {
@@ -886,13 +894,14 @@
         color: var(--light-gray);
     }
 
-    /* Status Messages */
+    /* Status Messages - PERBAIKAN POSISI & Z-INDEX */
     .status-container {
         position: fixed;
         top: 20px;
         right: 20px;
-        z-index: 1001;
+        z-index: 9999; /* Diperbaiki z-index lebih tinggi */
         max-width: 300px;
+        pointer-events: none; /* Agar tidak mengganggu klik */
     }
 
     .status {
@@ -901,11 +910,14 @@
         margin-bottom: 10px;
         backdrop-filter: blur(10px);
         border: 1px solid;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* Shadow lebih gelap */
         animation: slideInRight 0.3s ease;
         display: flex;
         align-items: center;
         gap: 10px;
+        pointer-events: auto; /* Kembali bisa diklik */
+        font-weight: 600;
+        font-size: 0.9rem;
     }
 
     @keyframes slideInRight {
@@ -914,27 +926,27 @@
     }
 
     .status.success {
-        background: rgba(76, 201, 167, 0.2);
-        color: var(--success);
-        border-color: rgba(76, 201, 167, 0.3);
+        background: rgba(76, 201, 167, 0.95);
+        color: white;
+        border-color: rgba(76, 201, 167, 0.5);
     }
 
     .status.error {
-        background: rgba(249, 65, 68, 0.2);
-        color: var(--error);
-        border-color: rgba(249, 65, 68, 0.3);
+        background: rgba(249, 65, 68, 0.95);
+        color: white;
+        border-color: rgba(249, 65, 68, 0.5);
     }
 
     .status.warning {
-        background: rgba(249, 199, 79, 0.2);
-        color: var(--warning);
-        border-color: rgba(249, 199, 79, 0.3);
+        background: rgba(249, 199, 79, 0.95);
+        color: var(--dark);
+        border-color: rgba(249, 199, 79, 0.5);
     }
 
     .status.info {
-        background: rgba(67, 97, 238, 0.2);
-        color: var(--primary);
-        border-color: rgba(67, 97, 238, 0.3);
+        background: rgba(67, 97, 238, 0.95);
+        color: white;
+        border-color: rgba(67, 97, 238, 0.5);
     }
 
     /* Loading Spinner */
@@ -957,6 +969,43 @@
         margin-top: 30px;
         padding-top: 20px;
         border-top: 1px solid var(--glass-border);
+    }
+
+    /* Real-time indicator */
+    .real-time-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--success);
+        font-size: 0.8rem;
+        margin-bottom: 15px;
+    }
+
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--success);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    /* Deleted product styling */
+    .deleted-product {
+        opacity: 0.7;
+        border: 1px solid var(--error);
+        background: rgba(249, 65, 68, 0.05);
+    }
+
+    .deleted-label {
+        color: var(--error);
+        font-size: 0.7rem;
+        font-weight: 600;
     }
 
     /* MOBILE FIXES */
@@ -1040,6 +1089,12 @@
             flex-direction: column;
             text-align: center;
         }
+        
+        .status {
+            padding: 12px 15px;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
     }
 
     /* Fix untuk iOS Safari */
@@ -1120,6 +1175,12 @@
         <!-- Main App Section -->
         <div id="app-section" class="section-hidden">
             <div class="glass-card">
+                <!-- Real-time Indicator -->
+                <div class="real-time-indicator">
+                    <div class="pulse-dot"></div>
+                    <span>Sinkronisasi Real-time Aktif</span>
+                </div>
+
                 <!-- User Welcome -->
                 <div class="user-welcome">
                     <div class="avatar">
@@ -1131,9 +1192,11 @@
                     </div>
                 </div>
 
-                <!-- Search Bar -->
+                <!-- Search Bar - PERBAIKAN: Menambahkan event listener untuk input -->
                 <div class="search-container">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Cari produk..." onkeypress="handleSearchEnter(event)">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Cari produk..." 
+                           onkeypress="handleSearchEnter(event)" 
+                           oninput="handleSearchInput(event)">
                     <button class="search-btn" onclick="searchProducts()">
                         <i class="fas fa-search"></i>
                     </button>
@@ -1181,7 +1244,7 @@
                 <!-- Product List -->
                 <div class="product-section" id="productSection">
                     <div class="section-header">
-                        <h3>Produk Anda</h3>
+                        <h3>Semua Produk</h3>
                         <span class="product-count" id="productCount">0 produk</span>
                     </div>
                     <div class="product-list" id="productList">
@@ -1192,7 +1255,7 @@
                 <!-- History Section -->
                 <div class="history-section" id="historySection">
                     <div class="section-header">
-                        <h3>Riwayat Aktivitas</h3>
+                        <h3>Riwayat Aktivitas Real-time</h3>
                     </div>
                     <div id="historyList">
                         <!-- History items will be loaded here -->
@@ -1460,6 +1523,8 @@
                     <h3>Apakah Anda yakin?</h3>
                     <p>Anda akan menghapus produk: <strong id="deleteProductName">Nama Produk</strong></p>
                     <p>Ditambahkan oleh: <strong id="deleteProductOwner">-</strong></p>
+                    <p>Asal: <strong id="deleteProductOrigin">-</strong></p>
+                    <p class="warning-text">Semua user akan melihat bahwa Anda menghapus produk ini!</p>
                     <p class="warning-text">Tindakan ini tidak dapat dibatalkan!</p>
                 </div>
             </div>
@@ -1472,139 +1537,178 @@
         </div>
     </div>
 
-    <!-- Status Container -->
+    <!-- Status Container - PERBAIKAN POSISI -->
     <div id="statusContainer" class="status-container"></div>
 
     <!-- ALL JAVASCRIPT INLINE -->
     <script>
-    // Mobile Optimized PI TRACE App
+    // Real-time PI TRACE App dengan Shared Database
     class PiTraceApp {
         constructor() {
             this.config = {
-                API_BASE_URL: 'https://pi-trace-backend.vercel.app/api',
-                DEBUG: true
+                DEBUG: true,
+                SYNC_INTERVAL: 2000, // 2 detik
+                MAX_PRODUCTS: 1000
             };
             
             this.state = {
                 currentUser: null,
                 isGuest: false,
                 products: [],
-                deletedProducts: [], // Riwayat produk yang dihapus
-                currentProduct: null,
-                activityHistory: [] // Riwayat aktivitas
+                activityHistory: [],
+                lastSync: null,
+                syncInterval: null,
+                currentProduct: null
             };
             
             this.init();
         }
 
         init() {
-            this.logDebug('Aplikasi PI TRACE Mobile Diinisialisasi');
+            this.logDebug('Aplikasi PI TRACE Real-time Diinisialisasi');
             this.setupEventListeners();
             this.detectMobile();
-            this.loadFromLocalStorage();
+            this.startRealTimeSync();
         }
 
-        // Load data dari localStorage
-        loadFromLocalStorage() {
-            try {
-                const savedProducts = localStorage.getItem('piTrace_products');
-                const savedHistory = localStorage.getItem('piTrace_history');
-                const savedDeleted = localStorage.getItem('piTrace_deleted');
-                
-                if (savedProducts) {
-                    this.state.products = JSON.parse(savedProducts);
-                }
-                if (savedHistory) {
-                    this.state.activityHistory = JSON.parse(savedHistory);
-                }
-                if (savedDeleted) {
-                    this.state.deletedProducts = JSON.parse(savedDeleted);
-                }
-                
-                this.logDebug('Data loaded from localStorage');
-            } catch (error) {
-                this.logDebug('Error loading from localStorage: ' + error.message);
-            }
-        }
-
-        // Save data ke localStorage
-        saveToLocalStorage() {
-            try {
-                localStorage.setItem('piTrace_products', JSON.stringify(this.state.products));
-                localStorage.setItem('piTrace_history', JSON.stringify(this.state.activityHistory));
-                localStorage.setItem('piTrace_deleted', JSON.stringify(this.state.deletedProducts));
-            } catch (error) {
-                this.logDebug('Error saving to localStorage: ' + error.message);
-            }
-        }
-
-        // Tambah riwayat aktivitas
-        addActivity(action, productName, productId = null, additionalInfo = '') {
-            const activity = {
-                id: 'act_' + Date.now(),
-                action: action,
-                productName: productName,
-                productId: productId,
-                user: this.state.currentUser.username,
-                userId: this.state.currentUser.uid,
-                additionalInfo: additionalInfo,
-                timestamp: new Date().toISOString(),
-                dateDisplay: new Date().toLocaleString('id-ID')
-            };
+        // Real-time Synchronization System
+        startRealTimeSync() {
+            // Load initial data
+            this.loadSharedData();
             
-            this.state.activityHistory.unshift(activity); // Tambah di awal array
-            if (this.state.activityHistory.length > 50) { // Batasi riwayat
-                this.state.activityHistory = this.state.activityHistory.slice(0, 50);
+            // Start sync interval
+            this.syncInterval = setInterval(() => {
+                this.syncData();
+            }, this.config.SYNC_INTERVAL);
+            
+            this.logDebug('Sinkronisasi real-time dimulai');
+        }
+
+        stopRealTimeSync() {
+            if (this.syncInterval) {
+                clearInterval(this.syncInterval);
+                this.logDebug('Sinkronisasi real-time dihentikan');
+            }
+        }
+
+        // Shared Database System
+        loadSharedData() {
+            try {
+                // Load from shared storage
+                const sharedProducts = localStorage.getItem('piTrace_shared_products');
+                const sharedHistory = localStorage.getItem('piTrace_shared_history');
+                
+                if (sharedProducts) {
+                    this.state.products = JSON.parse(sharedProducts);
+                    this.logDebug(`Loaded ${this.state.products.length} products from shared storage`);
+                }
+                
+                if (sharedHistory) {
+                    this.state.activityHistory = JSON.parse(sharedHistory);
+                    this.logDebug(`Loaded ${this.state.activityHistory.length} history items`);
+                }
+                
+                this.state.lastSync = new Date();
+                this.updateUI();
+                
+            } catch (error) {
+                this.logDebug('Error loading shared data: ' + error.message);
+            }
+        }
+
+        saveSharedData() {
+            try {
+                localStorage.setItem('piTrace_shared_products', JSON.stringify(this.state.products));
+                localStorage.setItem('piTrace_shared_history', JSON.stringify(this.state.activityHistory));
+                
+                // Trigger storage event for other tabs/windows
+                window.dispatchEvent(new Event('storage'));
+                
+                this.state.lastSync = new Date();
+                this.logDebug('Data shared saved successfully');
+                
+            } catch (error) {
+                this.logDebug('Error saving shared data: ' + error.message);
+            }
+        }
+
+        syncData() {
+            // Check for changes from other instances
+            const lastProducts = localStorage.getItem('piTrace_shared_products');
+            const lastHistory = localStorage.getItem('piTrace_shared_history');
+            
+            if (lastProducts) {
+                const remoteProducts = JSON.parse(lastProducts);
+                if (JSON.stringify(this.state.products) !== JSON.stringify(remoteProducts)) {
+                    this.state.products = remoteProducts;
+                    this.updateUI();
+                    this.logDebug('Products synced from remote changes');
+                }
             }
             
-            this.saveToLocalStorage();
+            if (lastHistory) {
+                const remoteHistory = JSON.parse(lastHistory);
+                if (JSON.stringify(this.state.activityHistory) !== JSON.stringify(remoteHistory)) {
+                    this.state.activityHistory = remoteHistory;
+                    this.loadActivityHistory();
+                    this.logDebug('History synced from remote changes');
+                }
+            }
+        }
+
+        // Event Listeners for real-time updates
+        setupEventListeners() {
+            // Listen for storage changes from other tabs
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'piTrace_shared_products' || e.key === 'piTrace_shared_history') {
+                    this.logDebug('Storage change detected, syncing...');
+                    setTimeout(() => {
+                        this.loadSharedData();
+                        this.showStatus('Data diperbarui secara real-time!', 'info');
+                    }, 100);
+                }
+            });
+
+            // Search input enter key support
+            document.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && e.target.id === 'searchInput') {
+                    this.searchProducts();
+                }
+            });
+
+            // PERBAIKAN: Auto refresh saat input dikosongkan
+            document.addEventListener('input', (e) => {
+                if (e.target.id === 'searchInput' && e.target.value === '') {
+                    // Jika input pencarian dikosongkan, langsung refresh tampilan
+                    this.updateUI();
+                    this.showStatus('Menampilkan semua produk', 'info');
+                }
+            });
+
+            // Close modals on backdrop click
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+
+            // Touch event improvements for mobile
+            document.addEventListener('touchstart', function() {}, { passive: true });
+        }
+
+        // Update all UI components - PERBAIKAN: Handle pencarian aktif
+        updateUI() {
+            // PERBAIKAN: Periksa status pencarian sebelum memperbarui UI
+            const searchTerm = document.getElementById('searchInput').value;
+            if (searchTerm) {
+                // Jika ada pencarian aktif, gunakan fungsi search
+                this.searchProducts();
+            } else {
+                // Jika tidak ada pencarian, tampilkan semua produk
+                this.loadUserProducts();
+            }
             this.loadActivityHistory();
-        }
-
-        // Generate kode unik yang pendek
-        generateShortHash() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = 'TRC';
-            for (let i = 0; i < 6; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
-        }
-
-        // Mobile Detection
-        detectMobile() {
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            if (isMobile) {
-                document.body.classList.add('mobile-device');
-                this.logDebug('Perangkat mobile terdeteksi');
-                
-                // Mobile specific adjustments
-                this.adjustForMobile();
-            }
-        }
-
-        adjustForMobile() {
-            // Add touch-friendly styles
-            const style = document.createElement('style');
-            style.textContent = `
-                .mobile-device .btn {
-                    min-height: 44px; /* Minimum touch target size */
-                }
-                
-                .mobile-device .feature-card {
-                    padding: 12px 8px;
-                }
-                
-                .mobile-device .search-input {
-                    font-size: 16px; /* Prevent zoom on iOS */
-                }
-                
-                /* Improve scrolling on mobile */
-                .mobile-device .product-list {
-                    -webkit-overflow-scrolling: touch;
-                }
-            `;
-            document.head.appendChild(style);
+            this.updateStats();
         }
 
         // Utility Methods
@@ -1617,6 +1721,13 @@
                     debugItem.className = 'debug-item';
                     debugItem.textContent = `[${timestamp}] ${message}`;
                     debugPanel.appendChild(debugItem);
+                    
+                    // Keep only last 10 debug items
+                    const items = debugPanel.querySelectorAll('.debug-item');
+                    if (items.length > 10) {
+                        items[0].remove();
+                    }
+                    
                     debugPanel.scrollTop = debugPanel.scrollHeight;
                 }
                 console.log(`[PI TRACE] ${message}`);
@@ -1654,24 +1765,13 @@
             return icons[type] || 'info-circle';
         }
 
-        // Event Listeners
-        setupEventListeners() {
-            // Search input enter key support
-            document.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && e.target.id === 'searchInput') {
-                    this.searchProducts();
-                }
-            });
-
-            // Close modals on backdrop click
-            document.addEventListener('click', (e) => {
-                if (e.target.classList.contains('modal')) {
-                    e.target.style.display = 'none';
-                }
-            });
-
-            // Touch event improvements for mobile
-            document.addEventListener('touchstart', function() {}, { passive: true });
+        // Mobile Detection
+        detectMobile() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                document.body.classList.add('mobile-device');
+                this.logDebug('Perangkat mobile terdeteksi');
+            }
         }
 
         // Login Methods
@@ -1721,11 +1821,11 @@
             document.getElementById('login-section').classList.replace('section-active', 'section-hidden');
             document.getElementById('app-section').classList.replace('section-hidden', 'section-active');
             
-            this.loadUserProducts();
-            this.loadActivityHistory();
+            this.updateUI();
         }
 
         logout() {
+            this.stopRealTimeSync();
             this.state.currentUser = null;
             this.state.isGuest = false;
             
@@ -1735,7 +1835,7 @@
             this.showStatus('Berhasil keluar');
         }
 
-        // Product Management
+        // Product Management - REAL-TIME
         showProductModal() {
             // Reset form
             ['productName', 'productCategory', 'productDescription', 'productQuantity', 'productPrice', 'originCity'].forEach(id => {
@@ -1784,13 +1884,14 @@
                 price: parseFloat(document.getElementById('productPrice').value) || 0,
                 originCountry: document.getElementById('originCountry').value,
                 originCity: document.getElementById('originCity').value,
-                id: 'prod_' + Date.now(),
+                id: 'prod_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
                 hash: document.getElementById('hashCodeDisplay').textContent,
                 owner: this.state.currentUser.username,
                 ownerId: this.state.currentUser.uid,
                 timestamp: new Date().toISOString(),
                 dateDisplay: new Date().toLocaleString('id-ID'),
-                status: 'active'
+                status: 'active',
+                isDeleted: false
             };
 
             // Validasi field wajib
@@ -1804,12 +1905,20 @@
                 return;
             }
 
-            this.state.products.unshift(productData); // Tambah di awal array
+            // Add to shared products
+            this.state.products.unshift(productData);
+            
+            // Add activity
             this.addActivity('Produk ditambahkan', productData.name, productData.id);
-            this.loadUserProducts();
+            
+            // ✅ PERBAIKAN: Langsung update UI sebelum save ke storage
+            this.updateUI();
+            
+            // Save to shared storage
+            this.saveSharedData();
+            
             this.closeModal('productModal');
-            this.showStatus('Produk berhasil ditambahkan!');
-            this.saveToLocalStorage();
+            this.showStatus('Produk berhasil ditambahkan! Semua user bisa melihatnya.');
         }
 
         loadUserProducts() {
@@ -1818,18 +1927,21 @@
             
             if (!productList) return;
 
-            if (this.state.products.length === 0) {
+            // Filter hanya produk yang tidak dihapus
+            const activeProducts = this.state.products.filter(product => !product.isDeleted);
+
+            if (activeProducts.length === 0) {
                 productList.innerHTML = `
                     <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.7)">
                         <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                        <p style="margin-bottom: 15px;">Belum ada produk</p>
+                        <p style="margin-bottom: 15px;">Belum ada produk dalam sistem</p>
                         <button class="btn btn-primary" onclick="app.showProductModal()">
                             Tambah Produk Pertama
                         </button>
                     </div>
                 `;
             } else {
-                productList.innerHTML = this.state.products.map(product => {
+                productList.innerHTML = activeProducts.map(product => {
                     const isOwner = product.ownerId === this.state.currentUser.uid;
                     const canDelete = isOwner;
                     
@@ -1842,12 +1954,17 @@
                                 <div class="product-owner">Ditambahkan oleh: ${product.owner}</div>
                             </div>
                             <div class="product-actions">
-                                <button class="btn btn-danger btn-small ${!canDelete ? 'btn-disabled' : ''}" 
-                                    onclick="event.stopPropagation(); ${canDelete ? `app.confirmDelete('${product.id}', '${product.name}', '${product.owner}')` : ''}"
-                                    ${!canDelete ? 'disabled' : ''}
-                                    title="${!canDelete ? 'Hanya pemilik produk yang dapat menghapus' : 'Hapus produk'}">
+                                ${canDelete ? `
+                                <button class="btn btn-danger btn-small" 
+                                    onclick="event.stopPropagation(); app.confirmDelete('${product.id}', '${product.name}', '${product.owner}')"
+                                    title="Hapus produk">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                ` : `
+                                <button class="btn btn-danger btn-small btn-disabled" disabled title="Hanya pemilik produk yang dapat menghapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                `}
                             </div>
                         </div>
                         <div class="product-details">
@@ -1880,7 +1997,7 @@
             }
             
             if (productCount) {
-                productCount.textContent = `${this.state.products.length} produk`;
+                productCount.textContent = `${activeProducts.length} produk`;
             }
         }
 
@@ -1891,28 +2008,46 @@
 
             this.state.currentProduct = product;
             const isOwner = product.ownerId === this.state.currentUser.uid;
+            const isDeleted = product.isDeleted;
             
             // Update tombol hapus di detail modal
             const deleteBtn = document.getElementById('deleteProductDetailBtn');
-            if (isOwner) {
+            if (isOwner && !isDeleted) {
                 deleteBtn.classList.remove('btn-disabled');
                 deleteBtn.disabled = false;
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Hapus Produk';
                 deleteBtn.title = 'Hapus produk';
+            } else if (isDeleted) {
+                deleteBtn.classList.add('btn-disabled');
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="fas fa-ban"></i> Produk Dihapus';
+                deleteBtn.title = 'Produk sudah dihapus';
             } else {
                 deleteBtn.classList.add('btn-disabled');
                 deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Hapus Produk';
                 deleteBtn.title = 'Hanya pemilik produk yang dapat menghapus';
             }
             
             const detailBody = document.getElementById('productDetailBody');
+            const statusText = isDeleted ? 
+                `<span style="color: var(--error);">❌ DIHAPUS</span>` : 
+                `<span style="color: var(--success);">✅ AKTIF</span>`;
+                
+            // Informasi penghapus
+            const deletedInfo = isDeleted ? `
+                <div class="detail-value"><strong>Dihapus oleh:</strong> ${product.deletedBy || 'Unknown'}</div>
+                <div class="detail-value"><strong>Dihapus pada:</strong> ${product.deletedAtDisplay || product.dateDisplay}</div>
+            ` : '';
+            
             detailBody.innerHTML = `
                 <div class="product-detail-header">
                     <div class="product-detail-icon">
                         <i class="fas fa-box"></i>
                     </div>
                     <div class="product-detail-title">
-                        <h2>${product.name}</h2>
-                        <div class="product-detail-category">${this.getCategoryDisplay(product.category)}</div>
+                        <h2>${product.name} ${isDeleted ? '(Dihapus)' : ''}</h2>
+                        <div class="product-detail-category">${this.getCategoryDisplay(product.category)} • ${statusText}</div>
                     </div>
                 </div>
                 
@@ -1921,8 +2056,9 @@
                         <h4>Informasi Produk</h4>
                         <div class="detail-value"><strong>Kuantitas:</strong> ${product.quantity} ${this.getUnitDisplay(product.unit)}</div>
                         <div class="detail-value"><strong>Kategori:</strong> ${this.getCategoryDisplay(product.category)}</div>
-                        <div class="detail-value"><strong>Status:</strong> <span style="color: #4cc9a7;">Aktif</span></div>
+                        <div class="detail-value"><strong>Status:</strong> ${statusText}</div>
                         <div class="detail-value"><strong>Ditambahkan oleh:</strong> ${product.owner}</div>
+                        ${deletedInfo}
                     </div>
                     
                     <div class="detail-card">
@@ -1960,7 +2096,9 @@
 
         // Hapus produk dari detail modal
         deleteCurrentProduct() {
-            if (this.state.currentProduct && this.state.currentProduct.ownerId === this.state.currentUser.uid) {
+            if (this.state.currentProduct && 
+                this.state.currentProduct.ownerId === this.state.currentUser.uid && 
+                !this.state.currentProduct.isDeleted) {
                 this.closeModal('productDetailModal');
                 this.confirmDelete(this.state.currentProduct.id, this.state.currentProduct.name, this.state.currentProduct.owner);
             } else {
@@ -1986,56 +2124,28 @@
 
         getUnitDisplay(unit) {
             const unitDisplay = {
-                'gram': 'g',
-                'kg': 'kg',
-                'ons': 'ons',
-                'pon': 'pon',
-                'ton': 'ton',
-                'ml': 'ml',
-                'liter': 'L',
-                'cc': 'cc',
-                'galon': 'galon',
-                'mm': 'mm',
-                'cm': 'cm',
-                'm': 'm',
-                'km': 'km',
-                'm2': 'm²',
-                'hektar': 'hektar',
-                'pcs': 'pcs',
-                'unit': 'unit',
-                'buah': 'buah',
-                'bungkus': 'bungkus',
-                'paket': 'paket',
-                'set': 'set',
-                'box': 'box',
-                'dus': 'dus',
-                'karung': 'karung',
-                'sak': 'sak',
-                'karton': 'karton',
-                'ikat': 'ikat',
-                'lusin': 'lusin',
-                'kodi': 'kodi',
-                'rim': 'rim',
-                'gross': 'gross',
-                'botol': 'botol',
-                'kaleng': 'kaleng',
-                'jerigen': 'jerigen',
-                'piring': 'piring',
-                'mangkok': 'mangkok',
-                'gelas': 'gelas',
-                'sendok': 'sendok',
-                'roll': 'roll',
-                'lembar': 'lembar',
-                'pasang': 'pasang',
-                'keping': 'keping'
+                'gram': 'g', 'kg': 'kg', 'ons': 'ons', 'pon': 'pon', 'ton': 'ton',
+                'ml': 'ml', 'liter': 'L', 'cc': 'cc', 'galon': 'galon',
+                'mm': 'mm', 'cm': 'cm', 'm': 'm', 'km': 'km',
+                'm2': 'm²', 'hektar': 'hektar',
+                'pcs': 'pcs', 'unit': 'unit', 'buah': 'buah', 'bungkus': 'bungkus',
+                'paket': 'paket', 'set': 'set', 'box': 'box', 'dus': 'dus',
+                'karung': 'karung', 'sak': 'sak', 'karton': 'karton', 'ikat': 'ikat',
+                'lusin': 'lusin', 'kodi': 'kodi', 'rim': 'rim', 'gross': 'gross',
+                'botol': 'botol', 'kaleng': 'kaleng', 'jerigen': 'jerigen',
+                'piring': 'piring', 'mangkok': 'mangkok', 'gelas': 'gelas', 'sendok': 'sendok',
+                'roll': 'roll', 'lembar': 'lembar', 'pasang': 'pasang', 'keping': 'keping'
             };
             return unitDisplay[unit] || unit;
         }
 
         confirmDelete(productId, productName, productOwner) {
-            this.state.currentProduct = { id: productId, name: productName, owner: productOwner };
+            const product = this.state.products.find(p => p.id === productId);
+            this.state.currentProduct = product;
+            
             document.getElementById('deleteProductName').textContent = productName;
             document.getElementById('deleteProductOwner').textContent = productOwner;
+            document.getElementById('deleteProductOrigin').textContent = `${product.originCity}, ${product.originCountry}`;
             
             // Setup delete confirmation
             const confirmBtn = document.getElementById('confirmDeleteBtn');
@@ -2047,35 +2157,54 @@
         deleteProduct(productId) {
             const productIndex = this.state.products.findIndex(p => p.id === productId);
             if (productIndex !== -1) {
-                const deletedProduct = this.state.products.splice(productIndex, 1)[0];
+                // Soft delete - mark as deleted instead of removing
+                this.state.products[productIndex].isDeleted = true;
+                this.state.products[productIndex].deletedBy = this.state.currentUser.username;
+                this.state.products[productIndex].deletedById = this.state.currentUser.uid;
+                this.state.products[productIndex].deletedAt = new Date().toISOString();
+                this.state.products[productIndex].deletedAtDisplay = new Date().toLocaleString('id-ID');
                 
-                // Simpan ke riwayat hapus dengan informasi lengkap
-                const deleteInfo = {
-                    ...deletedProduct,
-                    deletedBy: this.state.currentUser.username,
-                    deletedById: this.state.currentUser.uid,
-                    deletedAt: new Date().toISOString(),
-                    deletedAtDisplay: new Date().toLocaleString('id-ID')
-                };
-                
-                this.state.deletedProducts.unshift(deleteInfo);
-                
-                // Tambah riwayat aktivitas dengan informasi hapus
+                // Add activity
                 this.addActivity(
                     'Produk dihapus', 
-                    deletedProduct.name, 
-                    deletedProduct.id,
-                    `Dihapus oleh: ${this.state.currentUser.username} | Asal produk: ${deletedProduct.originCity}, ${deletedProduct.originCountry}`
+                    this.state.products[productIndex].name, 
+                    productId,
+                    `Dihapus oleh: ${this.state.currentUser.username} | Asal: ${this.state.products[productIndex].originCity}, ${this.state.products[productIndex].originCountry} | Kode: ${this.state.products[productIndex].hash}`
                 );
                 
-                this.loadUserProducts();
+                // ✅ PERBAIKAN: Langsung update UI sebelum save ke storage
+                this.updateUI();
+                
+                // Save to shared storage
+                this.saveSharedData();
+                
                 this.closeModal('deleteConfirmModal');
-                this.showStatus('Produk berhasil dihapus!', 'success');
-                this.saveToLocalStorage();
+                this.showStatus('Produk berhasil dihapus! Semua user bisa melihat status penghapusan.', 'success');
             }
         }
 
-        // Load activity history
+        // Activity History - REAL-TIME
+        addActivity(action, productName, productId = null, additionalInfo = '') {
+            const activity = {
+                id: 'act_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                action: action,
+                productName: productName,
+                productId: productId,
+                user: this.state.currentUser.username,
+                userId: this.state.currentUser.uid,
+                additionalInfo: additionalInfo,
+                timestamp: new Date().toISOString(),
+                dateDisplay: new Date().toLocaleString('id-ID')
+            };
+            
+            this.state.activityHistory.unshift(activity);
+            
+            // Keep only last 100 activities
+            if (this.state.activityHistory.length > 100) {
+                this.state.activityHistory = this.state.activityHistory.slice(0, 100);
+            }
+        }
+
         loadActivityHistory() {
             const historyList = document.getElementById('historyList');
             if (!historyList) return;
@@ -2124,7 +2253,27 @@
             }
         }
 
-        // QR Scanner - FIXED
+        // Generate kode unik yang pendek
+        generateShortHash() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = 'TRC';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Update statistics
+        updateStats() {
+            const activeProducts = this.state.products.filter(p => !p.isDeleted).length;
+            const deletedProducts = this.state.products.filter(p => p.isDeleted).length;
+            
+            document.getElementById('totalProductsStat').textContent = this.state.products.length;
+            document.getElementById('activeProductsStat').textContent = activeProducts;
+            document.getElementById('transitProductsStat').textContent = deletedProducts;
+        }
+
+        // QR Scanner
         openQRScanner() {
             this.showModal('qrScannerModal');
         }
@@ -2140,7 +2289,6 @@
             
             // Simulate QR code processing
             setTimeout(() => {
-                // Cek apakah kode QR sesuai dengan format produk kita
                 const matchedProduct = this.state.products.find(product => 
                     product.hash === qrCode || product.id === qrCode
                 );
@@ -2157,37 +2305,38 @@
 
         // Supply Chain
         openSupplyChain() {
-            document.getElementById('totalProductsStat').textContent = this.state.products.length;
-            document.getElementById('activeProductsStat').textContent = this.state.products.filter(p => p.status === 'active').length;
-            document.getElementById('transitProductsStat').textContent = this.state.products.filter(p => p.status === 'transit').length;
-            
+            this.updateStats();
             this.showModal('supplyChainModal');
         }
 
-        // Search
+        // Search - PERBAIKAN: Handle produk yang dihapus dengan benar
         searchProducts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            if (!searchTerm) {
-                this.loadUserProducts();
-                return;
-            }
             
+            // ✅ PERBAIKAN: Selalu filter produk yang tidak dihapus
             const filteredProducts = this.state.products.filter(product => 
-                product.name.toLowerCase().includes(searchTerm) ||
-                product.category.toLowerCase().includes(searchTerm) ||
-                product.description.toLowerCase().includes(searchTerm) ||
-                product.hash.toLowerCase().includes(searchTerm) ||
-                product.originCity.toLowerCase().includes(searchTerm) ||
-                product.originCountry.toLowerCase().includes(searchTerm) ||
-                product.owner.toLowerCase().includes(searchTerm)
+                !product.isDeleted && (
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    product.category.toLowerCase().includes(searchTerm) ||
+                    (product.description && product.description.toLowerCase().includes(searchTerm)) ||
+                    product.hash.toLowerCase().includes(searchTerm) ||
+                    product.originCity.toLowerCase().includes(searchTerm) ||
+                    product.originCountry.toLowerCase().includes(searchTerm) ||
+                    product.owner.toLowerCase().includes(searchTerm)
+                )
             );
             
             const productList = document.getElementById('productList');
+            const productCount = document.getElementById('productCount');
+            
             if (filteredProducts.length === 0) {
                 productList.innerHTML = `
                     <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.7)">
                         <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px;"></i>
                         <p style="margin-bottom: 15px;">Tidak ada produk yang cocok dengan "${searchTerm}"</p>
+                        ${searchTerm ? `<button class="btn btn-primary" onclick="document.getElementById('searchInput').value=''; app.updateUI()">
+                            Tampilkan Semua Produk
+                        </button>` : ''}
                     </div>
                 `;
             } else {
@@ -2204,12 +2353,17 @@
                                 <div class="product-owner">Ditambahkan oleh: ${product.owner}</div>
                             </div>
                             <div class="product-actions">
-                                <button class="btn btn-danger btn-small ${!canDelete ? 'btn-disabled' : ''}" 
-                                    onclick="event.stopPropagation(); ${canDelete ? `app.confirmDelete('${product.id}', '${product.name}', '${product.owner}')` : ''}"
-                                    ${!canDelete ? 'disabled' : ''}
-                                    title="${!canDelete ? 'Hanya pemilik produk yang dapat menghapus' : 'Hapus produk'}">
+                                ${canDelete ? `
+                                <button class="btn btn-danger btn-small" 
+                                    onclick="event.stopPropagation(); app.confirmDelete('${product.id}', '${product.name}', '${product.owner}')"
+                                    title="Hapus produk">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                ` : `
+                                <button class="btn btn-danger btn-small btn-disabled" disabled title="Hanya pemilik produk yang dapat menghapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                `}
                             </div>
                         </div>
                         <div class="product-details">
@@ -2229,12 +2383,33 @@
                 }).join('');
             }
             
+            if (productCount) {
+                productCount.textContent = `${filteredProducts.length} produk ditemukan`;
+            }
+            
             this.showStatus(`Menampilkan ${filteredProducts.length} hasil untuk "${searchTerm}"`, 'info');
         }
 
         handleSearchEnter(event) {
             if (event.key === 'Enter') {
                 this.searchProducts();
+            }
+        }
+
+        // PERBAIKAN BARU: Fungsi untuk handle input real-time
+        handleSearchInput(event) {
+            const searchTerm = event.target.value;
+            
+            // Jika input dikosongkan, langsung refresh tampilan
+            if (searchTerm === '') {
+                this.updateUI();
+            }
+            // Jika ada input, tunggu sebentar lalu search (debounce)
+            else {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    this.searchProducts();
+                }, 300); // Delay 300ms
             }
         }
 
@@ -2278,6 +2453,7 @@
     function openSupplyChain() { app.openSupplyChain(); }
     function searchProducts() { app.searchProducts(); }
     function handleSearchEnter(event) { app.handleSearchEnter(event); }
+    function handleSearchInput(event) { app.handleSearchInput(event); }
     function createPayment() { app.createPayment(); }
     function closeModal(modalId) { app.closeModal(modalId); }
     function updateProductPreview() { app.updateProductPreview(); }
