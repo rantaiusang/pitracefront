@@ -4,9 +4,1130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PI TRACE - Blockchain Supply Chain Tracking</title>
-    <link rel="stylesheet" href="style.css">
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Pi SDK -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    
+    <!-- ALL CSS INLINE -->
+    <style>
+    /* ============================================= */
+    /* PI TRACE - Simplified Styles */
+    /* ============================================= */
+    :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --secondary: #6c757d;
+        --success: #4cc9a7;
+        --warning: #f9c74f;
+        --error: #f94144;
+        --dark: #2b2d42;
+        --gray: #8d99ae;
+        --light-gray: #edf2f4;
+        --white: #ffffff;
+        
+        /* Glass Effect */
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg-gradient);
+        min-height: 100vh;
+        padding: 20px;
+        color: var(--dark);
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 500px;
+        margin: 0 auto;
+        min-height: calc(100vh - 40px);
+    }
+
+    /* Section Management */
+    .section-active {
+        display: block !important;
+    }
+
+    .section-hidden {
+        display: none !important;
+    }
+
+    /* Glass Card */
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 40px 30px;
+        box-shadow: var(--glass-shadow);
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header & Logo */
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, var(--primary), #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logo i {
+        font-size: 2rem;
+        color: var(--white);
+    }
+
+    .title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--white), #e2e2e2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        color: var(--light-gray);
+        font-size: 1.1rem;
+    }
+
+    .welcome-message {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .welcome-message h2 {
+        color: var(--white);
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+
+    .welcome-message p {
+        color: var(--light-gray);
+        opacity: 0.9;
+    }
+
+    /* Login Actions - Hanya 2 Tombol */
+    .login-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin: 30px 0;
+    }
+
+    /* Button Styles */
+    .btn {
+        padding: 15px 25px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+        font-family: inherit;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), #764ba2);
+        color: var(--white);
+        box-shadow: 0 6px 20px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--white);
+        border: 2px solid var(--glass-border);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success), #2a9d8f);
+        color: var(--white);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 2px solid var(--glass-border);
+        color: var(--white);
+    }
+
+    .btn-outline:hover {
+        background: var(--glass-bg);
+    }
+
+    .btn-large {
+        padding: 18px 25px;
+        font-size: 1.1rem;
+    }
+
+    .btn-logout {
+        width: 100%;
+        margin: 0;
+    }
+
+    /* User Welcome */
+    .user-welcome {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        border: 1px solid var(--glass-border);
+    }
+
+    .avatar {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary), #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .avatar i {
+        font-size: 1.5rem;
+        color: var(--white);
+    }
+
+    .user-info h2 {
+        color: var(--white);
+        font-size: 1.4rem;
+        margin-bottom: 5px;
+    }
+
+    .user-info #login-type {
+        color: var(--light-gray);
+        font-size: 0.9rem;
+    }
+
+    /* Search Bar */
+    .search-container {
+        position: relative;
+        margin: 20px 0;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 15px 50px 15px 20px;
+        border: none;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+        color: var(--dark);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-input:focus {
+        outline: none;
+        box-shadow: 0 4px 20px rgba(67, 97, 238, 0.3);
+    }
+
+    .search-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--primary);
+        border: none;
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--white);
+    }
+
+    /* Features Grid */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin: 25px 0;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--glass-border);
+        border-radius: 15px;
+        padding: 20px 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-3px);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto 10px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .feature-icon.primary {
+        background: linear-gradient(135deg, var(--primary), #764ba2);
+    }
+
+    .feature-icon.success {
+        background: linear-gradient(135deg, var(--success), #2a9d8f);
+    }
+
+    .feature-icon.warning {
+        background: linear-gradient(135deg, var(--warning), #f8961e);
+    }
+
+    .feature-icon i {
+        font-size: 1.3rem;
+        color: var(--white);
+    }
+
+    .feature-card h3 {
+        color: var(--white);
+        font-size: 1rem;
+        margin-bottom: 5px;
+    }
+
+    .feature-card p {
+        color: var(--light-gray);
+        font-size: 0.8rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 25px 0;
+    }
+
+    /* Product Section */
+    .product-section {
+        margin: 30px 0;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .section-header h3 {
+        color: var(--white);
+        font-size: 1.3rem;
+    }
+
+    .product-count {
+        background: var(--primary);
+        color: var(--white);
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+    }
+
+    .product-list {
+        display: grid;
+        gap: 15px;
+    }
+
+    /* Product Card */
+    .product-card {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--glass-border);
+        border-radius: 15px;
+        padding: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .product-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+
+    .product-name {
+        color: var(--white);
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+
+    .product-meta {
+        color: var(--light-gray);
+        font-size: 0.8rem;
+    }
+
+    .status-badge {
+        background: var(--success);
+        color: var(--white);
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: var(--white);
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+        color: var(--dark);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .modal-content {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 25px 25px 15px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .modal-header h2 {
+        color: var(--white);
+        font-size: 1.5rem;
+    }
+
+    .close-modal {
+        font-size: 2rem;
+        color: var(--light-gray);
+        cursor: pointer;
+    }
+
+    .modal-body {
+        padding: 20px 25px;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 15px 25px;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    /* QR Scanner Styles */
+    .qr-scanner-container {
+        text-align: center;
+    }
+
+    .scanner-placeholder {
+        padding: 20px 0;
+    }
+
+    .scanner-placeholder i {
+        font-size: 3rem;
+        color: var(--light-gray);
+        margin-bottom: 15px;
+    }
+
+    .scanner-placeholder h3 {
+        color: var(--white);
+        margin-bottom: 10px;
+    }
+
+    .scanner-placeholder p {
+        color: var(--light-gray);
+        margin-bottom: 20px;
+    }
+
+    .scanner-frame {
+        width: 200px;
+        height: 200px;
+        margin: 0 auto;
+        border: 2px solid var(--primary);
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .scan-line {
+        position: absolute;
+        height: 2px;
+        background: var(--primary);
+        width: 100%;
+        top: 50%;
+        animation: scan 2s linear infinite;
+    }
+
+    @keyframes scan {
+        0% { top: 10%; }
+        50% { top: 90%; }
+        100% { top: 10%; }
+    }
+
+    .manual-input-section {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .manual-input-section h4 {
+        color: var(--white);
+        margin-bottom: 15px;
+    }
+
+    /* Supply Chain Styles */
+    .supply-chain-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .stat-item {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .stat-item h3 {
+        color: var(--white);
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+    }
+
+    .stat-item p {
+        color: var(--light-gray);
+        font-size: 0.8rem;
+    }
+
+    /* Debug Panel */
+    .debug-panel {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 25px;
+        max-height: 150px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        border: 1px solid var(--glass-border);
+    }
+
+    .debug-item {
+        padding: 8px 10px;
+        margin-bottom: 5px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        border-left: 3px solid var(--primary);
+        color: var(--light-gray);
+    }
+
+    /* Status Messages */
+    .status-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1001;
+        max-width: 300px;
+    }
+
+    .status {
+        padding: 15px 18px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        backdrop-filter: blur(10px);
+        border: 1px solid;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        animation: slideInRight 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(100%); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .status.success {
+        background: rgba(76, 201, 167, 0.2);
+        color: var(--success);
+        border-color: rgba(76, 201, 167, 0.3);
+    }
+
+    .status.error {
+        background: rgba(249, 65, 68, 0.2);
+        color: var(--error);
+        border-color: rgba(249, 65, 68, 0.3);
+    }
+
+    .status.warning {
+        background: rgba(249, 199, 79, 0.2);
+        color: var(--warning);
+        border-color: rgba(249, 199, 79, 0.3);
+    }
+
+    .status.info {
+        background: rgba(67, 97, 238, 0.2);
+        color: var(--primary);
+        border-color: rgba(67, 97, 238, 0.3);
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--white);
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Logout Section */
+    .logout-section {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    /* MOBILE FIXES */
+    @media (max-width: 768px) {
+        .container {
+            padding: 10px;
+        }
+        
+        .glass-card {
+            padding: 30px 20px;
+        }
+        
+        .title {
+            font-size: 2rem;
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .features-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .supply-chain-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .status-container {
+            left: 10px;
+            right: 10px;
+            top: 10px;
+            max-width: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding: 10px !important;
+            font-size: 14px !important;
+        }
+        
+        .container {
+            max-width: 100% !important;
+            min-height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .glass-card {
+            padding: 25px 15px !important;
+            margin: 0 !important;
+            border-radius: 15px !important;
+            min-height: auto !important;
+        }
+        
+        .header {
+            margin-bottom: 20px !important;
+        }
+        
+        .logo {
+            width: 60px !important;
+            height: 60px !important;
+            margin-bottom: 15px !important;
+        }
+        
+        .logo i {
+            font-size: 1.5rem !important;
+        }
+        
+        .title {
+            font-size: 1.8rem !important;
+            margin-bottom: 5px !important;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem !important;
+        }
+        
+        .welcome-message {
+            margin-bottom: 25px !important;
+        }
+        
+        .welcome-message h2 {
+            font-size: 1.3rem !important;
+        }
+        
+        .welcome-message p {
+            font-size: 0.9rem !important;
+        }
+        
+        .btn {
+            padding: 16px 20px !important;
+            font-size: 16px !important;
+            min-height: 54px !important;
+            margin-bottom: 10px !important;
+        }
+        
+        .btn-large {
+            padding: 18px 20px !important;
+            font-size: 17px !important;
+        }
+        
+        .login-actions {
+            margin: 25px 0 !important;
+            gap: 12px !important;
+        }
+        
+        .user-welcome {
+            padding: 15px !important;
+            margin-bottom: 20px !important;
+            flex-direction: column !important;
+            text-align: center !important;
+            gap: 10px !important;
+        }
+        
+        .avatar {
+            width: 50px !important;
+            height: 50px !important;
+        }
+        
+        .avatar i {
+            font-size: 1.2rem !important;
+        }
+        
+        .user-info h2 {
+            font-size: 1.2rem !important;
+        }
+        
+        .search-container {
+            margin: 15px 0 !important;
+        }
+        
+        .search-input {
+            padding: 14px 45px 14px 15px !important;
+            font-size: 16px !important;
+        }
+        
+        .search-btn {
+            width: 35px !important;
+            height: 35px !important;
+            right: 8px !important;
+        }
+        
+        .features-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 8px !important;
+            margin: 20px 0 !important;
+        }
+        
+        .feature-card {
+            padding: 12px 8px !important;
+            border-radius: 12px !important;
+        }
+        
+        .feature-icon {
+            width: 40px !important;
+            height: 40px !important;
+            margin-bottom: 8px !important;
+            border-radius: 10px !important;
+        }
+        
+        .feature-icon i {
+            font-size: 1.1rem !important;
+        }
+        
+        .feature-card h3 {
+            font-size: 0.8rem !important;
+            margin-bottom: 3px !important;
+        }
+        
+        .feature-card p {
+            font-size: 0.7rem !important;
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+            margin: 20px 0 !important;
+        }
+        
+        .action-buttons .btn {
+            margin-bottom: 0 !important;
+        }
+        
+        .product-section {
+            margin: 25px 0 !important;
+        }
+        
+        .section-header {
+            margin-bottom: 15px !important;
+        }
+        
+        .section-header h3 {
+            font-size: 1.1rem !important;
+        }
+        
+        .product-count {
+            font-size: 0.7rem !important;
+            padding: 3px 8px !important;
+        }
+        
+        .product-list {
+            gap: 10px !important;
+        }
+        
+        .product-card {
+            padding: 15px !important;
+            border-radius: 12px !important;
+        }
+        
+        .product-header {
+            margin-bottom: 8px !important;
+        }
+        
+        .product-name {
+            font-size: 1rem !important;
+        }
+        
+        .product-meta {
+            font-size: 0.75rem !important;
+        }
+        
+        .modal {
+            padding: 10px !important;
+            align-items: flex-start !important;
+            padding-top: 20px !important;
+        }
+        
+        .modal-content {
+            max-width: 100% !important;
+            margin: 0 !important;
+            border-radius: 15px !important;
+            max-height: 95vh !important;
+        }
+        
+        .modal-header {
+            padding: 20px 20px 15px !important;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.3rem !important;
+        }
+        
+        .modal-body {
+            padding: 15px 20px !important;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        
+        .modal-footer .btn {
+            width: 100% !important;
+            margin: 0 !important;
+        }
+        
+        .form-group {
+            margin-bottom: 12px !important;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 14px 12px !important;
+            font-size: 16px !important;
+        }
+        
+        .scanner-placeholder {
+            padding: 15px 0 !important;
+        }
+        
+        .scanner-placeholder i {
+            font-size: 2.5rem !important;
+            margin-bottom: 10px !important;
+        }
+        
+        .scanner-placeholder h3 {
+            font-size: 1.1rem !important;
+            margin-bottom: 8px !important;
+        }
+        
+        .scanner-frame {
+            width: 180px !important;
+            height: 180px !important;
+        }
+        
+        .supply-chain-stats {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 10px !important;
+            margin-bottom: 20px !important;
+        }
+        
+        .stat-item {
+            padding: 12px 8px !important;
+        }
+        
+        .stat-item h3 {
+            font-size: 1.4rem !important;
+        }
+        
+        .stat-item p {
+            font-size: 0.7rem !important;
+        }
+        
+        .status-container {
+            position: fixed !important;
+            top: 10px !important;
+            left: 10px !important;
+            right: 10px !important;
+            max-width: none !important;
+            z-index: 10000 !important;
+        }
+        
+        .status {
+            padding: 12px 15px !important;
+            font-size: 14px !important;
+        }
+        
+        .debug-panel {
+            padding: 12px !important;
+            margin-top: 20px !important;
+            max-height: 120px !important;
+        }
+        
+        .debug-item {
+            padding: 6px 8px !important;
+            font-size: 0.75rem !important;
+        }
+        
+        .logout-section {
+            margin-top: 25px !important;
+            padding-top: 15px !important;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .glass-card {
+            padding: 20px 12px !important;
+        }
+        
+        .title {
+            font-size: 1.6rem !important;
+        }
+        
+        .features-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 6px !important;
+        }
+        
+        .feature-card {
+            padding: 10px 6px !important;
+        }
+        
+        .feature-icon {
+            width: 35px !important;
+            height: 35px !important;
+        }
+        
+        .feature-icon i {
+            font-size: 1rem !important;
+        }
+        
+        .feature-card h3 {
+            font-size: 0.75rem !important;
+        }
+        
+        .feature-card p {
+            font-size: 0.65rem !important;
+        }
+        
+        .btn {
+            padding: 14px 16px !important;
+            font-size: 15px !important;
+        }
+    }
+
+    /* Fix untuk iOS Safari */
+    @supports (-webkit-touch-callout: none) {
+        .glass-card {
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+        }
+        
+        .btn {
+            -webkit-tap-highlight-color: transparent;
+        }
+    }
+
+    /* Pastikan section management bekerja */
+    #login-section.section-active,
+    #app-section.section-active {
+        display: block !important;
+    }
+
+    #login-section.section-hidden,
+    #app-section.section-hidden {
+        display: none !important;
+    }
+
+    /* Loading state improvement */
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Touch improvements */
+    @media (hover: none) and (pointer: coarse) {
+        .btn:hover {
+            transform: none !important;
+        }
+        
+        .feature-card:hover {
+            transform: none !important;
+        }
+        
+        .product-card:hover {
+            transform: none !important;
+        }
+    }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -223,6 +1344,372 @@
     <!-- Status Container -->
     <div id="statusContainer" class="status-container"></div>
 
-    <script src="script.js"></script>
+    <!-- ALL JAVASCRIPT INLINE -->
+    <script>
+    // Mobile Optimized PI TRACE App
+    class PiTraceApp {
+        constructor() {
+            this.config = {
+                API_BASE_URL: 'https://pi-trace-backend.vercel.app/api',
+                DEBUG: true
+            };
+            
+            this.state = {
+                currentUser: null,
+                isGuest: false,
+                products: [],
+                currentProduct: null
+            };
+            
+            this.init();
+        }
+
+        init() {
+            this.logDebug('PI TRACE Mobile App Initialized');
+            this.setupEventListeners();
+            this.detectMobile();
+        }
+
+        // Mobile Detection
+        detectMobile() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                document.body.classList.add('mobile-device');
+                this.logDebug('Mobile device detected');
+                
+                // Mobile specific adjustments
+                this.adjustForMobile();
+            }
+        }
+
+        adjustForMobile() {
+            // Add touch-friendly styles
+            const style = document.createElement('style');
+            style.textContent = `
+                .mobile-device .btn {
+                    min-height: 44px; /* Minimum touch target size */
+                }
+                
+                .mobile-device .feature-card {
+                    padding: 12px 8px;
+                }
+                
+                .mobile-device .search-input {
+                    font-size: 16px; /* Prevent zoom on iOS */
+                }
+                
+                /* Improve scrolling on mobile */
+                .mobile-device .product-list {
+                    -webkit-overflow-scrolling: touch;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Utility Methods
+        logDebug(message) {
+            if (this.config.DEBUG) {
+                const debugPanel = document.getElementById('debugPanel');
+                if (debugPanel) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    const debugItem = document.createElement('div');
+                    debugItem.className = 'debug-item';
+                    debugItem.textContent = `[${timestamp}] ${message}`;
+                    debugPanel.appendChild(debugItem);
+                    debugPanel.scrollTop = debugPanel.scrollHeight;
+                }
+                console.log(`[PI TRACE] ${message}`);
+            }
+        }
+
+        showStatus(message, type = 'success') {
+            const statusContainer = document.getElementById('statusContainer');
+            if (!statusContainer) return;
+
+            const statusEl = document.createElement('div');
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = `
+                <i class="fas fa-${this.getStatusIcon(type)}"></i>
+                <span>${message}</span>
+            `;
+
+            statusContainer.appendChild(statusEl);
+
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                if (statusEl.parentNode) {
+                    statusEl.remove();
+                }
+            }, 4000);
+        }
+
+        getStatusIcon(type) {
+            const icons = {
+                success: 'check-circle',
+                error: 'exclamation-circle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+
+        // Event Listeners
+        setupEventListeners() {
+            // Search input enter key support
+            document.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && e.target.id === 'searchInput') {
+                    this.searchProducts();
+                }
+            });
+
+            // Close modals on backdrop click
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+
+            // Touch event improvements for mobile
+            document.addEventListener('touchstart', function() {}, { passive: true });
+        }
+
+        // Login Methods
+        async loginWithPi() {
+            this.logDebug('Starting Pi Wallet login...');
+            
+            try {
+                if (!window.Pi) {
+                    throw new Error('Pi SDK not available');
+                }
+
+                await window.Pi.init({ version: "2.0", sandbox: true });
+                this.logDebug('Pi SDK initialized');
+
+                const user = await window.Pi.authenticate(['username', 'payments'], () => {});
+                
+                this.state.currentUser = user;
+                this.state.isGuest = false;
+                
+                this.showMainApp(user.username, 'Pi Wallet');
+                this.showStatus(`Welcome ${user.username}!`);
+
+            } catch (error) {
+                this.logDebug(`Pi login failed: ${error.message}`);
+                this.showStatus('Pi login unavailable, using guest mode', 'warning');
+                this.guestLogin();
+            }
+        }
+
+        guestLogin() {
+            const guestUser = {
+                username: 'Guest User',
+                uid: 'guest_' + Date.now()
+            };
+            
+            this.state.currentUser = guestUser;
+            this.state.isGuest = true;
+            
+            this.showMainApp(guestUser.username, 'Guest Mode');
+            this.showStatus('Welcome! Guest mode activated.');
+        }
+
+        showMainApp(username, loginType) {
+            document.getElementById('username').textContent = username;
+            document.getElementById('login-type').textContent = `Logged in with ${loginType}`;
+            
+            document.getElementById('login-section').classList.replace('section-active', 'section-hidden');
+            document.getElementById('app-section').classList.replace('section-hidden', 'section-active');
+            
+            this.loadUserProducts();
+        }
+
+        logout() {
+            this.state.currentUser = null;
+            this.state.isGuest = false;
+            this.state.products = [];
+            
+            document.getElementById('login-section').classList.replace('section-hidden', 'section-active');
+            document.getElementById('app-section').classList.replace('section-active', 'section-hidden');
+            
+            this.showStatus('Logged out successfully');
+        }
+
+        // Product Management
+        showProductModal() {
+            // Reset form
+            ['productName', 'productCategory', 'productQuantity', 'productPrice'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.value = id === 'productQuantity' ? '1' : '';
+            });
+            
+            this.showModal('productModal');
+        }
+
+        submitProduct() {
+            const productData = {
+                name: document.getElementById('productName').value,
+                category: document.getElementById('productCategory').value,
+                quantity: parseInt(document.getElementById('productQuantity').value) || 1,
+                price: parseFloat(document.getElementById('productPrice').value) || 0,
+                id: 'prod_' + Date.now(),
+                timestamp: new Date().toISOString(),
+                status: 'active'
+            };
+
+            if (!productData.name || !productData.category) {
+                this.showStatus('Please fill required fields', 'error');
+                return;
+            }
+
+            this.state.products.push(productData);
+            this.loadUserProducts();
+            this.closeModal('productModal');
+            this.showStatus('Product added successfully!');
+        }
+
+        loadUserProducts() {
+            const productList = document.getElementById('productList');
+            const productCount = document.getElementById('productCount');
+            
+            if (!productList) return;
+
+            if (this.state.products.length === 0) {
+                productList.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.7)">
+                        <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p style="margin-bottom: 15px;">No products yet</p>
+                        <button class="btn btn-primary" onclick="app.showProductModal()">
+                            Add Your First Product
+                        </button>
+                    </div>
+                `;
+            } else {
+                productList.innerHTML = this.state.products.map(product => `
+                    <div class="product-card" onclick="app.viewProduct('${product.id}')">
+                        <div class="product-header">
+                            <div>
+                                <div class="product-name">${product.name}</div>
+                                <div class="product-meta">${product.category} • ${product.quantity} pcs</div>
+                            </div>
+                            <div class="status-badge">${product.status}</div>
+                        </div>
+                        ${product.price ? `<div style="color: #4cc9a7; font-weight: bold; margin-top: 8px;">${product.price} π</div>` : ''}
+                    </div>
+                `).join('');
+            }
+            
+            if (productCount) {
+                productCount.textContent = `${this.state.products.length} product${this.state.products.length !== 1 ? 's' : ''}`;
+            }
+        }
+
+        viewProduct(productId) {
+            const product = this.state.products.find(p => p.id === productId);
+            if (product) {
+                this.showStatus(`Viewing: ${product.name}`);
+            }
+        }
+
+        // Modal Management
+        showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // QR Scanner
+        openQRScanner() {
+            this.showModal('qrScannerModal');
+        }
+
+        processManualQR() {
+            const qrCode = document.getElementById('manualQRInput').value;
+            if (!qrCode) {
+                this.showStatus('Please enter QR code', 'error');
+                return;
+            }
+            
+            this.showStatus(`Tracking product: ${qrCode}`);
+            this.closeModal('qrScannerModal');
+            
+            // Simulate finding product
+            setTimeout(() => {
+                this.showStatus('Product found in supply chain!', 'success');
+            }, 1500);
+        }
+
+        // Supply Chain
+        openSupplyChain() {
+            document.getElementById('totalProductsStat').textContent = this.state.products.length;
+            document.getElementById('activeProductsStat').textContent = this.state.products.filter(p => p.status === 'active').length;
+            document.getElementById('transitProductsStat').textContent = this.state.products.filter(p => p.status === 'transit').length;
+            
+            this.showModal('supplyChainModal');
+        }
+
+        // Search
+        searchProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            this.showStatus(`Searching for: ${searchTerm || 'all products'}`);
+            // Search logic would go here
+        }
+
+        handleSearchEnter(event) {
+            if (event.key === 'Enter') {
+                this.searchProducts();
+            }
+        }
+
+        // Payment
+        async createPayment() {
+            if (this.state.isGuest) {
+                this.showStatus('Login with Pi Wallet for payments', 'warning');
+                return;
+            }
+
+            try {
+                const payment = await window.Pi.createPayment({
+                    amount: 3.14,
+                    memo: 'PI TRACE - Premium Feature'
+                });
+                
+                this.showStatus('Payment initiated! Check Pi Wallet.');
+                this.logDebug(`Payment created: ${payment.identifier}`);
+                
+            } catch (error) {
+                this.showStatus('Payment failed', 'error');
+                this.logDebug(`Payment error: ${error.message}`);
+            }
+        }
+    }
+
+    // Initialize app when DOM is loaded
+    let app;
+    document.addEventListener('DOMContentLoaded', function() {
+        app = new PiTraceApp();
+    });
+
+    // Global functions for HTML onclick
+    function loginWithPi() { app.loginWithPi(); }
+    function guestLogin() { app.guestLogin(); }
+    function logout() { app.logout(); }
+    function showProductModal() { app.showProductModal(); }
+    function submitProduct() { app.submitProduct(); }
+    function openQRScanner() { app.openQRScanner(); }
+    function processManualQR() { app.processManualQR(); }
+    function openSupplyChain() { app.openSupplyChain(); }
+    function searchProducts() { app.searchProducts(); }
+    function handleSearchEnter(event) { app.handleSearchEnter(event); }
+    function createPayment() { app.createPayment(); }
+    function closeModal(modalId) { app.closeModal(modalId); }
+    </script>
 </body>
 </html>
