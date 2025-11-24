@@ -1229,6 +1229,12 @@
                         <option value="elektronik">Elektronik</option>
                         <option value="makanan">Makanan & Minuman</option>
                         <option value="pakaian">Pakaian</option>
+                        <option value="pertanian">Hasil Pertanian</option>
+                        <option value="perikanan">Hasil Perikanan</option>
+                        <option value="peternakan">Hasil Peternakan</option>
+                        <option value="kerajinan">Kerajinan Tangan</option>
+                        <option value="obat">Obat & Farmasi</option>
+                        <option value="kosmetik">Kosmetik</option>
                         <option value="other">Lainnya</option>
                     </select>
                 </div>
@@ -1242,13 +1248,69 @@
                         <input type="number" id="productQuantity" value="1" min="1">
                     </div>
                     <div class="form-group">
-                        <label>Satuan</label>
+                        <label>Satuan *</label>
                         <select id="productUnit">
-                            <option value="pcs">Pieces</option>
-                            <option value="kg">Kilogram</option>
-                            <option value="box">Kotak</option>
+                            <!-- Satuan Berat -->
+                            <option value="gram">Gram (g)</option>
+                            <option value="kg">Kilogram (kg)</option>
+                            <option value="ons">Ons</option>
+                            <option value="pon">Pon</option>
+                            <option value="ton">Ton</option>
+                            
+                            <!-- Satuan Volume -->
+                            <option value="ml">Mililiter (ml)</option>
+                            <option value="liter">Liter (L)</option>
+                            <option value="cc">CC</option>
+                            <option value="galon">Galon</option>
+                            
+                            <!-- Satuan Panjang -->
+                            <option value="mm">Milimeter (mm)</option>
+                            <option value="cm">Centimeter (cm)</option>
+                            <option value="m">Meter (m)</option>
+                            <option value="km">Kilometer (km)</option>
+                            
+                            <!-- Satuan Luas -->
+                            <option value="m2">Meter Persegi (m²)</option>
+                            <option value="hektar">Hektar</option>
+                            
+                            <!-- Satuan Buah/Pieces -->
+                            <option value="pcs">Pieces (pcs)</option>
                             <option value="unit">Unit</option>
-                            <option value="liter">Liter</option>
+                            <option value="buah">Buah</option>
+                            <option value="bungkus">Bungkus</option>
+                            <option value="paket">Paket</option>
+                            <option value="set">Set</option>
+                            
+                            <!-- Satuan Kemasan -->
+                            <option value="box">Box/Kotak</option>
+                            <option value="dus">Dus</option>
+                            <option value="karung">Karung</option>
+                            <option value="sak">Sak</option>
+                            <option value="karton">Karton</option>
+                            
+                            <!-- Satuan Khusus -->
+                            <option value="ikat">Ikat</option>
+                            <option value="lusin">Lusin</option>
+                            <option value="kodi">Kodi</option>
+                            <option value="rim">Rim</option>
+                            <option value="gross">Gross</option>
+                            
+                            <!-- Satuan Cairan -->
+                            <option value="botol">Botol</option>
+                            <option value="kaleng">Kaleng</option>
+                            <option value="jerigen">Jerigen</option>
+                            
+                            <!-- Satuan Makanan -->
+                            <option value="piring">Piring</option>
+                            <option value="mangkok">Mangkok</option>
+                            <option value="gelas">Gelas</option>
+                            <option value="sendok">Sendok</option>
+                            
+                            <!-- Satuan Lainnya -->
+                            <option value="roll">Roll</option>
+                            <option value="lembar">Lembar</option>
+                            <option value="pasang">Pasang</option>
+                            <option value="keping">Keping</option>
                         </select>
                     </div>
                 </div>
@@ -1776,7 +1838,7 @@
                         <div class="product-header">
                             <div>
                                 <div class="product-name">${product.name}</div>
-                                <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${product.unit}</div>
+                                <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${this.getUnitDisplay(product.unit)}</div>
                                 <div class="product-owner">Ditambahkan oleh: ${product.owner}</div>
                             </div>
                             <div class="product-actions">
@@ -1857,7 +1919,7 @@
                 <div class="product-detail-info">
                     <div class="detail-card">
                         <h4>Informasi Produk</h4>
-                        <div class="detail-value"><strong>Kuantitas:</strong> ${product.quantity} ${product.unit}</div>
+                        <div class="detail-value"><strong>Kuantitas:</strong> ${product.quantity} ${this.getUnitDisplay(product.unit)}</div>
                         <div class="detail-value"><strong>Kategori:</strong> ${this.getCategoryDisplay(product.category)}</div>
                         <div class="detail-value"><strong>Status:</strong> <span style="color: #4cc9a7;">Aktif</span></div>
                         <div class="detail-value"><strong>Ditambahkan oleh:</strong> ${product.owner}</div>
@@ -1911,9 +1973,63 @@
                 'elektronik': 'Elektronik',
                 'makanan': 'Makanan & Minuman',
                 'pakaian': 'Pakaian',
+                'pertanian': 'Hasil Pertanian',
+                'perikanan': 'Hasil Perikanan',
+                'peternakan': 'Hasil Peternakan',
+                'kerajinan': 'Kerajinan Tangan',
+                'obat': 'Obat & Farmasi',
+                'kosmetik': 'Kosmetik',
                 'other': 'Lainnya'
             };
             return categories[category] || category;
+        }
+
+        getUnitDisplay(unit) {
+            const unitDisplay = {
+                'gram': 'g',
+                'kg': 'kg',
+                'ons': 'ons',
+                'pon': 'pon',
+                'ton': 'ton',
+                'ml': 'ml',
+                'liter': 'L',
+                'cc': 'cc',
+                'galon': 'galon',
+                'mm': 'mm',
+                'cm': 'cm',
+                'm': 'm',
+                'km': 'km',
+                'm2': 'm²',
+                'hektar': 'hektar',
+                'pcs': 'pcs',
+                'unit': 'unit',
+                'buah': 'buah',
+                'bungkus': 'bungkus',
+                'paket': 'paket',
+                'set': 'set',
+                'box': 'box',
+                'dus': 'dus',
+                'karung': 'karung',
+                'sak': 'sak',
+                'karton': 'karton',
+                'ikat': 'ikat',
+                'lusin': 'lusin',
+                'kodi': 'kodi',
+                'rim': 'rim',
+                'gross': 'gross',
+                'botol': 'botol',
+                'kaleng': 'kaleng',
+                'jerigen': 'jerigen',
+                'piring': 'piring',
+                'mangkok': 'mangkok',
+                'gelas': 'gelas',
+                'sendok': 'sendok',
+                'roll': 'roll',
+                'lembar': 'lembar',
+                'pasang': 'pasang',
+                'keping': 'keping'
+            };
+            return unitDisplay[unit] || unit;
         }
 
         confirmDelete(productId, productName, productOwner) {
@@ -2084,7 +2200,7 @@
                         <div class="product-header">
                             <div>
                                 <div class="product-name">${product.name}</div>
-                                <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${product.unit}</div>
+                                <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${this.getUnitDisplay(product.unit)}</div>
                                 <div class="product-owner">Ditambahkan oleh: ${product.owner}</div>
                             </div>
                             <div class="product-actions">
