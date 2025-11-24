@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI TRACE - Blockchain Supply Chain Tracking</title>
+    <title>PI TRACE - Pelacakan Rantai Pasok Blockchain</title>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -182,6 +182,11 @@
 
     .btn-success {
         background: linear-gradient(135deg, var(--success), #2a9d8f);
+        color: var(--white);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, var(--error), #d32f2f);
         color: var(--white);
     }
 
@@ -389,6 +394,7 @@
         border-radius: 15px;
         padding: 20px;
         transition: all 0.3s ease;
+        cursor: pointer;
     }
 
     .product-card:hover {
@@ -414,12 +420,63 @@
         font-size: 0.8rem;
     }
 
+    .product-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-small {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+    }
+
     .status-badge {
         background: var(--success);
         color: var(--white);
         padding: 4px 10px;
         border-radius: 8px;
         font-size: 0.7rem;
+    }
+
+    .product-details {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .product-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        color: var(--light-gray);
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+    }
+
+    .info-value {
+        color: var(--white);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .hash-code {
+        background: rgba(255,255,255,0.1);
+        padding: 8px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 0.7rem;
+        color: var(--light-gray);
+        word-break: break-all;
     }
 
     /* Form Styles */
@@ -458,6 +515,35 @@
     .form-group textarea:focus {
         outline: none;
         box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    /* Preview Info */
+    .preview-info {
+        background: rgba(255,255,255,0.05);
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    .info-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-label-preview {
+        color: var(--light-gray);
+        font-size: 0.8rem;
+    }
+
+    .info-value-preview {
+        color: var(--white);
+        font-size: 0.8rem;
+        font-weight: 600;
     }
 
     /* Modal Styles */
@@ -603,6 +689,68 @@
         font-size: 0.8rem;
     }
 
+    /* History Styles */
+    .history-section {
+        margin-top: 25px;
+    }
+
+    .history-item {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .history-action {
+        color: var(--white);
+        font-weight: 600;
+    }
+
+    .history-date {
+        color: var(--light-gray);
+        font-size: 0.7rem;
+    }
+
+    .history-product {
+        color: var(--light-gray);
+        font-size: 0.8rem;
+    }
+
+    /* Delete Warning */
+    .delete-warning {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .delete-warning i {
+        font-size: 3rem;
+        color: var(--error);
+        margin-bottom: 15px;
+    }
+
+    .delete-warning h3 {
+        color: var(--white);
+        margin-bottom: 10px;
+    }
+
+    .delete-warning p {
+        color: var(--light-gray);
+        margin-bottom: 8px;
+    }
+
+    .warning-text {
+        color: var(--error) !important;
+        font-weight: 600;
+    }
+
     /* Debug Panel */
     .debug-panel {
         background: rgba(0, 0, 0, 0.3);
@@ -734,8 +882,13 @@
             top: 10px;
             max-width: none;
         }
+        
+        .product-info {
+            grid-template-columns: 1fr;
+        }
     }
 
+    /* Tambahan responsive fixes untuk mobile */
     @media (max-width: 480px) {
         body {
             padding: 10px !important;
@@ -756,331 +909,14 @@
             min-height: auto !important;
         }
         
-        .header {
-            margin-bottom: 20px !important;
+        .product-actions {
+            flex-direction: column;
+            gap: 5px;
         }
         
-        .logo {
-            width: 60px !important;
-            height: 60px !important;
-            margin-bottom: 15px !important;
-        }
-        
-        .logo i {
-            font-size: 1.5rem !important;
-        }
-        
-        .title {
-            font-size: 1.8rem !important;
-            margin-bottom: 5px !important;
-        }
-        
-        .subtitle {
-            font-size: 0.9rem !important;
-        }
-        
-        .welcome-message {
-            margin-bottom: 25px !important;
-        }
-        
-        .welcome-message h2 {
-            font-size: 1.3rem !important;
-        }
-        
-        .welcome-message p {
-            font-size: 0.9rem !important;
-        }
-        
-        .btn {
-            padding: 16px 20px !important;
-            font-size: 16px !important;
-            min-height: 54px !important;
-            margin-bottom: 10px !important;
-        }
-        
-        .btn-large {
-            padding: 18px 20px !important;
-            font-size: 17px !important;
-        }
-        
-        .login-actions {
-            margin: 25px 0 !important;
-            gap: 12px !important;
-        }
-        
-        .user-welcome {
-            padding: 15px !important;
-            margin-bottom: 20px !important;
-            flex-direction: column !important;
-            text-align: center !important;
-            gap: 10px !important;
-        }
-        
-        .avatar {
-            width: 50px !important;
-            height: 50px !important;
-        }
-        
-        .avatar i {
-            font-size: 1.2rem !important;
-        }
-        
-        .user-info h2 {
-            font-size: 1.2rem !important;
-        }
-        
-        .search-container {
-            margin: 15px 0 !important;
-        }
-        
-        .search-input {
-            padding: 14px 45px 14px 15px !important;
-            font-size: 16px !important;
-        }
-        
-        .search-btn {
-            width: 35px !important;
-            height: 35px !important;
-            right: 8px !important;
-        }
-        
-        .features-grid {
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 8px !important;
-            margin: 20px 0 !important;
-        }
-        
-        .feature-card {
-            padding: 12px 8px !important;
-            border-radius: 12px !important;
-        }
-        
-        .feature-icon {
-            width: 40px !important;
-            height: 40px !important;
-            margin-bottom: 8px !important;
-            border-radius: 10px !important;
-        }
-        
-        .feature-icon i {
-            font-size: 1.1rem !important;
-        }
-        
-        .feature-card h3 {
-            font-size: 0.8rem !important;
-            margin-bottom: 3px !important;
-        }
-        
-        .feature-card p {
+        .btn-small {
+            padding: 8px 12px !important;
             font-size: 0.7rem !important;
-        }
-        
-        .action-buttons {
-            grid-template-columns: 1fr !important;
-            gap: 10px !important;
-            margin: 20px 0 !important;
-        }
-        
-        .action-buttons .btn {
-            margin-bottom: 0 !important;
-        }
-        
-        .product-section {
-            margin: 25px 0 !important;
-        }
-        
-        .section-header {
-            margin-bottom: 15px !important;
-        }
-        
-        .section-header h3 {
-            font-size: 1.1rem !important;
-        }
-        
-        .product-count {
-            font-size: 0.7rem !important;
-            padding: 3px 8px !important;
-        }
-        
-        .product-list {
-            gap: 10px !important;
-        }
-        
-        .product-card {
-            padding: 15px !important;
-            border-radius: 12px !important;
-        }
-        
-        .product-header {
-            margin-bottom: 8px !important;
-        }
-        
-        .product-name {
-            font-size: 1rem !important;
-        }
-        
-        .product-meta {
-            font-size: 0.75rem !important;
-        }
-        
-        .modal {
-            padding: 10px !important;
-            align-items: flex-start !important;
-            padding-top: 20px !important;
-        }
-        
-        .modal-content {
-            max-width: 100% !important;
-            margin: 0 !important;
-            border-radius: 15px !important;
-            max-height: 95vh !important;
-        }
-        
-        .modal-header {
-            padding: 20px 20px 15px !important;
-        }
-        
-        .modal-header h2 {
-            font-size: 1.3rem !important;
-        }
-        
-        .modal-body {
-            padding: 15px 20px !important;
-        }
-        
-        .modal-footer {
-            padding: 15px 20px !important;
-            flex-direction: column !important;
-            gap: 8px !important;
-        }
-        
-        .modal-footer .btn {
-            width: 100% !important;
-            margin: 0 !important;
-        }
-        
-        .form-group {
-            margin-bottom: 12px !important;
-        }
-        
-        .form-row {
-            grid-template-columns: 1fr !important;
-            gap: 12px !important;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 14px 12px !important;
-            font-size: 16px !important;
-        }
-        
-        .scanner-placeholder {
-            padding: 15px 0 !important;
-        }
-        
-        .scanner-placeholder i {
-            font-size: 2.5rem !important;
-            margin-bottom: 10px !important;
-        }
-        
-        .scanner-placeholder h3 {
-            font-size: 1.1rem !important;
-            margin-bottom: 8px !important;
-        }
-        
-        .scanner-frame {
-            width: 180px !important;
-            height: 180px !important;
-        }
-        
-        .supply-chain-stats {
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 10px !important;
-            margin-bottom: 20px !important;
-        }
-        
-        .stat-item {
-            padding: 12px 8px !important;
-        }
-        
-        .stat-item h3 {
-            font-size: 1.4rem !important;
-        }
-        
-        .stat-item p {
-            font-size: 0.7rem !important;
-        }
-        
-        .status-container {
-            position: fixed !important;
-            top: 10px !important;
-            left: 10px !important;
-            right: 10px !important;
-            max-width: none !important;
-            z-index: 10000 !important;
-        }
-        
-        .status {
-            padding: 12px 15px !important;
-            font-size: 14px !important;
-        }
-        
-        .debug-panel {
-            padding: 12px !important;
-            margin-top: 20px !important;
-            max-height: 120px !important;
-        }
-        
-        .debug-item {
-            padding: 6px 8px !important;
-            font-size: 0.75rem !important;
-        }
-        
-        .logout-section {
-            margin-top: 25px !important;
-            padding-top: 15px !important;
-        }
-    }
-
-    @media (max-width: 360px) {
-        .glass-card {
-            padding: 20px 12px !important;
-        }
-        
-        .title {
-            font-size: 1.6rem !important;
-        }
-        
-        .features-grid {
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 6px !important;
-        }
-        
-        .feature-card {
-            padding: 10px 6px !important;
-        }
-        
-        .feature-icon {
-            width: 35px !important;
-            height: 35px !important;
-        }
-        
-        .feature-icon i {
-            font-size: 1rem !important;
-        }
-        
-        .feature-card h3 {
-            font-size: 0.75rem !important;
-        }
-        
-        .feature-card p {
-            font-size: 0.65rem !important;
-        }
-        
-        .btn {
-            padding: 14px 16px !important;
-            font-size: 15px !important;
         }
     }
 
@@ -1105,12 +941,6 @@
     #login-section.section-hidden,
     #app-section.section-hidden {
         display: none !important;
-    }
-
-    /* Loading state improvement */
-    .loading-spinner {
-        width: 20px;
-        height: 20px;
     }
 
     /* Touch improvements */
@@ -1139,28 +969,28 @@
                         <i class="fas fa-link"></i>
                     </div>
                     <h1 class="title">PI TRACE</h1>
-                    <p class="subtitle">Blockchain Supply Chain Tracking</p>
+                    <p class="subtitle">Pelacakan Rantai Pasok Blockchain</p>
                 </div>
                 
                 <div class="welcome-message">
-                    <h2>Welcome to PI TRACE</h2>
-                    <p>Track your products through supply chain using blockchain</p>
+                    <h2>Selamat Datang di PI TRACE</h2>
+                    <p>Lacak produk Anda melalui rantai pasok menggunakan blockchain</p>
                 </div>
                 
                 <div class="login-actions">
                     <button class="btn btn-primary btn-large" onclick="loginWithPi()">
                         <i class="fab fa-raspberry-pi"></i>
-                        Login with Pi Wallet
+                        Login dengan Pi Wallet
                     </button>
                     
                     <button class="btn btn-secondary btn-large" onclick="guestLogin()">
                         <i class="fas fa-user"></i>
-                        Continue as Guest
+                        Lanjut sebagai Tamu
                     </button>
                 </div>
 
                 <div class="debug-panel" id="debugPanel">
-                    <div class="debug-item">Ready - Choose login method to start</div>
+                    <div class="debug-item">Siap - Pilih metode login untuk memulai</div>
                 </div>
             </div>
         </div>
@@ -1174,14 +1004,14 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="user-info">
-                        <h2>Welcome, <span id="username">User</span>!</h2>
-                        <p id="login-type">Authenticated with Pi Wallet</p>
+                        <h2>Selamat Datang, <span id="username">Pengguna</span>!</h2>
+                        <p id="login-type">Terautentikasi dengan Pi Wallet</p>
                     </div>
                 </div>
 
                 <!-- Search Bar -->
                 <div class="search-container">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search products..." onkeypress="handleSearchEnter(event)">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Cari produk..." onkeypress="handleSearchEnter(event)">
                     <button class="search-btn" onclick="searchProducts()">
                         <i class="fas fa-search"></i>
                     </button>
@@ -1193,24 +1023,24 @@
                         <div class="feature-icon primary">
                             <i class="fas fa-qrcode"></i>
                         </div>
-                        <h3>QR Tracking</h3>
-                        <p>Scan QR codes</p>
+                        <h3>Pelacakan QR</h3>
+                        <p>Scan kode QR</p>
                     </div>
 
                     <div class="feature-card" onclick="showProductModal()">
                         <div class="feature-icon success">
                             <i class="fas fa-box"></i>
                         </div>
-                        <h3>Add Product</h3>
-                        <p>Register new</p>
+                        <h3>Tambah Produk</h3>
+                        <p>Daftar produk baru</p>
                     </div>
 
                     <div class="feature-card" onclick="openSupplyChain()">
                         <div class="feature-icon warning">
                             <i class="fas fa-shipping-fast"></i>
                         </div>
-                        <h3>Supply Chain</h3>
-                        <p>View journey</p>
+                        <h3>Rantai Pasok</h3>
+                        <p>Lihat perjalanan</p>
                     </div>
                 </div>
 
@@ -1218,22 +1048,32 @@
                 <div class="action-buttons">
                     <button class="btn btn-primary" onclick="showProductModal()">
                         <i class="fas fa-plus-circle"></i>
-                        Add Product
+                        Tambah Produk
                     </button>
                     <button class="btn btn-success" onclick="createPayment()">
                         <i class="fas fa-coins"></i>
-                        Payment
+                        Pembayaran
                     </button>
                 </div>
 
                 <!-- Product List -->
                 <div class="product-section" id="productSection">
                     <div class="section-header">
-                        <h3>Your Products</h3>
-                        <span class="product-count" id="productCount">0 products</span>
+                        <h3>Produk Anda</h3>
+                        <span class="product-count" id="productCount">0 produk</span>
                     </div>
                     <div class="product-list" id="productList">
                         <!-- Products will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div class="history-section" id="historySection">
+                    <div class="section-header">
+                        <h3>Riwayat Aktivitas</h3>
+                    </div>
+                    <div id="historyList">
+                        <!-- History items will be loaded here -->
                     </div>
                 </div>
 
@@ -1241,102 +1081,155 @@
                 <div class="logout-section">
                     <button class="btn btn-outline btn-logout" onclick="logout()">
                         <i class="fas fa-sign-out-alt"></i>
-                        Logout
+                        Keluar
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Product Registration Modal -->
     <div id="productModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Register Product</h2>
+                <h2>Daftar Produk Baru</h2>
                 <span class="close-modal" onclick="closeModal('productModal')">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Product Name *</label>
-                    <input type="text" id="productName" placeholder="Enter product name">
+                    <label>Nama Produk *</label>
+                    <input type="text" id="productName" placeholder="Masukkan nama produk" oninput="updateProductPreview()">
                 </div>
                 <div class="form-group">
-                    <label>Category *</label>
-                    <select id="productCategory">
-                        <option value="">Select category</option>
-                        <option value="electronics">Electronics</option>
-                        <option value="food">Food</option>
-                        <option value="clothing">Clothing</option>
+                    <label>Kategori *</label>
+                    <select id="productCategory" onchange="updateProductPreview()">
+                        <option value="">Pilih kategori</option>
+                        <option value="elektronik">Elektronik</option>
+                        <option value="makanan">Makanan & Minuman</option>
+                        <option value="pakaian">Pakaian</option>
+                        <option value="other">Lainnya</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi</label>
+                    <textarea id="productDescription" rows="2" placeholder="Deskripsi produk..."></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Quantity</label>
+                        <label>Kuantitas</label>
                         <input type="number" id="productQuantity" value="1" min="1">
                     </div>
                     <div class="form-group">
-                        <label>Price (π)</label>
-                        <input type="number" id="productPrice" placeholder="0.00" step="0.01">
+                        <label>Satuan</label>
+                        <select id="productUnit">
+                            <option value="pcs">Pieces</option>
+                            <option value="kg">Kilogram</option>
+                            <option value="box">Kotak</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Harga (π)</label>
+                    <input type="number" id="productPrice" placeholder="0.00" step="0.01">
+                </div>
+                
+                <!-- Preview Info -->
+                <div class="preview-info">
+                    <div class="info-row">
+                        <span class="info-label-preview">Tanggal Upload:</span>
+                        <span class="info-value-preview" id="uploadDateDisplay">Akan digenerate otomatis</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label-preview">Kode Unik:</span>
+                        <span class="info-value-preview" id="hashCodeDisplay">Akan digenerate otomatis</span>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('productModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="submitProduct()">Register</button>
+                <button class="btn btn-outline" onclick="closeModal('productModal')">Batal</button>
+                <button class="btn btn-primary" onclick="submitProduct()">
+                    <i class="fas fa-save"></i> Daftarkan Produk
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- QR Scanner Modal -->
     <div id="qrScannerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>QR Scanner</h2>
+                <h2>Pemindai QR Code</h2>
                 <span class="close-modal" onclick="closeModal('qrScannerModal')">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="scanner-placeholder">
                     <i class="fas fa-camera"></i>
-                    <h3>QR Code Scanner</h3>
-                    <p>Point camera at QR code</p>
+                    <h3>Pemindai QR Code</h3>
+                    <p>Arahkan kamera ke kode QR untuk melacak produk</p>
                     <div class="scanner-frame">
                         <div class="scan-line"></div>
                     </div>
                 </div>
                 <div class="manual-input-section">
-                    <h4>Or Enter Manually</h4>
-                    <input type="text" id="manualQRInput" class="search-input" placeholder="Enter QR code">
+                    <h4>Atau Masukkan Kode Manual</h4>
+                    <input type="text" id="manualQRInput" class="search-input" placeholder="Masukkan kode QR">
                     <button class="btn btn-primary" onclick="processManualQR()" style="margin-top: 10px; width: 100%">
-                        Track Product
+                        Lacak Produk
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Supply Chain Modal -->
     <div id="supplyChainModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Supply Chain</h2>
+                <h2>Ringkasan Rantai Pasok</h2>
                 <span class="close-modal" onclick="closeModal('supplyChainModal')">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="supply-chain-stats">
                     <div class="stat-item">
                         <h3 id="totalProductsStat">0</h3>
-                        <p>Total Products</p>
+                        <p>Total Produk</p>
                     </div>
                     <div class="stat-item">
                         <h3 id="activeProductsStat">0</h3>
-                        <p>Active</p>
+                        <p>Aktif</p>
                     </div>
                     <div class="stat-item">
                         <h3 id="transitProductsStat">0</h3>
-                        <p>In Transit</p>
+                        <p>Dalam Pengiriman</p>
                     </div>
                 </div>
                 <div id="supplyChainList">
                     <!-- Supply chain items -->
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Konfirmasi Hapus</h2>
+                <span class="close-modal" onclick="closeModal('deleteConfirmModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="delete-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Apakah Anda yakin?</h3>
+                    <p>Anda akan menghapus produk: <strong id="deleteProductName">Nama Produk</strong></p>
+                    <p class="warning-text">Tindakan ini tidak dapat dibatalkan!</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('deleteConfirmModal')">Batal</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash"></i> Hapus Produk
+                </button>
             </div>
         </div>
     </div>
@@ -1358,16 +1251,83 @@
                 currentUser: null,
                 isGuest: false,
                 products: [],
-                currentProduct: null
+                deletedProducts: [], // Riwayat produk yang dihapus
+                currentProduct: null,
+                activityHistory: [] // Riwayat aktivitas
             };
             
             this.init();
         }
 
         init() {
-            this.logDebug('PI TRACE Mobile App Initialized');
+            this.logDebug('Aplikasi PI TRACE Mobile Diinisialisasi');
             this.setupEventListeners();
             this.detectMobile();
+            this.loadFromLocalStorage();
+        }
+
+        // Load data dari localStorage
+        loadFromLocalStorage() {
+            try {
+                const savedProducts = localStorage.getItem('piTrace_products');
+                const savedHistory = localStorage.getItem('piTrace_history');
+                const savedDeleted = localStorage.getItem('piTrace_deleted');
+                
+                if (savedProducts) {
+                    this.state.products = JSON.parse(savedProducts);
+                }
+                if (savedHistory) {
+                    this.state.activityHistory = JSON.parse(savedHistory);
+                }
+                if (savedDeleted) {
+                    this.state.deletedProducts = JSON.parse(savedDeleted);
+                }
+                
+                this.logDebug('Data loaded from localStorage');
+            } catch (error) {
+                this.logDebug('Error loading from localStorage: ' + error.message);
+            }
+        }
+
+        // Save data ke localStorage
+        saveToLocalStorage() {
+            try {
+                localStorage.setItem('piTrace_products', JSON.stringify(this.state.products));
+                localStorage.setItem('piTrace_history', JSON.stringify(this.state.activityHistory));
+                localStorage.setItem('piTrace_deleted', JSON.stringify(this.state.deletedProducts));
+            } catch (error) {
+                this.logDebug('Error saving to localStorage: ' + error.message);
+            }
+        }
+
+        // Tambah riwayat aktivitas
+        addActivity(action, productName, productId = null) {
+            const activity = {
+                id: 'act_' + Date.now(),
+                action: action,
+                productName: productName,
+                productId: productId,
+                timestamp: new Date().toISOString(),
+                dateDisplay: new Date().toLocaleString('id-ID')
+            };
+            
+            this.state.activityHistory.unshift(activity); // Tambah di awal array
+            if (this.state.activityHistory.length > 50) { // Batasi riwayat
+                this.state.activityHistory = this.state.activityHistory.slice(0, 50);
+            }
+            
+            this.saveToLocalStorage();
+            this.loadActivityHistory();
+        }
+
+        // Generate kode unik yang pendek
+        generateShortHash() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = 'TRC';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
         }
 
         // Mobile Detection
@@ -1375,7 +1335,7 @@
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             if (isMobile) {
                 document.body.classList.add('mobile-device');
-                this.logDebug('Mobile device detected');
+                this.logDebug('Perangkat mobile terdeteksi');
                 
                 // Mobile specific adjustments
                 this.adjustForMobile();
@@ -1475,15 +1435,15 @@
 
         // Login Methods
         async loginWithPi() {
-            this.logDebug('Starting Pi Wallet login...');
+            this.logDebug('Memulai login Pi Wallet...');
             
             try {
                 if (!window.Pi) {
-                    throw new Error('Pi SDK not available');
+                    throw new Error('Pi SDK tidak tersedia');
                 }
 
                 await window.Pi.init({ version: "2.0", sandbox: true });
-                this.logDebug('Pi SDK initialized');
+                this.logDebug('Pi SDK diinisialisasi');
 
                 const user = await window.Pi.authenticate(['username', 'payments'], () => {});
                 
@@ -1491,80 +1451,95 @@
                 this.state.isGuest = false;
                 
                 this.showMainApp(user.username, 'Pi Wallet');
-                this.showStatus(`Welcome ${user.username}!`);
+                this.showStatus(`Selamat datang ${user.username}!`);
 
             } catch (error) {
-                this.logDebug(`Pi login failed: ${error.message}`);
-                this.showStatus('Pi login unavailable, using guest mode', 'warning');
+                this.logDebug(`Login Pi gagal: ${error.message}`);
+                this.showStatus('Login Pi tidak tersedia, menggunakan mode tamu', 'warning');
                 this.guestLogin();
             }
         }
 
         guestLogin() {
             const guestUser = {
-                username: 'Guest User',
+                username: 'Pengguna Tamu',
                 uid: 'guest_' + Date.now()
             };
             
             this.state.currentUser = guestUser;
             this.state.isGuest = true;
             
-            this.showMainApp(guestUser.username, 'Guest Mode');
-            this.showStatus('Welcome! Guest mode activated.');
+            this.showMainApp(guestUser.username, 'Mode Tamu');
+            this.showStatus('Selamat datang! Mode tamu diaktifkan.');
         }
 
         showMainApp(username, loginType) {
             document.getElementById('username').textContent = username;
-            document.getElementById('login-type').textContent = `Logged in with ${loginType}`;
+            document.getElementById('login-type').textContent = `Login dengan ${loginType}`;
             
             document.getElementById('login-section').classList.replace('section-active', 'section-hidden');
             document.getElementById('app-section').classList.replace('section-hidden', 'section-active');
             
             this.loadUserProducts();
+            this.loadActivityHistory();
         }
 
         logout() {
             this.state.currentUser = null;
             this.state.isGuest = false;
-            this.state.products = [];
             
             document.getElementById('login-section').classList.replace('section-hidden', 'section-active');
             document.getElementById('app-section').classList.replace('section-active', 'section-hidden');
             
-            this.showStatus('Logged out successfully');
+            this.showStatus('Berhasil keluar');
         }
 
         // Product Management
         showProductModal() {
             // Reset form
-            ['productName', 'productCategory', 'productQuantity', 'productPrice'].forEach(id => {
+            ['productName', 'productCategory', 'productDescription', 'productQuantity', 'productPrice'].forEach(id => {
                 const element = document.getElementById(id);
                 if (element) element.value = id === 'productQuantity' ? '1' : '';
             });
             
+            // Generate preview info
+            this.updateProductPreview();
+            
             this.showModal('productModal');
+        }
+
+        updateProductPreview() {
+            const now = new Date();
+            document.getElementById('uploadDateDisplay').textContent = now.toLocaleString('id-ID');
+            document.getElementById('hashCodeDisplay').textContent = this.generateShortHash();
         }
 
         submitProduct() {
             const productData = {
                 name: document.getElementById('productName').value,
                 category: document.getElementById('productCategory').value,
+                description: document.getElementById('productDescription').value,
                 quantity: parseInt(document.getElementById('productQuantity').value) || 1,
+                unit: document.getElementById('productUnit').value,
                 price: parseFloat(document.getElementById('productPrice').value) || 0,
                 id: 'prod_' + Date.now(),
+                hash: document.getElementById('hashCodeDisplay').textContent,
                 timestamp: new Date().toISOString(),
+                dateDisplay: new Date().toLocaleString('id-ID'),
                 status: 'active'
             };
 
             if (!productData.name || !productData.category) {
-                this.showStatus('Please fill required fields', 'error');
+                this.showStatus('Harap isi semua field yang wajib', 'error');
                 return;
             }
 
-            this.state.products.push(productData);
+            this.state.products.unshift(productData); // Tambah di awal array
+            this.addActivity('Produk ditambahkan', productData.name, productData.id);
             this.loadUserProducts();
             this.closeModal('productModal');
-            this.showStatus('Product added successfully!');
+            this.showStatus('Produk berhasil ditambahkan!');
+            this.saveToLocalStorage();
         }
 
         loadUserProducts() {
@@ -1577,37 +1552,131 @@
                 productList.innerHTML = `
                     <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.7)">
                         <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                        <p style="margin-bottom: 15px;">No products yet</p>
+                        <p style="margin-bottom: 15px;">Belum ada produk</p>
                         <button class="btn btn-primary" onclick="app.showProductModal()">
-                            Add Your First Product
+                            Tambah Produk Pertama
                         </button>
                     </div>
                 `;
             } else {
                 productList.innerHTML = this.state.products.map(product => `
-                    <div class="product-card" onclick="app.viewProduct('${product.id}')">
+                    <div class="product-card">
                         <div class="product-header">
                             <div>
                                 <div class="product-name">${product.name}</div>
-                                <div class="product-meta">${product.category} • ${product.quantity} pcs</div>
+                                <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${product.unit}</div>
                             </div>
-                            <div class="status-badge">${product.status}</div>
+                            <div class="product-actions">
+                                <button class="btn btn-danger btn-small" onclick="app.confirmDelete('${product.id}', '${product.name}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
-                        ${product.price ? `<div style="color: #4cc9a7; font-weight: bold; margin-top: 8px;">${product.price} π</div>` : ''}
+                        <div class="product-details">
+                            <div class="product-info">
+                                <div class="info-item">
+                                    <span class="info-label">Kode Unik:</span>
+                                    <span class="info-value">${product.hash}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Tanggal:</span>
+                                    <span class="info-value">${product.dateDisplay}</span>
+                                </div>
+                            </div>
+                            ${product.description ? `
+                                <div class="info-item">
+                                    <span class="info-label">Deskripsi:</span>
+                                    <span class="info-value">${product.description}</span>
+                                </div>
+                            ` : ''}
+                            ${product.price > 0 ? `
+                                <div class="info-item">
+                                    <span class="info-label">Harga:</span>
+                                    <span class="info-value" style="color: #4cc9a7;">${product.price} π</span>
+                                </div>
+                            ` : ''}
+                        </div>
                     </div>
                 `).join('');
             }
             
             if (productCount) {
-                productCount.textContent = `${this.state.products.length} product${this.state.products.length !== 1 ? 's' : ''}`;
+                productCount.textContent = `${this.state.products.length} produk`;
             }
         }
 
-        viewProduct(productId) {
-            const product = this.state.products.find(p => p.id === productId);
-            if (product) {
-                this.showStatus(`Viewing: ${product.name}`);
+        getCategoryDisplay(category) {
+            const categories = {
+                'elektronik': 'Elektronik',
+                'makanan': 'Makanan & Minuman',
+                'pakaian': 'Pakaian',
+                'other': 'Lainnya'
+            };
+            return categories[category] || category;
+        }
+
+        confirmDelete(productId, productName) {
+            this.state.currentProduct = { id: productId, name: productName };
+            document.getElementById('deleteProductName').textContent = productName;
+            
+            // Setup delete confirmation
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            confirmBtn.onclick = () => this.deleteProduct(productId);
+            
+            this.showModal('deleteConfirmModal');
+        }
+
+        deleteProduct(productId) {
+            const productIndex = this.state.products.findIndex(p => p.id === productId);
+            if (productIndex !== -1) {
+                const deletedProduct = this.state.products.splice(productIndex, 1)[0];
+                
+                // Simpan ke riwayat hapus
+                this.state.deletedProducts.unshift({
+                    ...deletedProduct,
+                    deletedAt: new Date().toISOString(),
+                    deletedAtDisplay: new Date().toLocaleString('id-ID')
+                });
+                
+                this.addActivity('Produk dihapus', deletedProduct.name, deletedProduct.id);
+                this.loadUserProducts();
+                this.closeModal('deleteConfirmModal');
+                this.showStatus('Produk berhasil dihapus!', 'success');
+                this.saveToLocalStorage();
             }
+        }
+
+        // Load activity history
+        loadActivityHistory() {
+            const historyList = document.getElementById('historyList');
+            if (!historyList) return;
+
+            if (this.state.activityHistory.length === 0) {
+                historyList.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.5)">
+                        <i class="fas fa-history" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>Belum ada riwayat aktivitas</p>
+                    </div>
+                `;
+            } else {
+                historyList.innerHTML = this.state.activityHistory.map(activity => `
+                    <div class="history-item">
+                        <div class="history-header">
+                            <span class="history-action">${this.getActivityDisplay(activity.action)}</span>
+                            <span class="history-date">${activity.dateDisplay}</span>
+                        </div>
+                        <div class="history-product">${activity.productName}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        getActivityDisplay(action) {
+            const actions = {
+                'Produk ditambahkan': '📦 Produk Ditambahkan',
+                'Produk dihapus': '🗑️ Produk Dihapus'
+            };
+            return actions[action] || action;
         }
 
         // Modal Management
@@ -1633,16 +1702,16 @@
         processManualQR() {
             const qrCode = document.getElementById('manualQRInput').value;
             if (!qrCode) {
-                this.showStatus('Please enter QR code', 'error');
+                this.showStatus('Harap masukkan kode QR', 'error');
                 return;
             }
             
-            this.showStatus(`Tracking product: ${qrCode}`);
+            this.showStatus(`Melacak produk: ${qrCode}`);
             this.closeModal('qrScannerModal');
             
             // Simulate finding product
             setTimeout(() => {
-                this.showStatus('Product found in supply chain!', 'success');
+                this.showStatus('Produk ditemukan dalam rantai pasok!', 'success');
             }, 1500);
         }
 
@@ -1658,7 +1727,7 @@
         // Search
         searchProducts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            this.showStatus(`Searching for: ${searchTerm || 'all products'}`);
+            this.showStatus(`Mencari: ${searchTerm || 'semua produk'}`);
             // Search logic would go here
         }
 
@@ -1671,22 +1740,22 @@
         // Payment
         async createPayment() {
             if (this.state.isGuest) {
-                this.showStatus('Login with Pi Wallet for payments', 'warning');
+                this.showStatus('Login dengan Pi Wallet untuk pembayaran', 'warning');
                 return;
             }
 
             try {
                 const payment = await window.Pi.createPayment({
                     amount: 3.14,
-                    memo: 'PI TRACE - Premium Feature'
+                    memo: 'PI TRACE - Fitur Premium'
                 });
                 
-                this.showStatus('Payment initiated! Check Pi Wallet.');
-                this.logDebug(`Payment created: ${payment.identifier}`);
+                this.showStatus('Pembayaran dimulai! Periksa Pi Wallet.');
+                this.logDebug(`Pembayaran dibuat: ${payment.identifier}`);
                 
             } catch (error) {
-                this.showStatus('Payment failed', 'error');
-                this.logDebug(`Payment error: ${error.message}`);
+                this.showStatus('Pembayaran gagal', 'error');
+                this.logDebug(`Error pembayaran: ${error.message}`);
             }
         }
     }
@@ -1710,6 +1779,7 @@
     function handleSearchEnter(event) { app.handleSearchEnter(event); }
     function createPayment() { app.createPayment(); }
     function closeModal(modalId) { app.closeModal(modalId); }
+    function updateProductPreview() { app.updateProductPreview(); }
     </script>
 </body>
 </html>
