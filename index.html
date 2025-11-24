@@ -1227,6 +1227,8 @@
                             <option value="pcs">Pieces</option>
                             <option value="kg">Kilogram</option>
                             <option value="box">Kotak</option>
+                            <option value="unit">Unit</option>
+                            <option value="liter">Liter</option>
                         </select>
                     </div>
                 </div>
@@ -1234,19 +1236,28 @@
                     <label>Harga (π)</label>
                     <input type="number" id="productPrice" placeholder="0.00" step="0.01">
                 </div>
+                
+                <!-- Asal Barang Section -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Negara Asal</label>
-                        <select id="originCountry">
+                        <label>Negara Asal *</label>
+                        <select id="originCountry" onchange="updateProductPreview()">
+                            <option value="">Pilih negara</option>
                             <option value="Indonesia">Indonesia</option>
                             <option value="Malaysia">Malaysia</option>
                             <option value="Singapore">Singapore</option>
+                            <option valueThailand">Thailand</option>
+                            <option value="Vietnam">Vietnam</option>
+                            <option value="Filipina">Filipina</option>
+                            <option value="China">China</option>
+                            <option value="Japan">Japan</option>
+                            <option value="Korea Selatan">Korea Selatan</option>
                             <option value="Other">Lainnya</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Kota Asal</label>
-                        <input type="text" id="originCity" placeholder="Nama kota">
+                        <label>Kota Asal *</label>
+                        <input type="text" id="originCity" placeholder="Masukkan kota asal" oninput="updateProductPreview()">
                     </div>
                 </div>
                 
@@ -1259,6 +1270,10 @@
                     <div class="info-row">
                         <span class="info-label-preview">Kode Unik:</span>
                         <span class="info-value-preview" id="hashCodeDisplay">Akan digenerate otomatis</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label-preview">Asal Barang:</span>
+                        <span class="info-value-preview" id="originDisplay">-</span>
                     </div>
                 </div>
             </div>
@@ -1639,7 +1654,7 @@
             });
             
             // Set default values
-            document.getElementById('originCountry').value = 'Indonesia';
+            document.getElementById('originCountry').value = '';
             document.getElementById('productUnit').value = 'pcs';
             
             // Generate preview info
@@ -1650,8 +1665,22 @@
 
         updateProductPreview() {
             const now = new Date();
+            const country = document.getElementById('originCountry').value;
+            const city = document.getElementById('originCity').value;
+            
             document.getElementById('uploadDateDisplay').textContent = now.toLocaleString('id-ID');
             document.getElementById('hashCodeDisplay').textContent = this.generateShortHash();
+            
+            // Update asal barang preview
+            if (country && city) {
+                document.getElementById('originDisplay').textContent = `${city}, ${country}`;
+            } else if (country) {
+                document.getElementById('originDisplay').textContent = country;
+            } else if (city) {
+                document.getElementById('originDisplay').textContent = city;
+            } else {
+                document.getElementById('originDisplay').textContent = '-';
+            }
         }
 
         submitProduct() {
@@ -1671,8 +1700,14 @@
                 status: 'active'
             };
 
+            // Validasi field wajib
             if (!productData.name || !productData.category) {
-                this.showStatus('Harap isi semua field yang wajib', 'error');
+                this.showStatus('Harap isi nama produk dan kategori', 'error');
+                return;
+            }
+
+            if (!productData.originCountry || !productData.originCity) {
+                this.showStatus('Harap isi negara dan kota asal barang', 'error');
                 return;
             }
 
@@ -1956,7 +1991,9 @@
                 product.name.toLowerCase().includes(searchTerm) ||
                 product.category.toLowerCase().includes(searchTerm) ||
                 product.description.toLowerCase().includes(searchTerm) ||
-                product.hash.toLowerCase().includes(searchTerm)
+                product.hash.toLowerCase().includes(searchTerm) ||
+                product.originCity.toLowerCase().includes(searchTerm) ||
+                product.originCountry.toLowerCase().includes(searchTerm)
             );
             
             const productList = document.getElementById('productList');
