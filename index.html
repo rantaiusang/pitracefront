@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PI TRACE - Blockchain Supply Chain Tracking</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -26,7 +26,6 @@
                     <p>Track your products through supply chain using blockchain</p>
                 </div>
                 
-                <!-- HANYA 2 TOMBOL LOGIN -->
                 <div class="login-actions">
                     <button class="btn btn-primary btn-large" onclick="loginWithPi()">
                         <i class="fab fa-raspberry-pi"></i>
@@ -61,7 +60,7 @@
 
                 <!-- Search Bar -->
                 <div class="search-container">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search products...">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search products..." onkeypress="handleSearchEnter(event)">
                     <button class="search-btn" onclick="searchProducts()">
                         <i class="fas fa-search"></i>
                     </button>
@@ -74,7 +73,7 @@
                             <i class="fas fa-qrcode"></i>
                         </div>
                         <h3>QR Tracking</h3>
-                        <p>Scan QR codes to track</p>
+                        <p>Scan QR codes</p>
                     </div>
 
                     <div class="feature-card" onclick="showProductModal()">
@@ -82,7 +81,7 @@
                             <i class="fas fa-box"></i>
                         </div>
                         <h3>Add Product</h3>
-                        <p>Register new product</p>
+                        <p>Register new</p>
                     </div>
 
                     <div class="feature-card" onclick="openSupplyChain()">
@@ -90,7 +89,7 @@
                             <i class="fas fa-shipping-fast"></i>
                         </div>
                         <h3>Supply Chain</h3>
-                        <p>View product journey</p>
+                        <p>View journey</p>
                     </div>
                 </div>
 
@@ -102,7 +101,7 @@
                     </button>
                     <button class="btn btn-success" onclick="createPayment()">
                         <i class="fas fa-coins"></i>
-                        Payment (3.14 π)
+                        Payment
                     </button>
                 </div>
 
@@ -126,139 +125,79 @@
                 </div>
             </div>
         </div>
-
-        <!-- Status Messages -->
-        <div id="status" class="status-container"></div>
     </div>
 
-    <!-- Product Registration Modal -->
+    <!-- Modals -->
     <div id="productModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Register New Product</h2>
+                <h2>Register Product</h2>
                 <span class="close-modal" onclick="closeModal('productModal')">&times;</span>
             </div>
-            
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="productName">Product Name *</label>
-                    <input type="text" id="productName" placeholder="Enter product name" oninput="updateProductPreview()">
+                    <label>Product Name *</label>
+                    <input type="text" id="productName" placeholder="Enter product name">
                 </div>
-                
                 <div class="form-group">
-                    <label for="productCategory">Category *</label>
-                    <select id="productCategory" onchange="updateProductPreview()">
+                    <label>Category *</label>
+                    <select id="productCategory">
                         <option value="">Select category</option>
                         <option value="electronics">Electronics</option>
+                        <option value="food">Food</option>
                         <option value="clothing">Clothing</option>
-                        <option value="food">Food & Beverages</option>
-                        <option value="other">Other</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label for="productDescription">Description</label>
-                    <textarea id="productDescription" rows="2" placeholder="Product description..."></textarea>
-                </div>
-
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="productQuantity">Quantity</label>
+                        <label>Quantity</label>
                         <input type="number" id="productQuantity" value="1" min="1">
                     </div>
                     <div class="form-group">
-                        <label for="productUnit">Unit</label>
-                        <select id="productUnit">
-                            <option value="pcs">Pieces</option>
-                            <option value="kg">Kilograms</option>
-                            <option value="box">Boxes</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="productPrice">Price (π)</label>
-                    <input type="number" id="productPrice" step="0.01" placeholder="0.00">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="originCountry">Country</label>
-                        <select id="originCountry">
-                            <option value="Indonesia">Indonesia</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="originCity">City</label>
-                        <input type="text" id="originCity" placeholder="City name">
-                    </div>
-                </div>
-
-                <!-- Preview Info -->
-                <div class="preview-info">
-                    <div class="info-item">
-                        <label>Upload Date</label>
-                        <div class="hash-code" id="uploadDateDisplay">Will be generated automatically</div>
-                    </div>
-                    
-                    <div class="info-item">
-                        <label>Unique Hash Code</label>
-                        <div class="hash-code" id="hashCodeDisplay">Will be generated automatically</div>
+                        <label>Price (π)</label>
+                        <input type="number" id="productPrice" placeholder="0.00" step="0.01">
                     </div>
                 </div>
             </div>
-            
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('productModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="submitProduct()">
-                    <i class="fas fa-save"></i> Register Product
-                </button>
+                <button class="btn btn-primary" onclick="submitProduct()">Register</button>
             </div>
         </div>
     </div>
 
-    <!-- QR Scanner Modal -->
     <div id="qrScannerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>QR Code Scanner</h2>
+                <h2>QR Scanner</h2>
                 <span class="close-modal" onclick="closeModal('qrScannerModal')">&times;</span>
             </div>
-            
             <div class="modal-body">
-                <div class="qr-scanner-container">
-                    <div class="scanner-placeholder">
-                        <i class="fas fa-camera"></i>
-                        <h3>QR Code Scanner</h3>
-                        <p>Point your camera at a QR code to track products</p>
-                        <div class="scanner-frame">
-                            <div class="scan-line"></div>
-                        </div>
+                <div class="scanner-placeholder">
+                    <i class="fas fa-camera"></i>
+                    <h3>QR Code Scanner</h3>
+                    <p>Point camera at QR code</p>
+                    <div class="scanner-frame">
+                        <div class="scan-line"></div>
                     </div>
-                    
-                    <div class="manual-input-section">
-                        <h4>Or Enter Code Manually</h4>
-                        <div class="form-group">
-                            <input type="text" id="manualQRInput" placeholder="Enter QR code here" class="search-input">
-                        </div>
-                        <button class="btn btn-primary" onclick="processManualQR()">
-                            <i class="fas fa-search"></i> Track Product
-                        </button>
-                    </div>
+                </div>
+                <div class="manual-input-section">
+                    <h4>Or Enter Manually</h4>
+                    <input type="text" id="manualQRInput" class="search-input" placeholder="Enter QR code">
+                    <button class="btn btn-primary" onclick="processManualQR()" style="margin-top: 10px; width: 100%">
+                        Track Product
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Supply Chain Modal -->
     <div id="supplyChainModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Supply Chain Overview</h2>
+                <h2>Supply Chain</h2>
                 <span class="close-modal" onclick="closeModal('supplyChainModal')">&times;</span>
             </div>
-            
             <div class="modal-body">
                 <div class="supply-chain-stats">
                     <div class="stat-item">
@@ -270,57 +209,19 @@
                         <p>Active</p>
                     </div>
                     <div class="stat-item">
-                        <h3 id="shippedProductsStat">0</h3>
+                        <h3 id="transitProductsStat">0</h3>
                         <p>In Transit</p>
                     </div>
                 </div>
-                
-                <div class="supply-chain-list">
-                    <h3>Product Journey</h3>
-                    <div id="supplyChainList">
-                        <!-- Supply chain items will be loaded here -->
-                    </div>
+                <div id="supplyChainList">
+                    <!-- Supply chain items -->
                 </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="closeModal('supplyChainModal')">
-                    <i class="fas fa-times"></i> Close
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Product Detail Modal -->
-    <div id="productDetailModal" class="modal">
-        <!-- Content will be loaded dynamically by JavaScript -->
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteConfirmModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Confirm Delete</h2>
-                <span class="close-modal" onclick="closeModal('deleteConfirmModal')">&times;</span>
-            </div>
-            
-            <div class="modal-body">
-                <div class="delete-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Are you sure?</h3>
-                    <p>You are about to delete the product: <strong id="deleteProductName">Product Name</strong></p>
-                    <p class="warning-text">This action cannot be undone!</p>
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('deleteConfirmModal')">Cancel</button>
-                <button class="btn btn-danger" id="confirmDeleteBtn">
-                    <i class="fas fa-trash"></i> Delete Product
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Status Container -->
+    <div id="statusContainer" class="status-container"></div>
 
     <script src="script.js"></script>
 </body>
