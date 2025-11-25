@@ -1250,6 +1250,10 @@
                         <i class="fas fa-coins"></i>
                         Pembayaran
                     </button>
+                    <button class="btn btn-outline" onclick="manualSync()" id="syncBtn">
+                        <i class="fas fa-sync-alt"></i>
+                        Sync Data
+                    </button>
                 </div>
 
                 <!-- Product List -->
@@ -1433,7 +1437,7 @@
                     </div>
                     <div class="stat-item">
                         <h3 id="activeProductsStat">0</h3>
-                        <p>Aktif</p>
+                        <p>Produk di Hapus</p>
                     </div>
                     <div class="stat-item">
                         <h3 id="transitProductsStat">0</h3>
@@ -1554,13 +1558,16 @@
     }
 
     // =============================================
-    // PI TRACE APP - FIXED BUTTON ISSUES
+    // PI TRACE APP - FIXED MULTI-DEVICE SYNC
     // =============================================
     class PiTraceApp {
         constructor() {
             this.config = {
                 DEBUG: true,
-                SYNC_INTERVAL: 2000
+                SYNC_INTERVAL: 5000, // Sync setiap 5 detik
+                CLOUD_STORAGE_URL: 'https://api.jsonbin.io/v3/b',
+                CLOUD_API_KEY: '$2a$10$wvKJ3u7s2Q9z8c1d5eRgE.7nZx4yV8qB0tA3cF6hN9jM5pL1rS2uD4',
+                CLOUD_BIN_ID: '65f1a9c71f5677401f1a0a55'
             };
             
             this.state = {
@@ -1577,14 +1584,16 @@
             this.init();
         }
 
-        init() {
+        async init() {
             this.logDebug('Aplikasi PI TRACE Diinisialisasi');
             this.detectPiBrowser();
             this.setupEventListeners();
             this.detectMobile();
+            
+            // Load data dari cloud
+            await this.loadFromCloud();
             this.startRealTimeSync();
             
-            // PERBAIKAN: Pastikan semua tombol bisa diklik
             this.enableAllButtons();
         }
 
@@ -1618,12 +1627,119 @@
             }
         }
 
+        // SOLUSI: Load data dari cloud storage
+        async loadFromCloud() {
+            try {
+                this.logDebug('Loading data dari cloud...');
+                
+                // Coba load dari localStorage dulu sebagai fallback
+                this.loadLocalData();
+                
+                // Coba load dari cloud
+                const response = await fetch(`${this.config.CLOUD_STORAGE_URL}/${this.config.CLOUD_BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': this.config.CLOUD_API_KEY
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const cloudData = data.record;
+                    
+                    if (cloudData && cloudData.products) {
+                        this.state.products = cloudData.products;
+                        this.state.activityHistory = cloudData.history || [];
+                        this.state.lastSync = new Date();
+                        
+                        // Simpan ke localStorage sebagai cache
+                        this.saveLocalData();
+                        
+                        this.logDebug(`Loaded ${this.state.products.length} products from cloud`);
+                        this.updateUI();
+                        this.showStatus('Data berhasil disinkronisasi dari cloud', 'success');
+                    }
+                } else {
+                    this.logDebug('Gagal load dari cloud, menggunakan data lokal');
+                }
+                
+            } catch (error) {
+                this.logDebug('Error loading from cloud: ' + error.message);
+                this.loadLocalData(); // Fallback ke localStorage
+            }
+        }
+
+        // SOLUSI: Save data ke cloud storage
+        async saveToCloud() {
+            try {
+                const dataToSave = {
+                    products: this.state.products,
+                    history: this.state.activityHistory,
+                    lastUpdated: new Date().toISOString(),
+                    syncCount: (dataToSave?.syncCount || 0) + 1
+                };
+                
+                const response = await fetch(`${this.config.CLOUD_STORAGE_URL}/${this.config.CLOUD_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': this.config.CLOUD_API_KEY
+                    },
+                    body: JSON.stringify(dataToSave)
+                });
+                
+                if (response.ok) {
+                    this.logDebug('Data berhasil disimpan ke cloud');
+                    return true;
+                } else {
+                    this.logDebug('Gagal menyimpan ke cloud: ' + response.status);
+                    return false;
+                }
+            } catch (error) {
+                this.logDebug('Error saving to cloud: ' + error.message);
+                return false;
+            }
+        }
+
+        // Load data dari localStorage
+        loadLocalData() {
+            try {
+                const localProducts = localStorage.getItem('pi_trace_products');
+                const localHistory = localStorage.getItem('pi_trace_history');
+                
+                if (localProducts) {
+                    this.state.products = JSON.parse(localProducts);
+                    this.logDebug(`Loaded ${this.state.products.length} products from local storage`);
+                }
+                
+                if (localHistory) {
+                    this.state.activityHistory = JSON.parse(localHistory);
+                    this.logDebug(`Loaded ${this.state.activityHistory.length} history items from local storage`);
+                }
+                
+                this.updateUI();
+                
+            } catch (error) {
+                this.logDebug('Error loading local data: ' + error.message);
+                this.state.products = [];
+                this.state.activityHistory = [];
+            }
+        }
+
+        // Save data ke localStorage
+        saveLocalData() {
+            try {
+                localStorage.setItem('pi_trace_products', JSON.stringify(this.state.products));
+                localStorage.setItem('pi_trace_history', JSON.stringify(this.state.activityHistory));
+                this.logDebug('Data disimpan ke local storage');
+            } catch (error) {
+                this.logDebug('Error saving local data: ' + error.message);
+            }
+        }
+
         // Real-time Sync
         startRealTimeSync() {
-            this.loadSharedData();
-            
-            this.syncInterval = setInterval(() => {
-                this.syncData();
+            this.syncInterval = setInterval(async () => {
+                await this.syncData();
             }, this.config.SYNC_INTERVAL);
             
             this.logDebug('Sinkronisasi real-time dimulai');
@@ -1636,85 +1752,22 @@
             }
         }
 
-        // Shared Database System
-        loadSharedData() {
+        async syncData() {
             try {
-                const sharedProducts = localStorage.getItem('pi_trace_products');
-                const sharedHistory = localStorage.getItem('pi_trace_history');
-                
-                if (sharedProducts) {
-                    this.state.products = JSON.parse(sharedProducts);
-                    this.logDebug(`Loaded ${this.state.products.length} products from shared storage`);
-                } else {
-                    this.state.products = [];
-                    localStorage.setItem('pi_trace_products', JSON.stringify([]));
-                }
-                
-                if (sharedHistory) {
-                    this.state.activityHistory = JSON.parse(sharedHistory);
-                    this.logDebug(`Loaded ${this.state.activityHistory.length} history items`);
-                } else {
-                    this.state.activityHistory = [];
-                    localStorage.setItem('pi_trace_history', JSON.stringify([]));
-                }
-                
-                this.state.lastSync = new Date();
-                this.updateUI();
-                
-            } catch (error) {
-                this.logDebug('Error loading shared data: ' + error.message);
-                this.state.products = [];
-                this.state.activityHistory = [];
-                this.saveSharedData();
-            }
-        }
-
-        saveSharedData() {
-            try {
-                localStorage.setItem('pi_trace_products', JSON.stringify(this.state.products));
-                localStorage.setItem('pi_trace_history', JSON.stringify(this.state.activityHistory));
-                
-                this.state.lastSync = new Date();
-                this.logDebug('Data shared saved successfully');
-                
-            } catch (error) {
-                this.logDebug('Error saving shared data: ' + error.message);
-            }
-        }
-
-        syncData() {
-            try {
-                const lastProducts = localStorage.getItem('pi_trace_products');
-                const lastHistory = localStorage.getItem('pi_trace_history');
-                
-                if (lastProducts) {
-                    const remoteProducts = JSON.parse(lastProducts);
-                    const currentProductsStr = JSON.stringify(this.state.products);
-                    const remoteProductsStr = JSON.stringify(remoteProducts);
-                    
-                    if (currentProductsStr !== remoteProductsStr) {
-                        this.state.products = remoteProducts;
-                        this.updateUI();
-                        this.logDebug('Products synced from remote changes');
-                    }
-                }
+                await this.loadFromCloud();
             } catch (error) {
                 this.logDebug('Sync error: ' + error.message);
             }
         }
 
+        // Manual sync
+        async manualSync() {
+            this.showStatus('Menyinkronisasi data...', 'info');
+            await this.loadFromCloud();
+        }
+
         // Event Listeners
         setupEventListeners() {
-            window.addEventListener('storage', (e) => {
-                if (e.key === 'pi_trace_products' || e.key === 'pi_trace_history') {
-                    this.logDebug('Storage change detected, syncing...');
-                    setTimeout(() => {
-                        this.loadSharedData();
-                        this.showStatus('Data diperbarui secara real-time!', 'info');
-                    }, 100);
-                }
-            });
-
             document.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && e.target.id === 'searchInput') {
                     this.searchProducts();
@@ -1820,7 +1873,7 @@
             }
         }
 
-        // Login Methods - PERBAIKAN: Pastikan guest login berfungsi
+        // Login Methods
         async loginWithPi() {
             this.logDebug('Memulai login Pi Wallet...');
             
@@ -1882,7 +1935,6 @@
             this.showMainApp(guestUser.username, 'Mode Tamu');
             this.showStatus('Selamat datang! Mode tamu diaktifkan.');
             
-            // PERBAIKAN: Pastikan semua tombol aktif setelah login
             this.enableAllButtons();
         }
 
@@ -1907,7 +1959,7 @@
             this.showStatus('Berhasil keluar');
         }
 
-        // Product Management - PERBAIKAN: Pastikan modal dan tombol berfungsi
+        // Product Management
         showProductModal() {
             // Reset form
             ['productName', 'productCategory', 'productDescription', 'productQuantity', 'productPrice', 'originCity'].forEach(id => {
@@ -1945,7 +1997,8 @@
             }
         }
 
-        submitProduct() {
+        // PERBAIKAN: Submit product dengan sinkronisasi cloud
+        async submitProduct() {
             const productData = {
                 name: document.getElementById('productName').value,
                 category: document.getElementById('productCategory').value,
@@ -1976,18 +2029,30 @@
                 return;
             }
 
-            // Add to shared products
-            this.state.products.unshift(productData);
-            
-            // Add activity
-            this.addActivity('Produk ditambahkan', productData.name, productData.id);
-            
-            // Save data
-            this.saveSharedData();
-            this.updateUI();
-            
-            this.closeModal('productModal');
-            this.showStatus('Produk berhasil ditambahkan! Semua user bisa melihatnya.', 'success');
+            try {
+                // Add to products array
+                this.state.products.unshift(productData);
+                
+                // Add activity
+                this.addActivity('Produk ditambahkan', productData.name, productData.id);
+                
+                // PERBAIKAN: Simpan ke cloud dan local
+                this.saveLocalData();
+                const cloudSuccess = await this.saveToCloud();
+                
+                this.updateUI();
+                this.closeModal('productModal');
+                
+                if (cloudSuccess) {
+                    this.showStatus('✅ Produk berhasil ditambahkan! Semua device akan melihat produk ini.', 'success');
+                } else {
+                    this.showStatus('✅ Produk berhasil ditambahkan! (Hanya tersimpan lokal)', 'warning');
+                }
+                
+            } catch (error) {
+                this.showStatus('Error menyimpan produk: ' + error.message, 'error');
+                this.logDebug('Submit product error: ' + error.message);
+            }
         }
 
         loadUserProducts() {
@@ -2207,7 +2272,8 @@
             this.showModal('deleteConfirmModal');
         }
 
-        deleteProduct(productId) {
+        // PERBAIKAN: Delete product dengan sinkronisasi cloud
+        async deleteProduct(productId) {
             const productIndex = this.state.products.findIndex(p => p.id === productId);
             if (productIndex !== -1) {
                 this.state.products[productIndex].isDeleted = true;
@@ -2223,11 +2289,23 @@
                     `Dihapus oleh: ${this.state.currentUser.username} | Asal: ${this.state.products[productIndex].originCity}, ${this.state.products[productIndex].originCountry} | Kode: ${this.state.products[productIndex].hash}`
                 );
                 
-                this.saveSharedData();
-                this.updateUI();
-                
-                this.closeModal('deleteConfirmModal');
-                this.showStatus('Produk berhasil dihapus! Semua user bisa melihat status penghapusan.', 'success');
+                try {
+                    // PERBAIKAN: Simpan ke cloud dan local
+                    this.saveLocalData();
+                    const cloudSuccess = await this.saveToCloud();
+                    
+                    this.updateUI();
+                    this.closeModal('deleteConfirmModal');
+                    
+                    if (cloudSuccess) {
+                        this.showStatus('✅ Produk berhasil dihapus! Semua device akan melihat perubahan ini.', 'success');
+                    } else {
+                        this.showStatus('✅ Produk berhasil dihapus! (Hanya tersimpan lokal)', 'warning');
+                    }
+                    
+                } catch (error) {
+                    this.showStatus('Error menghapus produk: ' + error.message, 'error');
+                }
             }
         }
 
@@ -2285,7 +2363,7 @@
             return actions[action] || action;
         }
 
-        // Modal Management - PERBAIKAN: Pastikan modal bisa ditutup
+        // Modal Management
         showModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
@@ -2489,119 +2567,72 @@
     let app;
     document.addEventListener('DOMContentLoaded', function() {
         app = new PiTraceApp();
-        
-        // PERBAIKAN: Pastikan semua event listener terpasang dengan benar
-        console.log('PI TRACE App initialized successfully');
+        console.log('PI TRACE App initialized dengan multi-device sync');
     });
 
-    // Global functions for HTML onclick - PERBAIKAN: Pastikan semua function terdefinisi
+    // Global functions for HTML onclick
     function loginWithPi() { 
-        if (app && typeof app.loginWithPi === 'function') {
-            app.loginWithPi(); 
-        } else {
-            console.error('app.loginWithPi is not available');
-        }
+        if (app && typeof app.loginWithPi === 'function') app.loginWithPi(); 
     }
     
     function guestLogin() { 
-        if (app && typeof app.guestLogin === 'function') {
-            app.guestLogin(); 
-        } else {
-            console.error('app.guestLogin is not available');
-            // Fallback langsung
-            const guestUser = {
-                username: 'Pengguna Tamu_' + Math.floor(Math.random() * 1000),
-                uid: 'guest_' + Date.now()
-            };
-            document.getElementById('username').textContent = guestUser.username;
-            document.getElementById('login-type').textContent = 'Mode Tamu';
-            document.getElementById('login-section').classList.replace('section-active', 'section-hidden');
-            document.getElementById('app-section').classList.replace('section-hidden', 'section-active');
-        }
+        if (app && typeof app.guestLogin === 'function') app.guestLogin(); 
     }
     
     function logout() { 
-        if (app && typeof app.logout === 'function') {
-            app.logout(); 
-        }
+        if (app && typeof app.logout === 'function') app.logout(); 
     }
     
     function showProductModal() { 
-        if (app && typeof app.showProductModal === 'function') {
-            app.showProductModal(); 
-        }
+        if (app && typeof app.showProductModal === 'function') app.showProductModal(); 
     }
     
     function submitProduct() { 
-        if (app && typeof app.submitProduct === 'function') {
-            app.submitProduct(); 
-        }
+        if (app && typeof app.submitProduct === 'function') app.submitProduct(); 
     }
     
     function openQRScanner() { 
-        if (app && typeof app.openQRScanner === 'function') {
-            app.openQRScanner(); 
-        }
+        if (app && typeof app.openQRScanner === 'function') app.openQRScanner(); 
     }
     
     function processManualQR() { 
-        if (app && typeof app.processManualQR === 'function') {
-            app.processManualQR(); 
-        }
+        if (app && typeof app.processManualQR === 'function') app.processManualQR(); 
     }
     
     function openSupplyChain() { 
-        if (app && typeof app.openSupplyChain === 'function') {
-            app.openSupplyChain(); 
-        }
+        if (app && typeof app.openSupplyChain === 'function') app.openSupplyChain(); 
     }
     
     function searchProducts() { 
-        if (app && typeof app.searchProducts === 'function') {
-            app.searchProducts(); 
-        }
+        if (app && typeof app.searchProducts === 'function') app.searchProducts(); 
     }
     
     function handleSearchEnter(event) { 
-        if (app && typeof app.handleSearchEnter === 'function') {
-            app.handleSearchEnter(event); 
-        }
+        if (app && typeof app.handleSearchEnter === 'function') app.handleSearchEnter(event); 
     }
     
     function handleSearchInput(event) { 
-        if (app && typeof app.handleSearchInput === 'function') {
-            app.handleSearchInput(event); 
-        }
+        if (app && typeof app.handleSearchInput === 'function') app.handleSearchInput(event); 
     }
     
     function createPayment() { 
-        if (app && typeof app.createPayment === 'function') {
-            app.createPayment(); 
-        }
+        if (app && typeof app.createPayment === 'function') app.createPayment(); 
     }
     
     function closeModal(modalId) { 
-        if (app && typeof app.closeModal === 'function') {
-            app.closeModal(modalId); 
-        } else {
-            // Fallback langsung
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        }
+        if (app && typeof app.closeModal === 'function') app.closeModal(modalId); 
     }
     
     function updateProductPreview() { 
-        if (app && typeof app.updateProductPreview === 'function') {
-            app.updateProductPreview(); 
-        }
+        if (app && typeof app.updateProductPreview === 'function') app.updateProductPreview(); 
     }
     
     function deleteCurrentProduct() { 
-        if (app && typeof app.deleteCurrentProduct === 'function') {
-            app.deleteCurrentProduct(); 
-        }
+        if (app && typeof app.deleteCurrentProduct === 'function') app.deleteCurrentProduct(); 
+    }
+    
+    function manualSync() {
+        if (app && typeof app.manualSync === 'function') app.manualSync();
     }
     </script>
 </body>
