@@ -1331,13 +1331,65 @@
                             <option value="pcs">Pieces (pcs)</option>
                             <option value="kg">Kilogram (kg)</option>
                             <option value="gram">Gram (g)</option>
+                            <option value="ons">Ons</option>
+                            <option value="kwintal">Kwintal</option>
+                            <option value="ton">Ton</option>
                             <option value="liter">Liter (L)</option>
                             <option value="ml">Mililiter (ml)</option>
+                            <option value="m3">Meter Kubik (m³)</option>
                             <option value="unit">Unit</option>
                             <option value="buah">Buah</option>
                             <option value="bungkus">Bungkus</option>
                             <option value="paket">Paket</option>
                             <option value="box">Box/Kotak</option>
+                            <option value="dus">Dus</option>
+                            <option value="karung">Karung</option>
+                            <option value="sak">Sak</option>
+                            <option value="bal">Bal</option>
+                            <option value="karton">Karton</option>
+                            <option value="roll">Roll</option>
+                            <option value="lembar">Lembar</option>
+                            <option value="meter">Meter (m)</option>
+                            <option value="cm">Centimeter (cm)</option>
+                            <option value="yard">Yard</option>
+                            <option value="kodi">Kodi</option>
+                            <option value="lusin">Lusin</option>
+                            <option value="gross">Gross</option>
+                            <option value="rim">Rim</option>
+                            <option value="botol">Botol</option>
+                            <option value="kaleng">Kaleng</option>
+                            <option value="tube">Tube</option>
+                            <option value="pot">Pot</option>
+                            <option value="sachet">Sachet</option>
+                            <option value="pouch">Pouch</option>
+                            <option value="can">Can</option>
+                            <option value="jar">Jar</option>
+                            <option value="drum">Drum</option>
+                            <option value="tong">Tong</option>
+                            <option value="tank">Tank</option>
+                            <option value="container">Container</option>
+                            <option value="pallet">Pallet</option>
+                            <option value="ikat">Ikat</option>
+                            <option value="sisir">Sisir</option>
+                            <option value="papan">Papan</option>
+                            <option value="genggam">Genggam</option>
+                            <option value="sendok">Sendok</option>
+                            <option value="cup">Cup</option>
+                            <option value="gelas">Gelas</option>
+                            <option value="mug">Mug</option>
+                            <option value="piring">Piring</option>
+                            <option value="mangkok">Mangkok</option>
+                            <option value="set">Set</option>
+                            <option value="pasang">Pasang</option>
+                            <option value="keping">Keping</option>
+                            <option value="batang">Batang</option>
+                            <option value="tandan">Tandan</option>
+                            <option value="jumbai">Jumbai</option>
+                            <option value="untai">Untai</option>
+                            <option value="gulung">Gulung</option>
+                            <option value="slop">Slop</option>
+                            <option value="renceng">Renceng</option>
+                            <option value="other">Lainnya</option>
                         </select>
                     </div>
                 </div>
@@ -2250,10 +2302,87 @@
             return categories[category] || category;
         }
 
+        // PERBAIKAN: Tambah semua satuan
         getUnitDisplay(unit) {
             const unitDisplay = {
-                'pcs': 'pcs', 'kg': 'kg', 'gram': 'g', 'liter': 'L', 'ml': 'ml',
-                'unit': 'unit', 'buah': 'buah', 'bungkus': 'bungkus', 'paket': 'paket', 'box': 'box'
+                // Satuan Berat
+                'pcs': 'pcs', 
+                'kg': 'kg', 
+                'gram': 'g', 
+                'ons': 'ons',
+                'kwintal': 'kwintal',
+                'ton': 'ton',
+                
+                // Satuan Volume
+                'liter': 'L', 
+                'ml': 'ml',
+                'm3': 'm³',
+                
+                // Satuan Kemasan
+                'unit': 'unit', 
+                'buah': 'buah', 
+                'bungkus': 'bungkus', 
+                'paket': 'paket', 
+                'box': 'box',
+                'dus': 'dus',
+                'karung': 'karung',
+                'sak': 'sak',
+                'bal': 'bal',
+                'karton': 'karton',
+                'roll': 'roll',
+                'lembar': 'lembar',
+                
+                // Satuan Panjang
+                'meter': 'm',
+                'cm': 'cm',
+                'yard': 'yard',
+                
+                // Satuan Kuantitas
+                'kodi': 'kodi',
+                'lusin': 'lusin',
+                'gross': 'gross',
+                'rim': 'rim',
+                
+                // Satuan Wadah
+                'botol': 'botol',
+                'kaleng': 'kaleng',
+                'tube': 'tube',
+                'pot': 'pot',
+                'sachet': 'sachet',
+                'pouch': 'pouch',
+                'can': 'can',
+                'jar': 'jar',
+                'drum': 'drum',
+                'tong': 'tong',
+                'tank': 'tank',
+                'container': 'container',
+                'pallet': 'pallet',
+                
+                // Satuan Tradisional
+                'ikat': 'ikat',
+                'sisir': 'sisir',
+                'papan': 'papan',
+                'genggam': 'genggam',
+                'sendok': 'sendok',
+                'cup': 'cup',
+                'gelas': 'gelas',
+                'mug': 'mug',
+                'piring': 'piring',
+                'mangkok': 'mangkok',
+                
+                // Satuan Set
+                'set': 'set',
+                'pasang': 'pasang',
+                'keping': 'keping',
+                'batang': 'batang',
+                'tandan': 'tandan',
+                'jumbai': 'jumbai',
+                'untai': 'untai',
+                'gulung': 'gulung',
+                'slop': 'slop',
+                'renceng': 'renceng',
+                
+                'other': 'lainnya'
             };
             return unitDisplay[unit] || unit;
         }
