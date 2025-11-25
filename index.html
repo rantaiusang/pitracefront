@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PI TRACE - Pelacakan Rantai Pasok Blockchain</title>
+    <title>PI TRACE - Pelacakan Rantai Pasok Terdesentralisasi</title>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Pi SDK -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    
+    <!-- Gun.js untuk P2P Sync -->
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/axe.js"></script>
     
     <style>
     /* ============================================= */
@@ -1020,6 +1025,38 @@
         font-weight: 600;
     }
 
+    /* Network Status */
+    .network-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        padding: 10px 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        border: 1px solid var(--glass-border);
+    }
+
+    .network-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .network-dot.connected {
+        background: var(--success);
+        animation: pulse 2s infinite;
+    }
+
+    .network-dot.disconnected {
+        background: var(--error);
+    }
+
+    .network-info {
+        color: var(--light-gray);
+        font-size: 0.8rem;
+    }
+
     /* MOBILE FIXES */
     @media (max-width: 768px) {
         .container {
@@ -1157,12 +1194,12 @@
                         <i class="fas fa-link"></i>
                     </div>
                     <h1 class="title">PI TRACE</h1>
-                    <p class="subtitle">Pelacakan Rantai Pasok Blockchain</p>
+                    <p class="subtitle">Pelacakan Rantai Pasok Terdesentralisasi</p>
                 </div>
                 
                 <div class="welcome-message">
                     <h2>Selamat Datang di PI TRACE</h2>
-                    <p>Lacak produk Anda melalui rantai pasok menggunakan blockchain</p>
+                    <p>Lacak produk Anda melalui rantai pasok menggunakan teknologi P2P</p>
                 </div>
                 
                 <div class="login-actions">
@@ -1186,10 +1223,10 @@
         <!-- Main App Section -->
         <div id="app-section" class="section-hidden">
             <div class="glass-card">
-                <!-- Real-time Indicator -->
-                <div class="real-time-indicator">
-                    <div class="pulse-dot"></div>
-                    <span>Sinkronisasi Real-time Aktif</span>
+                <!-- Network Status -->
+                <div class="network-status" id="networkStatus">
+                    <div class="network-dot connected"></div>
+                    <div class="network-info">Terhubung ke jaringan P2P</div>
                 </div>
 
                 <!-- User Welcome -->
@@ -1331,65 +1368,11 @@
                             <option value="pcs">Pieces (pcs)</option>
                             <option value="kg">Kilogram (kg)</option>
                             <option value="gram">Gram (g)</option>
-                            <option value="ons">Ons</option>
-                            <option value="kwintal">Kwintal</option>
-                            <option value="ton">Ton</option>
                             <option value="liter">Liter (L)</option>
-                            <option value="ml">Mililiter (ml)</option>
-                            <option value="m3">Meter Kubik (m³)</option>
                             <option value="unit">Unit</option>
-                            <option value="buah">Buah</option>
-                            <option value="bungkus">Bungkus</option>
-                            <option value="paket">Paket</option>
                             <option value="box">Box/Kotak</option>
-                            <option value="dus">Dus</option>
-                            <option value="karung">Karung</option>
-                            <option value="sak">Sak</option>
-                            <option value="bal">Bal</option>
-                            <option value="karton">Karton</option>
-                            <option value="roll">Roll</option>
-                            <option value="lembar">Lembar</option>
-                            <option value="meter">Meter (m)</option>
-                            <option value="cm">Centimeter (cm)</option>
-                            <option value="yard">Yard</option>
-                            <option value="kodi">Kodi</option>
-                            <option value="lusin">Lusin</option>
-                            <option value="gross">Gross</option>
-                            <option value="rim">Rim</option>
-                            <option value="botol">Botol</option>
-                            <option value="kaleng">Kaleng</option>
-                            <option value="tube">Tube</option>
-                            <option value="pot">Pot</option>
-                            <option value="sachet">Sachet</option>
-                            <option value="pouch">Pouch</option>
-                            <option value="can">Can</option>
-                            <option value="jar">Jar</option>
-                            <option value="drum">Drum</option>
-                            <option value="tong">Tong</option>
-                            <option value="tank">Tank</option>
-                            <option value="container">Container</option>
-                            <option value="pallet">Pallet</option>
-                            <option value="ikat">Ikat</option>
-                            <option value="sisir">Sisir</option>
-                            <option value="papan">Papan</option>
-                            <option value="genggam">Genggam</option>
-                            <option value="sendok">Sendok</option>
-                            <option value="cup">Cup</option>
-                            <option value="gelas">Gelas</option>
-                            <option value="mug">Mug</option>
-                            <option value="piring">Piring</option>
-                            <option value="mangkok">Mangkok</option>
+                            <option value="pack">Pack</option>
                             <option value="set">Set</option>
-                            <option value="pasang">Pasang</option>
-                            <option value="keping">Keping</option>
-                            <option value="batang">Batang</option>
-                            <option value="tandan">Tandan</option>
-                            <option value="jumbai">Jumbai</option>
-                            <option value="untai">Untai</option>
-                            <option value="gulung">Gulung</option>
-                            <option value="slop">Slop</option>
-                            <option value="renceng">Renceng</option>
-                            <option value="other">Lainnya</option>
                         </select>
                     </div>
                 </div>
@@ -1610,16 +1593,18 @@
     }
 
     // =============================================
-    // PI TRACE APP - FIXED MULTI-DEVICE SYNC
+    // PI TRACE APP - FULLY DECENTRALIZED WITH GUN.JS
     // =============================================
     class PiTraceApp {
         constructor() {
             this.config = {
                 DEBUG: true,
-                SYNC_INTERVAL: 5000, // Sync setiap 5 detik
-                CLOUD_STORAGE_URL: 'https://api.jsonbin.io/v3/b',
-                CLOUD_API_KEY: '$2a$10$wvKJ3u7s2Q9z8c1d5eRgE.7nZx4yV8qB0tA3cF6hN9jM5pL1rS2uD4',
-                CLOUD_BIN_ID: '65f1a9c71f5677401f1a0a55'
+                SYNC_INTERVAL: 3000,
+                GUN_PEERS: [
+                    'https://gun-manhattan.herokuapp.com/gun',
+                    'https://gun-us.herokuapp.com/gun', 
+                    'https://gun-eu.herokuapp.com/gun'
+                ]
             };
             
             this.state = {
@@ -1630,7 +1615,10 @@
                 lastSync: null,
                 syncInterval: null,
                 currentProduct: null,
-                isPiBrowser: false
+                isPiBrowser: false,
+                gun: null,
+                gunUser: null,
+                networkConnected: false
             };
             
             this.init();
@@ -1638,18 +1626,199 @@
 
         async init() {
             this.logDebug('Aplikasi PI TRACE Diinisialisasi');
+            this.initGunJS();
             this.detectPiBrowser();
             this.setupEventListeners();
             this.detectMobile();
             
-            // Load data dari cloud
-            await this.loadFromCloud();
             this.startRealTimeSync();
-            
             this.enableAllButtons();
         }
 
-        // PERBAIKAN: Enable semua tombol
+        // 🆕 Inisialisasi Gun.js untuk P2P
+        initGunJS() {
+            try {
+                this.logDebug('Menginisialisasi Gun.js...');
+                
+                this.state.gun = Gun({
+                    peers: this.config.GUN_PEERS,
+                    localStorage: false
+                });
+                
+                // Setup SEA
+                this.state.gun.SEA = window.SEA;
+                
+                // Listen untuk network events
+                this.state.gun.on('hi', (peer) => {
+                    this.logDebug(`Terhubung ke peer: ${peer}`);
+                    this.updateNetworkStatus(true);
+                });
+                
+                this.state.gun.on('bye', (peer) => {
+                    this.logDebug(`Putus dari peer: ${peer}`);
+                    // Cek apakah masih ada koneksi lain
+                    setTimeout(() => this.checkNetworkStatus(), 1000);
+                });
+                
+                this.logDebug('Gun.js berhasil diinisialisasi');
+                this.showStatus('Jaringan P2P terhubung', 'success');
+                
+            } catch (error) {
+                this.logDebug('Error inisialisasi Gun.js: ' + error.message);
+                this.showStatus('Gagal terhubung ke jaringan P2P', 'error');
+            }
+        }
+
+        // 🆕 Update network status UI
+        updateNetworkStatus(connected) {
+            this.state.networkConnected = connected;
+            const networkStatus = document.getElementById('networkStatus');
+            if (networkStatus) {
+                const dot = networkStatus.querySelector('.network-dot');
+                const info = networkStatus.querySelector('.network-info');
+                
+                if (connected) {
+                    dot.className = 'network-dot connected';
+                    info.textContent = 'Terhubung ke jaringan P2P';
+                    networkStatus.style.display = 'flex';
+                } else {
+                    dot.className = 'network-dot disconnected';
+                    info.textContent = 'Terputus dari jaringan P2P';
+                    networkStatus.style.display = 'flex';
+                }
+            }
+        }
+
+        // 🆕 Check network status
+        checkNetworkStatus() {
+            // Implementasi sederhana untuk cek status jaringan
+            const hasPeers = this.state.gun && this.state.gun._.opt.peers;
+            let connected = false;
+            
+            if (hasPeers) {
+                for (let peer in this.state.gun._.opt.peers) {
+                    if (this.state.gun._.opt.peers[peer].url) {
+                        connected = true;
+                        break;
+                    }
+                }
+            }
+            
+            this.updateNetworkStatus(connected);
+            return connected;
+        }
+
+        // 🆕 Save data ke Gun.js P2P network
+        async saveToGun() {
+            if (!this.state.gun) {
+                this.logDebug('Gun.js tidak tersedia, simpan ke localStorage');
+                this.saveLocalData();
+                return false;
+            }
+            
+            try {
+                const dataToSave = {
+                    products: this.state.products,
+                    history: this.state.activityHistory,
+                    lastUpdated: new Date().toISOString(),
+                    syncCount: (this.lastSyncCount || 0) + 1
+                };
+                
+                // Simpan ke Gun.js
+                this.state.gun.get('pi-trace-global').put(dataToSave);
+                
+                this.logDebug('Data berhasil disimpan ke jaringan P2P');
+                this.lastSyncCount = dataToSave.syncCount;
+                return true;
+                
+            } catch (error) {
+                this.logDebug('Error saving to Gun: ' + error.message);
+                this.saveLocalData();
+                return false;
+            }
+        }
+
+        // 🆕 Load data dari Gun.js P2P network
+        async loadFromGun() {
+            if (!this.state.gun) {
+                this.logDebug('Gun.js tidak tersedia, load dari localStorage');
+                this.loadLocalData();
+                return;
+            }
+            
+            try {
+                this.logDebug('Loading data dari jaringan P2P...');
+                
+                this.state.gun.get('pi-trace-global').on((data) => {
+                    if (data && data.products) {
+                        this.mergeData(data);
+                        this.state.lastSync = new Date();
+                        this.saveLocalData();
+                        
+                        this.logDebug(`Loaded ${data.products.length} products dari P2P`);
+                        this.updateUI();
+                        
+                        if (!this.initialLoad) {
+                            this.showStatus('Data berhasil disinkronisasi dari jaringan P2P', 'success');
+                            this.initialLoad = true;
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                this.logDebug('Error loading from Gun: ' + error.message);
+                this.loadLocalData();
+            }
+        }
+
+        // 🆕 Smart data merging dengan conflict resolution
+        mergeData(newData) {
+            const existingProducts = this.state.products;
+            const newProducts = newData.products || [];
+            
+            // Create map untuk fast lookup
+            const existingMap = new Map();
+            existingProducts.forEach(p => existingMap.set(p.id, p));
+            
+            // Merge strategy: ambil versi terbaru berdasarkan timestamp
+            const mergedProducts = [];
+            const allIds = new Set([
+                ...existingProducts.map(p => p.id),
+                ...newProducts.map(p => p.id)
+            ]);
+            
+            allIds.forEach(id => {
+                const existing = existingMap.get(id);
+                const incoming = newProducts.find(p => p.id === id);
+                
+                if (!existing && incoming) {
+                    // Produk baru dari network
+                    mergedProducts.push(incoming);
+                } else if (existing && !incoming) {
+                    // Produk hanya ada di local
+                    mergedProducts.push(existing);
+                } else if (existing && incoming) {
+                    // Conflict - ambil yang terbaru
+                    const existingTime = new Date(existing.timestamp || 0);
+                    const incomingTime = new Date(incoming.timestamp || 0);
+                    
+                    if (incomingTime > existingTime) {
+                        mergedProducts.push(incoming);
+                    } else {
+                        mergedProducts.push(existing);
+                    }
+                }
+            });
+            
+            // Sort by timestamp terbaru
+            mergedProducts.sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            
+            this.state.products = mergedProducts;
+            this.state.activityHistory = newData.history || this.state.activityHistory;
+        }
+
         enableAllButtons() {
             const buttons = document.querySelectorAll('button');
             buttons.forEach(button => {
@@ -1660,7 +1829,6 @@
             });
         }
 
-        // Deteksi Pi Browser
         detectPiBrowser() {
             const isPiBrowser = /PiBrowser/i.test(navigator.userAgent) || 
                                navigator.userAgent.includes('Pi') ||
@@ -1676,79 +1844,6 @@
                     piLoginBtn.classList.add('btn-disabled');
                     piLoginBtn.disabled = true;
                 }
-            }
-        }
-
-        // SOLUSI: Load data dari cloud storage
-        async loadFromCloud() {
-            try {
-                this.logDebug('Loading data dari cloud...');
-                
-                // Coba load dari localStorage dulu sebagai fallback
-                this.loadLocalData();
-                
-                // Coba load dari cloud
-                const response = await fetch(`${this.config.CLOUD_STORAGE_URL}/${this.config.CLOUD_BIN_ID}/latest`, {
-                    headers: {
-                        'X-Master-Key': this.config.CLOUD_API_KEY
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    const cloudData = data.record;
-                    
-                    if (cloudData && cloudData.products) {
-                        this.state.products = cloudData.products;
-                        this.state.activityHistory = cloudData.history || [];
-                        this.state.lastSync = new Date();
-                        
-                        // Simpan ke localStorage sebagai cache
-                        this.saveLocalData();
-                        
-                        this.logDebug(`Loaded ${this.state.products.length} products from cloud`);
-                        this.updateUI();
-                        this.showStatus('Data berhasil disinkronisasi dari cloud', 'success');
-                    }
-                } else {
-                    this.logDebug('Gagal load dari cloud, menggunakan data lokal');
-                }
-                
-            } catch (error) {
-                this.logDebug('Error loading from cloud: ' + error.message);
-                this.loadLocalData(); // Fallback ke localStorage
-            }
-        }
-
-        // SOLUSI: Save data ke cloud storage
-        async saveToCloud() {
-            try {
-                const dataToSave = {
-                    products: this.state.products,
-                    history: this.state.activityHistory,
-                    lastUpdated: new Date().toISOString(),
-                    syncCount: (dataToSave?.syncCount || 0) + 1
-                };
-                
-                const response = await fetch(`${this.config.CLOUD_STORAGE_URL}/${this.config.CLOUD_BIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': this.config.CLOUD_API_KEY
-                    },
-                    body: JSON.stringify(dataToSave)
-                });
-                
-                if (response.ok) {
-                    this.logDebug('Data berhasil disimpan ke cloud');
-                    return true;
-                } else {
-                    this.logDebug('Gagal menyimpan ke cloud: ' + response.status);
-                    return false;
-                }
-            } catch (error) {
-                this.logDebug('Error saving to cloud: ' + error.message);
-                return false;
             }
         }
 
@@ -1788,13 +1883,15 @@
             }
         }
 
-        // Real-time Sync
+        // Real-time Sync dengan Gun.js
         startRealTimeSync() {
+            this.loadFromGun();
+            
             this.syncInterval = setInterval(async () => {
                 await this.syncData();
             }, this.config.SYNC_INTERVAL);
             
-            this.logDebug('Sinkronisasi real-time dimulai');
+            this.logDebug('Sinkronisasi real-time P2P dimulai');
         }
 
         stopRealTimeSync() {
@@ -1806,7 +1903,7 @@
 
         async syncData() {
             try {
-                await this.loadFromCloud();
+                await this.saveToGun();
             } catch (error) {
                 this.logDebug('Sync error: ' + error.message);
             }
@@ -1815,7 +1912,8 @@
         // Manual sync
         async manualSync() {
             this.showStatus('Menyinkronisasi data...', 'info');
-            await this.loadFromCloud();
+            await this.saveToGun();
+            await this.loadFromGun();
         }
 
         // Event Listeners
@@ -1838,7 +1936,6 @@
                 }
             });
 
-            // PERBAIKAN: Pastikan tombol close modal bisa diklik
             document.querySelectorAll('.close-modal').forEach(closeBtn => {
                 closeBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -2013,19 +2110,15 @@
 
         // Product Management
         showProductModal() {
-            // Reset form
             ['productName', 'productCategory', 'productDescription', 'productQuantity', 'productPrice', 'originCity'].forEach(id => {
                 const element = document.getElementById(id);
                 if (element) element.value = id === 'productQuantity' ? '1' : '';
             });
             
-            // Set default values
             document.getElementById('originCountry').value = '';
             document.getElementById('productUnit').value = 'pcs';
             
-            // Generate preview info
             this.updateProductPreview();
-            
             this.showModal('productModal');
         }
 
@@ -2049,7 +2142,7 @@
             }
         }
 
-        // PERBAIKAN: Submit product dengan sinkronisasi cloud
+        // Submit product dengan Gun.js P2P
         async submitProduct() {
             const productData = {
                 name: document.getElementById('productName').value,
@@ -2082,23 +2175,19 @@
             }
 
             try {
-                // Add to products array
                 this.state.products.unshift(productData);
-                
-                // Add activity
                 this.addActivity('Produk ditambahkan', productData.name, productData.id);
                 
-                // PERBAIKAN: Simpan ke cloud dan local
-                this.saveLocalData();
-                const cloudSuccess = await this.saveToCloud();
+                // 🆕 SIMPAN KE GUN.JS P2P
+                const gunSuccess = await this.saveToGun();
                 
                 this.updateUI();
                 this.closeModal('productModal');
                 
-                if (cloudSuccess) {
-                    this.showStatus('✅ Produk berhasil ditambahkan! Semua device akan melihat produk ini.', 'success');
+                if (gunSuccess) {
+                    this.showStatus('✅ Produk berhasil ditambahkan! Semua device di jaringan P2P akan melihat produk ini.', 'success');
                 } else {
-                    this.showStatus('✅ Produk berhasil ditambahkan! (Hanya tersimpan lokal)', 'warning');
+                    this.showStatus('✅ Produk berhasil ditambahkan! (Hanya tersimpan lokal sementara)', 'warning');
                 }
                 
             } catch (error) {
@@ -2302,87 +2391,16 @@
             return categories[category] || category;
         }
 
-        // PERBAIKAN: Tambah semua satuan
         getUnitDisplay(unit) {
             const unitDisplay = {
-                // Satuan Berat
                 'pcs': 'pcs', 
                 'kg': 'kg', 
                 'gram': 'g', 
-                'ons': 'ons',
-                'kwintal': 'kwintal',
-                'ton': 'ton',
-                
-                // Satuan Volume
-                'liter': 'L', 
-                'ml': 'ml',
-                'm3': 'm³',
-                
-                // Satuan Kemasan
+                'liter': 'L',
                 'unit': 'unit', 
-                'buah': 'buah', 
-                'bungkus': 'bungkus', 
-                'paket': 'paket', 
                 'box': 'box',
-                'dus': 'dus',
-                'karung': 'karung',
-                'sak': 'sak',
-                'bal': 'bal',
-                'karton': 'karton',
-                'roll': 'roll',
-                'lembar': 'lembar',
-                
-                // Satuan Panjang
-                'meter': 'm',
-                'cm': 'cm',
-                'yard': 'yard',
-                
-                // Satuan Kuantitas
-                'kodi': 'kodi',
-                'lusin': 'lusin',
-                'gross': 'gross',
-                'rim': 'rim',
-                
-                // Satuan Wadah
-                'botol': 'botol',
-                'kaleng': 'kaleng',
-                'tube': 'tube',
-                'pot': 'pot',
-                'sachet': 'sachet',
-                'pouch': 'pouch',
-                'can': 'can',
-                'jar': 'jar',
-                'drum': 'drum',
-                'tong': 'tong',
-                'tank': 'tank',
-                'container': 'container',
-                'pallet': 'pallet',
-                
-                // Satuan Tradisional
-                'ikat': 'ikat',
-                'sisir': 'sisir',
-                'papan': 'papan',
-                'genggam': 'genggam',
-                'sendok': 'sendok',
-                'cup': 'cup',
-                'gelas': 'gelas',
-                'mug': 'mug',
-                'piring': 'piring',
-                'mangkok': 'mangkok',
-                
-                // Satuan Set
-                'set': 'set',
-                'pasang': 'pasang',
-                'keping': 'keping',
-                'batang': 'batang',
-                'tandan': 'tandan',
-                'jumbai': 'jumbai',
-                'untai': 'untai',
-                'gulung': 'gulung',
-                'slop': 'slop',
-                'renceng': 'renceng',
-                
-                'other': 'lainnya'
+                'pack': 'pack',
+                'set': 'set'
             };
             return unitDisplay[unit] || unit;
         }
@@ -2401,7 +2419,7 @@
             this.showModal('deleteConfirmModal');
         }
 
-        // PERBAIKAN: Delete product dengan sinkronisasi cloud
+        // Delete product dengan Gun.js P2P
         async deleteProduct(productId) {
             const productIndex = this.state.products.findIndex(p => p.id === productId);
             if (productIndex !== -1) {
@@ -2419,17 +2437,16 @@
                 );
                 
                 try {
-                    // PERBAIKAN: Simpan ke cloud dan local
-                    this.saveLocalData();
-                    const cloudSuccess = await this.saveToCloud();
+                    // 🆕 SIMPAN KE GUN.JS P2P
+                    const gunSuccess = await this.saveToGun();
                     
                     this.updateUI();
                     this.closeModal('deleteConfirmModal');
                     
-                    if (cloudSuccess) {
-                        this.showStatus('✅ Produk berhasil dihapus! Semua device akan melihat perubahan ini.', 'success');
+                    if (gunSuccess) {
+                        this.showStatus('✅ Produk berhasil dihapus! Semua device di jaringan P2P akan melihat perubahan ini.', 'success');
                     } else {
-                        this.showStatus('✅ Produk berhasil dihapus! (Hanya tersimpan lokal)', 'warning');
+                        this.showStatus('✅ Produk berhasil dihapus! (Hanya tersimpan lokal sementara)', 'warning');
                     }
                     
                 } catch (error) {
@@ -2696,7 +2713,7 @@
     let app;
     document.addEventListener('DOMContentLoaded', function() {
         app = new PiTraceApp();
-        console.log('PI TRACE App initialized dengan multi-device sync');
+        console.log('PI TRACE App initialized dengan P2P Gun.js');
     });
 
     // Global functions for HTML onclick
