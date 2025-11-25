@@ -11,7 +11,6 @@
     <!-- Pi SDK -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     
-    <!-- ALL CSS INLINE -->
     <style>
     /* ============================================= */
     /* PI TRACE - Simplified Styles */
@@ -137,7 +136,7 @@
         opacity: 0.9;
     }
 
-    /* Login Actions - Hanya 2 Tombol */
+    /* Login Actions */
     .login-actions {
         display: flex;
         flex-direction: column;
@@ -894,14 +893,14 @@
         color: var(--light-gray);
     }
 
-    /* Status Messages - PERBAIKAN POSISI & Z-INDEX */
+    /* Status Messages */
     .status-container {
         position: fixed;
         top: 20px;
         right: 20px;
-        z-index: 9999; /* Diperbaiki z-index lebih tinggi */
+        z-index: 9999;
         max-width: 300px;
-        pointer-events: none; /* Agar tidak mengganggu klik */
+        pointer-events: none;
     }
 
     .status {
@@ -910,12 +909,12 @@
         margin-bottom: 10px;
         backdrop-filter: blur(10px);
         border: 1px solid;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* Shadow lebih gelap */
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
         animation: slideInRight 0.3s ease;
         display: flex;
         align-items: center;
         gap: 10px;
-        pointer-events: auto; /* Kembali bisa diklik */
+        pointer-events: auto;
         font-weight: 600;
         font-size: 0.9rem;
     }
@@ -1054,7 +1053,6 @@
         }
     }
 
-    /* Tambahan responsive fixes untuk mobile */
     @media (max-width: 480px) {
         body {
             padding: 10px !important;
@@ -1192,7 +1190,7 @@
                     </div>
                 </div>
 
-                <!-- Search Bar - PERBAIKAN: Menambahkan event listener untuk input -->
+                <!-- Search Bar -->
                 <div class="search-container">
                     <input type="text" id="searchInput" class="search-input" placeholder="Cari produk..." 
                            onkeypress="handleSearchEnter(event)" 
@@ -1313,67 +1311,16 @@
                     <div class="form-group">
                         <label>Satuan *</label>
                         <select id="productUnit">
-                            <!-- Satuan Berat -->
-                            <option value="gram">Gram (g)</option>
-                            <option value="kg">Kilogram (kg)</option>
-                            <option value="ons">Ons</option>
-                            <option value="pon">Pon</option>
-                            <option value="ton">Ton</option>
-                            
-                            <!-- Satuan Volume -->
-                            <option value="ml">Mililiter (ml)</option>
-                            <option value="liter">Liter (L)</option>
-                            <option value="cc">CC</option>
-                            <option value="galon">Galon</option>
-                            
-                            <!-- Satuan Panjang -->
-                            <option value="mm">Milimeter (mm)</option>
-                            <option value="cm">Centimeter (cm)</option>
-                            <option value="m">Meter (m)</option>
-                            <option value="km">Kilometer (km)</option>
-                            
-                            <!-- Satuan Luas -->
-                            <option value="m2">Meter Persegi (m²)</option>
-                            <option value="hektar">Hektar</option>
-                            
-                            <!-- Satuan Buah/Pieces -->
                             <option value="pcs">Pieces (pcs)</option>
+                            <option value="kg">Kilogram (kg)</option>
+                            <option value="gram">Gram (g)</option>
+                            <option value="liter">Liter (L)</option>
+                            <option value="ml">Mililiter (ml)</option>
                             <option value="unit">Unit</option>
                             <option value="buah">Buah</option>
                             <option value="bungkus">Bungkus</option>
                             <option value="paket">Paket</option>
-                            <option value="set">Set</option>
-                            
-                            <!-- Satuan Kemasan -->
                             <option value="box">Box/Kotak</option>
-                            <option value="dus">Dus</option>
-                            <option value="karung">Karung</option>
-                            <option value="sak">Sak</option>
-                            <option value="karton">Karton</option>
-                            
-                            <!-- Satuan Khusus -->
-                            <option value="ikat">Ikat</option>
-                            <option value="lusin">Lusin</option>
-                            <option value="kodi">Kodi</option>
-                            <option value="rim">Rim</option>
-                            <option value="gross">Gross</option>
-                            
-                            <!-- Satuan Cairan -->
-                            <option value="botol">Botol</option>
-                            <option value="kaleng">Kaleng</option>
-                            <option value="jerigen">Jerigen</option>
-                            
-                            <!-- Satuan Makanan -->
-                            <option value="piring">Piring</option>
-                            <option value="mangkok">Mangkok</option>
-                            <option value="gelas">Gelas</option>
-                            <option value="sendok">Sendok</option>
-                            
-                            <!-- Satuan Lainnya -->
-                            <option value="roll">Roll</option>
-                            <option value="lembar">Lembar</option>
-                            <option value="pasang">Pasang</option>
-                            <option value="keping">Keping</option>
                         </select>
                     </div>
                 </div>
@@ -1393,10 +1340,6 @@
                             <option value="Singapore">Singapore</option>
                             <option value="Thailand">Thailand</option>
                             <option value="Vietnam">Vietnam</option>
-                            <option value="Filipina">Filipina</option>
-                            <option value="China">China</option>
-                            <option value="Japan">Japan</option>
-                            <option value="Korea Selatan">Korea Selatan</option>
                             <option value="Other">Lainnya</option>
                         </select>
                     </div>
@@ -1537,7 +1480,7 @@
         </div>
     </div>
 
-    <!-- Status Container - PERBAIKAN POSISI -->
+    <!-- Status Container -->
     <div id="statusContainer" class="status-container"></div>
 
     <!-- ALL JAVASCRIPT INLINE -->
@@ -1557,7 +1500,6 @@
         
         if (piSDKInitializing) {
             console.log('Pi SDK sedang dalam proses inisialisasi...');
-            // Tunggu sampai selesai
             return new Promise((resolve) => {
                 const checkInit = setInterval(() => {
                     if (piSDKInitialized) {
@@ -1582,7 +1524,7 @@
             // Tunggu sampai Pi SDK benar-benar ready
             await new Promise((resolve, reject) => {
                 let attempts = 0;
-                const maxAttempts = 50; // 5 detik timeout
+                const maxAttempts = 50;
                 
                 const checkPiReady = setInterval(() => {
                     attempts++;
@@ -1592,7 +1534,7 @@
                         resolve();
                     } else if (attempts >= maxAttempts) {
                         clearInterval(checkPiReady);
-                        reject(new Error('Pi SDK timeout - init function tidak ditemukan'));
+                        reject(new Error('Pi SDK timeout'));
                     }
                 }, 100);
             });
@@ -1620,7 +1562,7 @@
         constructor() {
             this.config = {
                 DEBUG: true,
-                SYNC_INTERVAL: 2000, // 2 detik
+                SYNC_INTERVAL: 2000,
                 MAX_PRODUCTS: 1000
             };
             
@@ -1646,24 +1588,30 @@
             this.startRealTimeSync();
         }
 
-        // Deteksi Pi Browser
+        // Deteksi Pi Browser - PERBAIKAN: Deteksi yang lebih akurat
         detectPiBrowser() {
-            const isPiBrowser = /PiBrowser/i.test(navigator.userAgent);
+            const isPiBrowser = /PiBrowser/i.test(navigator.userAgent) || 
+                               navigator.userAgent.includes('Pi') ||
+                               (typeof window.Pi !== 'undefined');
+            
             this.state.isPiBrowser = isPiBrowser;
             this.logDebug(`Pi Browser terdeteksi: ${isPiBrowser}`);
+            this.logDebug(`User Agent: ${navigator.userAgent}`);
             
             if (!isPiBrowser) {
-                // Jika bukan Pi Browser, nonaktifkan tombol Pi Login
                 const piLoginBtn = document.getElementById('piLoginBtn');
                 if (piLoginBtn) {
                     piLoginBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Hanya di Pi Browser';
                     piLoginBtn.classList.add('btn-disabled');
                     piLoginBtn.disabled = true;
+                    piLoginBtn.title = 'Fitur ini hanya tersedia di Pi Browser';
                 }
+            } else {
+                this.logDebug('Pi Browser terdeteksi, tombol Pi Login aktif');
             }
         }
 
-        // Real-time Synchronization System
+        // Real-time Synchronization System - PERBAIKAN: Sync yang lebih reliable
         startRealTimeSync() {
             // Load initial data
             this.loadSharedData();
@@ -1683,21 +1631,28 @@
             }
         }
 
-        // Shared Database System
+        // Shared Database System - PERBAIKAN: Gunakan key yang sama untuk semua device
         loadSharedData() {
             try {
-                // Load from shared storage
-                const sharedProducts = localStorage.getItem('piTrace_shared_products');
-                const sharedHistory = localStorage.getItem('piTrace_shared_history');
+                // PERBAIKAN: Gunakan key yang konsisten untuk semua device
+                const sharedProducts = localStorage.getItem('pi_trace_products');
+                const sharedHistory = localStorage.getItem('pi_trace_history');
                 
                 if (sharedProducts) {
                     this.state.products = JSON.parse(sharedProducts);
                     this.logDebug(`Loaded ${this.state.products.length} products from shared storage`);
+                } else {
+                    // Initialize empty array jika belum ada data
+                    this.state.products = [];
+                    localStorage.setItem('pi_trace_products', JSON.stringify([]));
                 }
                 
                 if (sharedHistory) {
                     this.state.activityHistory = JSON.parse(sharedHistory);
                     this.logDebug(`Loaded ${this.state.activityHistory.length} history items`);
+                } else {
+                    this.state.activityHistory = [];
+                    localStorage.setItem('pi_trace_history', JSON.stringify([]));
                 }
                 
                 this.state.lastSync = new Date();
@@ -1705,16 +1660,24 @@
                 
             } catch (error) {
                 this.logDebug('Error loading shared data: ' + error.message);
+                // Initialize empty data jika error
+                this.state.products = [];
+                this.state.activityHistory = [];
+                this.saveSharedData();
             }
         }
 
         saveSharedData() {
             try {
-                localStorage.setItem('piTrace_shared_products', JSON.stringify(this.state.products));
-                localStorage.setItem('piTrace_shared_history', JSON.stringify(this.state.activityHistory));
+                // PERBAIKAN: Gunakan key yang konsisten
+                localStorage.setItem('pi_trace_products', JSON.stringify(this.state.products));
+                localStorage.setItem('pi_trace_history', JSON.stringify(this.state.activityHistory));
                 
                 // Trigger storage event for other tabs/windows
-                window.dispatchEvent(new Event('storage'));
+                window.dispatchEvent(new StorageEvent('storage', {
+                    key: 'pi_trace_products',
+                    newValue: JSON.stringify(this.state.products)
+                }));
                 
                 this.state.lastSync = new Date();
                 this.logDebug('Data shared saved successfully');
@@ -1725,34 +1688,44 @@
         }
 
         syncData() {
-            // Check for changes from other instances
-            const lastProducts = localStorage.getItem('piTrace_shared_products');
-            const lastHistory = localStorage.getItem('piTrace_shared_history');
-            
-            if (lastProducts) {
-                const remoteProducts = JSON.parse(lastProducts);
-                if (JSON.stringify(this.state.products) !== JSON.stringify(remoteProducts)) {
-                    this.state.products = remoteProducts;
-                    this.updateUI();
-                    this.logDebug('Products synced from remote changes');
+            try {
+                const lastProducts = localStorage.getItem('pi_trace_products');
+                const lastHistory = localStorage.getItem('pi_trace_history');
+                
+                if (lastProducts) {
+                    const remoteProducts = JSON.parse(lastProducts);
+                    // PERBAIKAN: Sync hanya jika ada perubahan
+                    const currentProductsStr = JSON.stringify(this.state.products);
+                    const remoteProductsStr = JSON.stringify(remoteProducts);
+                    
+                    if (currentProductsStr !== remoteProductsStr) {
+                        this.state.products = remoteProducts;
+                        this.updateUI();
+                        this.logDebug('Products synced from remote changes');
+                    }
                 }
-            }
-            
-            if (lastHistory) {
-                const remoteHistory = JSON.parse(lastHistory);
-                if (JSON.stringify(this.state.activityHistory) !== JSON.stringify(remoteHistory)) {
-                    this.state.activityHistory = remoteHistory;
-                    this.loadActivityHistory();
-                    this.logDebug('History synced from remote changes');
+                
+                if (lastHistory) {
+                    const remoteHistory = JSON.parse(lastHistory);
+                    const currentHistoryStr = JSON.stringify(this.state.activityHistory);
+                    const remoteHistoryStr = JSON.stringify(remoteHistory);
+                    
+                    if (currentHistoryStr !== remoteHistoryStr) {
+                        this.state.activityHistory = remoteHistory;
+                        this.loadActivityHistory();
+                        this.logDebug('History synced from remote changes');
+                    }
                 }
+            } catch (error) {
+                this.logDebug('Sync error: ' + error.message);
             }
         }
 
         // Event Listeners for real-time updates
         setupEventListeners() {
-            // Listen for storage changes from other tabs
+            // Listen for storage changes from other tabs - PERBAIKAN: Handle storage event dengan benar
             window.addEventListener('storage', (e) => {
-                if (e.key === 'piTrace_shared_products' || e.key === 'piTrace_shared_history') {
+                if (e.key === 'pi_trace_products' || e.key === 'pi_trace_history') {
                     this.logDebug('Storage change detected, syncing...');
                     setTimeout(() => {
                         this.loadSharedData();
@@ -1768,10 +1741,9 @@
                 }
             });
 
-            // PERBAIKAN: Auto refresh saat input dikosongkan
+            // Auto refresh saat input dikosongkan
             document.addEventListener('input', (e) => {
                 if (e.target.id === 'searchInput' && e.target.value === '') {
-                    // Jika input pencarian dikosongkan, langsung refresh tampilan
                     this.updateUI();
                     this.showStatus('Menampilkan semua produk', 'info');
                 }
@@ -1788,15 +1760,12 @@
             document.addEventListener('touchstart', function() {}, { passive: true });
         }
 
-        // Update all UI components - PERBAIKAN: Handle pencarian aktif
+        // Update all UI components
         updateUI() {
-            // PERBAIKAN: Periksa status pencarian sebelum memperbarui UI
             const searchTerm = document.getElementById('searchInput').value;
             if (searchTerm) {
-                // Jika ada pencarian aktif, gunakan fungsi search
                 this.searchProducts();
             } else {
-                // Jika tidak ada pencarian, tampilkan semua produk
                 this.loadUserProducts();
             }
             this.loadActivityHistory();
@@ -1866,7 +1835,7 @@
             }
         }
 
-        // Login Methods - PERBAIKAN: Menggunakan initializePiSDK yang baru
+        // Login Methods - PERBAIKAN BESAR: Simplified Pi Login
         async loginWithPi() {
             this.logDebug('Memulai login Pi Wallet...');
             
@@ -1878,10 +1847,9 @@
             }
             
             try {
-                // Tampilkan status loading
                 this.showStatus('Menginisialisasi Pi SDK...', 'info');
                 
-                // Initialize Pi SDK dengan method yang sudah diperbaiki
+                // Initialize Pi SDK
                 const sdkReady = await initializePiSDK();
                 
                 if (!sdkReady) {
@@ -1889,26 +1857,22 @@
                 }
 
                 this.logDebug('Pi SDK berhasil diinisialisasi, memulai autentikasi...');
-                this.showStatus('Meminta autentikasi Pi Wallet...', 'info');
+                this.showStatus('Membuka Pi Wallet...', 'info');
 
-                // PERBAIKAN: Gunakan approach yang lebih sederhana untuk authentication
-                const scopes = ['username', 'payments'];
+                // PERBAIKAN: Gunakan approach yang sangat sederhana
+                // Tunggu sebentar sebelum memanggil authenticate
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // PERBAIKAN: Tambahkan timeout untuk authentication
-                const authPromise = window.Pi.authenticate(scopes, () => {});
-                
-                // Timeout setelah 30 detik
-                const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error('Authentication timeout')), 30000);
+                // Panggil authenticate dengan parameter yang sederhana
+                const user = await window.Pi.authenticate(['username', 'payments'], () => {
+                    this.logDebug('Incomplete payment found callback');
                 });
-                
-                // Race between auth and timeout
-                const user = await Promise.race([authPromise, timeoutPromise]);
-                
+
                 if (!user || !user.username) {
                     throw new Error('Autentikasi gagal - data user tidak valid');
                 }
 
+                // PERBAIKAN: Simpan user data dengan benar
                 this.state.currentUser = {
                     username: user.username,
                     uid: user.uid || 'pi_user_' + Date.now()
@@ -1921,19 +1885,14 @@
 
             } catch (error) {
                 this.logDebug(`Login Pi gagal: ${error.message}`);
+                this.showStatus(`Login gagal: ${error.message}`, 'error');
                 
-                if (error.message.includes('timeout') || error.message.includes('user closed') || error.message.includes('canceled')) {
-                    this.showStatus('Autentikasi dibatalkan atau timeout', 'warning');
-                    // Tidak auto fallback ke guest, biarkan user memilih
-                } else {
-                    this.showStatus('Login Pi gagal: ' + error.message, 'error');
-                    // Tawarkan fallback ke guest mode
-                    setTimeout(() => {
-                        if (confirm('Login dengan Pi Wallet gagal. Lanjut sebagai tamu?')) {
-                            this.guestLogin();
-                        }
-                    }, 1000);
-                }
+                // Tawarkan fallback ke guest mode setelah 2 detik
+                setTimeout(() => {
+                    if (confirm('Login dengan Pi Wallet gagal. Lanjut sebagai tamu?')) {
+                        this.guestLogin();
+                    }
+                }, 2000);
             }
         }
 
@@ -1998,7 +1957,6 @@
             document.getElementById('hashCodeDisplay').textContent = this.generateShortHash();
             document.getElementById('ownerDisplay').textContent = this.state.currentUser.username;
             
-            // Update asal barang preview
             if (country && city) {
                 document.getElementById('originDisplay').textContent = `${city}, ${country}`;
             } else if (country) {
@@ -2047,11 +2005,9 @@
             // Add activity
             this.addActivity('Produk ditambahkan', productData.name, productData.id);
             
-            // ✅ PERBAIKAN: Langsung update UI sebelum save ke storage
-            this.updateUI();
-            
-            // Save to shared storage
+            // PERBAIKAN: Save data sebelum update UI
             this.saveSharedData();
+            this.updateUI();
             
             this.closeModal('productModal');
             this.showStatus('Produk berhasil ditambahkan! Semua user bisa melihatnya.');
@@ -2063,7 +2019,6 @@
             
             if (!productList) return;
 
-            // Filter hanya produk yang tidak dihapus
             const activeProducts = this.state.products.filter(product => !product.isDeleted);
 
             if (activeProducts.length === 0) {
@@ -2146,23 +2101,19 @@
             const isOwner = product.ownerId === this.state.currentUser.uid;
             const isDeleted = product.isDeleted;
             
-            // Update tombol hapus di detail modal
             const deleteBtn = document.getElementById('deleteProductDetailBtn');
             if (isOwner && !isDeleted) {
                 deleteBtn.classList.remove('btn-disabled');
                 deleteBtn.disabled = false;
                 deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Hapus Produk';
-                deleteBtn.title = 'Hapus produk';
             } else if (isDeleted) {
                 deleteBtn.classList.add('btn-disabled');
                 deleteBtn.disabled = true;
                 deleteBtn.innerHTML = '<i class="fas fa-ban"></i> Produk Dihapus';
-                deleteBtn.title = 'Produk sudah dihapus';
             } else {
                 deleteBtn.classList.add('btn-disabled');
                 deleteBtn.disabled = true;
                 deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Hapus Produk';
-                deleteBtn.title = 'Hanya pemilik produk yang dapat menghapus';
             }
             
             const detailBody = document.getElementById('productDetailBody');
@@ -2170,7 +2121,6 @@
                 `<span style="color: var(--error);">❌ DIHAPUS</span>` : 
                 `<span style="color: var(--success);">✅ AKTIF</span>`;
                 
-            // Informasi penghapus
             const deletedInfo = isDeleted ? `
                 <div class="detail-value"><strong>Dihapus oleh:</strong> ${product.deletedBy || 'Unknown'}</div>
                 <div class="detail-value"><strong>Dihapus pada:</strong> ${product.deletedAtDisplay || product.dateDisplay}</div>
@@ -2283,7 +2233,6 @@
             document.getElementById('deleteProductOwner').textContent = productOwner;
             document.getElementById('deleteProductOrigin').textContent = `${product.originCity}, ${product.originCountry}`;
             
-            // Setup delete confirmation
             const confirmBtn = document.getElementById('confirmDeleteBtn');
             confirmBtn.onclick = () => this.deleteProduct(productId);
             
@@ -2293,14 +2242,12 @@
         deleteProduct(productId) {
             const productIndex = this.state.products.findIndex(p => p.id === productId);
             if (productIndex !== -1) {
-                // Soft delete - mark as deleted instead of removing
                 this.state.products[productIndex].isDeleted = true;
                 this.state.products[productIndex].deletedBy = this.state.currentUser.username;
                 this.state.products[productIndex].deletedById = this.state.currentUser.uid;
                 this.state.products[productIndex].deletedAt = new Date().toISOString();
                 this.state.products[productIndex].deletedAtDisplay = new Date().toLocaleString('id-ID');
                 
-                // Add activity
                 this.addActivity(
                     'Produk dihapus', 
                     this.state.products[productIndex].name, 
@@ -2308,11 +2255,8 @@
                     `Dihapus oleh: ${this.state.currentUser.username} | Asal: ${this.state.products[productIndex].originCity}, ${this.state.products[productIndex].originCountry} | Kode: ${this.state.products[productIndex].hash}`
                 );
                 
-                // ✅ PERBAIKAN: Langsung update UI sebelum save ke storage
-                this.updateUI();
-                
-                // Save to shared storage
                 this.saveSharedData();
+                this.updateUI();
                 
                 this.closeModal('deleteConfirmModal');
                 this.showStatus('Produk berhasil dihapus! Semua user bisa melihat status penghapusan.', 'success');
@@ -2335,7 +2279,6 @@
             
             this.state.activityHistory.unshift(activity);
             
-            // Keep only last 100 activities
             if (this.state.activityHistory.length > 100) {
                 this.state.activityHistory = this.state.activityHistory.slice(0, 100);
             }
@@ -2423,7 +2366,6 @@
             
             this.showStatus(`Melacak produk dengan kode: ${qrCode}`);
             
-            // Simulate QR code processing
             setTimeout(() => {
                 const matchedProduct = this.state.products.find(product => 
                     product.hash === qrCode || product.id === qrCode
@@ -2445,11 +2387,10 @@
             this.showModal('supplyChainModal');
         }
 
-        // Search - PERBAIKAN: Handle produk yang dihapus dengan benar
+        // Search
         searchProducts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             
-            // ✅ PERBAIKAN: Selalu filter produk yang tidak dihapus
             const filteredProducts = this.state.products.filter(product => 
                 !product.isDeleted && (
                     product.name.toLowerCase().includes(searchTerm) ||
@@ -2532,24 +2473,20 @@
             }
         }
 
-        // PERBAIKAN BARU: Fungsi untuk handle input real-time
         handleSearchInput(event) {
             const searchTerm = event.target.value;
             
-            // Jika input dikosongkan, langsung refresh tampilan
             if (searchTerm === '') {
                 this.updateUI();
-            }
-            // Jika ada input, tunggu sebentar lalu search (debounce)
-            else {
+            } else {
                 clearTimeout(this.searchTimeout);
                 this.searchTimeout = setTimeout(() => {
                     this.searchProducts();
-                }, 300); // Delay 300ms
+                }, 300);
             }
         }
 
-        // Payment - PERBAIKAN: Menggunakan initializePiSDK yang baru
+        // Payment
         async createPayment() {
             if (this.state.isGuest) {
                 this.showStatus('Login dengan Pi Wallet untuk menggunakan fitur pembayaran', 'warning');
@@ -2557,7 +2494,6 @@
             }
 
             try {
-                // Pastikan Pi SDK sudah diinisialisasi
                 const sdkReady = await initializePiSDK();
                 if (!sdkReady) {
                     this.showStatus('Pi SDK tidak tersedia untuk pembayaran', 'error');
