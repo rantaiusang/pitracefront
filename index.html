@@ -1012,19 +1012,6 @@
         100% { opacity: 1; }
     }
 
-    /* Deleted product styling */
-    .deleted-product {
-        opacity: 0.7;
-        border: 1px solid var(--error);
-        background: rgba(249, 65, 68, 0.05);
-    }
-
-    .deleted-label {
-        color: var(--error);
-        font-size: 0.7rem;
-        font-weight: 600;
-    }
-
     /* Network Status */
     .network-status {
         display: flex;
@@ -1055,6 +1042,19 @@
     .network-info {
         color: var(--light-gray);
         font-size: 0.8rem;
+    }
+
+    /* Peer Count */
+    .peer-count {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        font-size: 0.7rem;
+        color: var(--light-gray);
     }
 
     /* MOBILE FIXES */
@@ -1227,6 +1227,12 @@
                 <div class="network-status" id="networkStatus">
                     <div class="network-dot connected"></div>
                     <div class="network-info">Terhubung ke jaringan P2P</div>
+                </div>
+
+                <!-- Peer Count -->
+                <div class="peer-count" id="peerCount">
+                    <i class="fas fa-users"></i>
+                    <span>Terhubung dengan <strong id="peerCountNumber">0</strong> peers</span>
                 </div>
 
                 <!-- User Welcome -->
@@ -1603,7 +1609,8 @@
                 GUN_PEERS: [
                     'https://gun-manhattan.herokuapp.com/gun',
                     'https://gun-us.herokuapp.com/gun', 
-                    'https://gun-eu.herokuapp.com/gun'
+                    'https://gun-eu.herokuapp.com/gun',
+                    'https://mvp-gun.herokuapp.com/gun'
                 ]
             };
             
@@ -1618,7 +1625,8 @@
                 isPiBrowser: false,
                 gun: null,
                 gunUser: null,
-                networkConnected: false
+                networkConnected: false,
+                peerCount: 0
             };
             
             this.init();
@@ -1626,7 +1634,7 @@
 
         async init() {
             this.logDebug('Aplikasi PI TRACE Diinisialisasi');
-            this.initGunJS();
+            await this.initGunJS();
             this.detectPiBrowser();
             this.setupEventListeners();
             this.detectMobile();
@@ -1635,37 +1643,71 @@
             this.enableAllButtons();
         }
 
-        // 🆕 Inisialisasi Gun.js untuk P2P
-        initGunJS() {
-            try {
-                this.logDebug('Menginisialisasi Gun.js...');
-                
-                this.state.gun = Gun({
-                    peers: this.config.GUN_PEERS,
-                    localStorage: false
-                });
-                
-                // Setup SEA
-                this.state.gun.SEA = window.SEA;
-                
-                // Listen untuk network events
-                this.state.gun.on('hi', (peer) => {
-                    this.logDebug(`Terhubung ke peer: ${peer}`);
-                    this.updateNetworkStatus(true);
-                });
-                
-                this.state.gun.on('bye', (peer) => {
-                    this.logDebug(`Putus dari peer: ${peer}`);
-                    // Cek apakah masih ada koneksi lain
-                    setTimeout(() => this.checkNetworkStatus(), 1000);
-                });
-                
-                this.logDebug('Gun.js berhasil diinisialisasi');
-                this.showStatus('Jaringan P2P terhubung', 'success');
-                
-            } catch (error) {
-                this.logDebug('Error inisialisasi Gun.js: ' + error.message);
-                this.showStatus('Gagal terhubung ke jaringan P2P', 'error');
+        // 🆕 Inisialisasi Gun.js untuk P2P - FIXED
+        async initGunJS() {
+            return new Promise((resolve) => {
+                try {
+                    this.logDebug('Menginisialisasi Gun.js...');
+                    
+                    // Initialize Gun dengan multiple peers
+                    this.state.gun = Gun({
+                        peers: this.config.GUN_PEERS,
+                        localStorage: false,
+                        radisk: false
+                    });
+                    
+                    // Setup SEA
+                    this.state.gun.SEA = window.SEA;
+                    
+                    // Listen untuk network events
+                    let connectedPeers = 0;
+                    
+                    this.state.gun.on('hi', (peer) => {
+                        this.logDebug(`Terhubung ke peer: ${peer}`);
+                        connectedPeers++;
+                        this.updatePeerCount(connectedPeers);
+                        this.updateNetworkStatus(true);
+                    });
+                    
+                    this.state.gun.on('bye', (peer) => {
+                        this.logDebug(`Putus dari peer: ${peer}`);
+                        connectedPeers = Math.max(0, connectedPeers - 1);
+                        this.updatePeerCount(connectedPeers);
+                        if (connectedPeers === 0) {
+                            this.updateNetworkStatus(false);
+                        }
+                    });
+                    
+                    // Test connection
+                    setTimeout(() => {
+                        this.logDebug('Gun.js berhasil diinisialisasi');
+                        this.showStatus('Jaringan P2P terhubung', 'success');
+                        resolve(true);
+                    }, 1000);
+                    
+                } catch (error) {
+                    this.logDebug('Error inisialisasi Gun.js: ' + error.message);
+                    this.showStatus('Gagal terhubung ke jaringan P2P', 'error');
+                    resolve(false);
+                }
+            });
+        }
+
+        // 🆕 Update peer count
+        updatePeerCount(count) {
+            this.state.peerCount = count;
+            const peerCountElement = document.getElementById('peerCountNumber');
+            if (peerCountElement) {
+                peerCountElement.textContent = count;
+            }
+            
+            const peerContainer = document.getElementById('peerCount');
+            if (peerContainer) {
+                if (count > 0) {
+                    peerContainer.style.display = 'flex';
+                } else {
+                    peerContainer.style.display = 'none';
+                }
             }
         }
 
@@ -1689,28 +1731,9 @@
             }
         }
 
-        // 🆕 Check network status
-        checkNetworkStatus() {
-            // Implementasi sederhana untuk cek status jaringan
-            const hasPeers = this.state.gun && this.state.gun._.opt.peers;
-            let connected = false;
-            
-            if (hasPeers) {
-                for (let peer in this.state.gun._.opt.peers) {
-                    if (this.state.gun._.opt.peers[peer].url) {
-                        connected = true;
-                        break;
-                    }
-                }
-            }
-            
-            this.updateNetworkStatus(connected);
-            return connected;
-        }
-
-        // 🆕 Save data ke Gun.js P2P network
+        // 🆕 Save data ke Gun.js P2P network - FIXED
         async saveToGun() {
-            if (!this.state.gun) {
+            if (!this.state.gun || !this.state.networkConnected) {
                 this.logDebug('Gun.js tidak tersedia, simpan ke localStorage');
                 this.saveLocalData();
                 return false;
@@ -1724,12 +1747,20 @@
                     syncCount: (this.lastSyncCount || 0) + 1
                 };
                 
-                // Simpan ke Gun.js
-                this.state.gun.get('pi-trace-global').put(dataToSave);
-                
-                this.logDebug('Data berhasil disimpan ke jaringan P2P');
-                this.lastSyncCount = dataToSave.syncCount;
-                return true;
+                // Gun.js put operation
+                return new Promise((resolve) => {
+                    this.state.gun.get('pi-trace-global-data').put(dataToSave, (ack) => {
+                        if (ack.err) {
+                            this.logDebug('Error saving to Gun: ' + ack.err);
+                            this.saveLocalData();
+                            resolve(false);
+                        } else {
+                            this.logDebug('Data berhasil disimpan ke jaringan P2P');
+                            this.lastSyncCount = dataToSave.syncCount;
+                            resolve(true);
+                        }
+                    });
+                });
                 
             } catch (error) {
                 this.logDebug('Error saving to Gun: ' + error.message);
@@ -1738,7 +1769,7 @@
             }
         }
 
-        // 🆕 Load data dari Gun.js P2P network
+        // 🆕 Load data dari Gun.js P2P network - FIXED
         async loadFromGun() {
             if (!this.state.gun) {
                 this.logDebug('Gun.js tidak tersedia, load dari localStorage');
@@ -1749,8 +1780,10 @@
             try {
                 this.logDebug('Loading data dari jaringan P2P...');
                 
-                this.state.gun.get('pi-trace-global').on((data) => {
+                // Gun.js real-time listener
+                this.state.gun.get('pi-trace-global-data').on((data) => {
                     if (data && data.products) {
+                        this.logDebug(`Received data from P2P: ${data.products.length} products`);
                         this.mergeData(data);
                         this.state.lastSync = new Date();
                         this.saveLocalData();
@@ -1773,6 +1806,8 @@
 
         // 🆕 Smart data merging dengan conflict resolution
         mergeData(newData) {
+            if (!newData || !newData.products) return;
+            
             const existingProducts = this.state.products;
             const newProducts = newData.products || [];
             
@@ -1812,7 +1847,7 @@
             
             // Sort by timestamp terbaru
             mergedProducts.sort((a, b) => 
-                new Date(b.timestamp) - new Date(a.timestamp)
+                new Date(b.timestamp || 0) - new Date(a.timestamp || 0)
             );
             
             this.state.products = mergedProducts;
@@ -1885,8 +1920,10 @@
 
         // Real-time Sync dengan Gun.js
         startRealTimeSync() {
+            // Load initial data
             this.loadFromGun();
             
+            // Periodic sync
             this.syncInterval = setInterval(async () => {
                 await this.syncData();
             }, this.config.SYNC_INTERVAL);
@@ -1903,7 +1940,9 @@
 
         async syncData() {
             try {
-                await this.saveToGun();
+                if (this.state.networkConnected) {
+                    await this.saveToGun();
+                }
             } catch (error) {
                 this.logDebug('Sync error: ' + error.message);
             }
@@ -1912,8 +1951,12 @@
         // Manual sync
         async manualSync() {
             this.showStatus('Menyinkronisasi data...', 'info');
-            await this.saveToGun();
-            await this.loadFromGun();
+            const success = await this.saveToGun();
+            if (success) {
+                this.showStatus('Data berhasil disinkronisasi ke jaringan P2P', 'success');
+            } else {
+                this.showStatus('Gagal menyinkronisasi data', 'error');
+            }
         }
 
         // Event Listeners
