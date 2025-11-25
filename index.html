@@ -1155,7 +1155,7 @@
                 </div>
                 
                 <div class="login-actions">
-                    <button class="btn btn-primary btn-large" onclick="loginWithPi()">
+                    <button class="btn btn-primary btn-large" onclick="loginWithPi()" id="piLoginBtn">
                         <i class="fab fa-raspberry-pi"></i>
                         Login dengan Pi Wallet
                     </button>
@@ -1631,7 +1631,8 @@
                 activityHistory: [],
                 lastSync: null,
                 syncInterval: null,
-                currentProduct: null
+                currentProduct: null,
+                isPiBrowser: false
             };
             
             this.init();
@@ -1639,9 +1640,27 @@
 
         init() {
             this.logDebug('Aplikasi PI TRACE Real-time Diinisialisasi');
+            this.detectPiBrowser();
             this.setupEventListeners();
             this.detectMobile();
             this.startRealTimeSync();
+        }
+
+        // Deteksi Pi Browser
+        detectPiBrowser() {
+            const isPiBrowser = /PiBrowser/i.test(navigator.userAgent);
+            this.state.isPiBrowser = isPiBrowser;
+            this.logDebug(`Pi Browser terdeteksi: ${isPiBrowser}`);
+            
+            if (!isPiBrowser) {
+                // Jika bukan Pi Browser, nonaktifkan tombol Pi Login
+                const piLoginBtn = document.getElementById('piLoginBtn');
+                if (piLoginBtn) {
+                    piLoginBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Hanya di Pi Browser';
+                    piLoginBtn.classList.add('btn-disabled');
+                    piLoginBtn.disabled = true;
+                }
+            }
         }
 
         // Real-time Synchronization System
@@ -1851,6 +1870,13 @@
         async loginWithPi() {
             this.logDebug('Memulai login Pi Wallet...');
             
+            // Cek apakah di Pi Browser
+            if (!this.state.isPiBrowser) {
+                this.showStatus('Login Pi Wallet hanya tersedia di Pi Browser', 'warning');
+                this.guestLogin();
+                return;
+            }
+            
             try {
                 // Tampilkan status loading
                 this.showStatus('Menginisialisasi Pi SDK...', 'info');
@@ -1865,11 +1891,19 @@
                 this.logDebug('Pi SDK berhasil diinisialisasi, memulai autentikasi...');
                 this.showStatus('Meminta autentikasi Pi Wallet...', 'info');
 
-                // Authenticate dengan Pi SDK
+                // PERBAIKAN: Gunakan approach yang lebih sederhana untuk authentication
                 const scopes = ['username', 'payments'];
-                const onIncompletePaymentFound = () => {}; // Callback kosong
                 
-                const user = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
+                // PERBAIKAN: Tambahkan timeout untuk authentication
+                const authPromise = window.Pi.authenticate(scopes, () => {});
+                
+                // Timeout setelah 30 detik
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Authentication timeout')), 30000);
+                });
+                
+                // Race between auth and timeout
+                const user = await Promise.race([authPromise, timeoutPromise]);
                 
                 if (!user || !user.username) {
                     throw new Error('Autentikasi gagal - data user tidak valid');
@@ -1888,14 +1922,17 @@
             } catch (error) {
                 this.logDebug(`Login Pi gagal: ${error.message}`);
                 
-                if (error.message.includes('timeout') || error.message.includes('SDK tidak ditemukan')) {
-                    this.showStatus('Pi Browser tidak terdeteksi, beralih ke mode tamu...', 'warning');
-                    setTimeout(() => {
-                        this.guestLogin();
-                    }, 2000);
+                if (error.message.includes('timeout') || error.message.includes('user closed') || error.message.includes('canceled')) {
+                    this.showStatus('Autentikasi dibatalkan atau timeout', 'warning');
+                    // Tidak auto fallback ke guest, biarkan user memilih
                 } else {
-                    this.showStatus('Login gagal, menggunakan mode tamu', 'warning');
-                    this.guestLogin();
+                    this.showStatus('Login Pi gagal: ' + error.message, 'error');
+                    // Tawarkan fallback ke guest mode
+                    setTimeout(() => {
+                        if (confirm('Login dengan Pi Wallet gagal. Lanjut sebagai tamu?')) {
+                            this.guestLogin();
+                        }
+                    }, 1000);
                 }
             }
         }
