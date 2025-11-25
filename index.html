@@ -1542,6 +1542,79 @@
 
     <!-- ALL JAVASCRIPT INLINE -->
     <script>
+    // =============================================
+    // PI SDK INITIALIZATION FIX
+    // =============================================
+    let piSDKInitialized = false;
+    let piSDKInitializing = false;
+
+    // Initialize Pi SDK dengan error handling yang better
+    async function initializePiSDK() {
+        if (piSDKInitialized) {
+            console.log('Pi SDK sudah diinisialisasi');
+            return true;
+        }
+        
+        if (piSDKInitializing) {
+            console.log('Pi SDK sedang dalam proses inisialisasi...');
+            // Tunggu sampai selesai
+            return new Promise((resolve) => {
+                const checkInit = setInterval(() => {
+                    if (piSDKInitialized) {
+                        clearInterval(checkInit);
+                        resolve(true);
+                    }
+                }, 100);
+            });
+        }
+        
+        piSDKInitializing = true;
+        console.log('Memulai inisialisasi Pi SDK...');
+        
+        try {
+            // Cek apakah Pi SDK tersedia
+            if (typeof window.Pi === 'undefined') {
+                console.warn('Pi SDK tidak ditemukan di window.Pi');
+                piSDKInitializing = false;
+                return false;
+            }
+            
+            // Tunggu sampai Pi SDK benar-benar ready
+            await new Promise((resolve, reject) => {
+                let attempts = 0;
+                const maxAttempts = 50; // 5 detik timeout
+                
+                const checkPiReady = setInterval(() => {
+                    attempts++;
+                    
+                    if (window.Pi && typeof window.Pi.init === 'function') {
+                        clearInterval(checkPiReady);
+                        resolve();
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(checkPiReady);
+                        reject(new Error('Pi SDK timeout - init function tidak ditemukan'));
+                    }
+                }, 100);
+            });
+            
+            // Initialize Pi SDK
+            await window.Pi.init({ 
+                version: "2.0", 
+                sandbox: true 
+            });
+            
+            piSDKInitialized = true;
+            piSDKInitializing = false;
+            console.log('✅ Pi SDK berhasil diinisialisasi');
+            return true;
+            
+        } catch (error) {
+            piSDKInitializing = false;
+            console.error('❌ Gagal inisialisasi Pi SDK:', error);
+            return false;
+        }
+    }
+
     // Real-time PI TRACE App dengan Shared Database
     class PiTraceApp {
         constructor() {
@@ -1774,30 +1847,56 @@
             }
         }
 
-        // Login Methods
+        // Login Methods - PERBAIKAN: Menggunakan initializePiSDK yang baru
         async loginWithPi() {
             this.logDebug('Memulai login Pi Wallet...');
             
             try {
-                if (!window.Pi) {
-                    throw new Error('Pi SDK tidak tersedia');
+                // Tampilkan status loading
+                this.showStatus('Menginisialisasi Pi SDK...', 'info');
+                
+                // Initialize Pi SDK dengan method yang sudah diperbaiki
+                const sdkReady = await initializePiSDK();
+                
+                if (!sdkReady) {
+                    throw new Error('Pi SDK tidak dapat diinisialisasi');
                 }
 
-                await window.Pi.init({ version: "2.0", sandbox: true });
-                this.logDebug('Pi SDK diinisialisasi');
+                this.logDebug('Pi SDK berhasil diinisialisasi, memulai autentikasi...');
+                this.showStatus('Meminta autentikasi Pi Wallet...', 'info');
 
-                const user = await window.Pi.authenticate(['username', 'payments'], () => {});
+                // Authenticate dengan Pi SDK
+                const scopes = ['username', 'payments'];
+                const onIncompletePaymentFound = () => {}; // Callback kosong
                 
-                this.state.currentUser = user;
+                const user = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
+                
+                if (!user || !user.username) {
+                    throw new Error('Autentikasi gagal - data user tidak valid');
+                }
+
+                this.state.currentUser = {
+                    username: user.username,
+                    uid: user.uid || 'pi_user_' + Date.now()
+                };
                 this.state.isGuest = false;
                 
                 this.showMainApp(user.username, 'Pi Wallet');
-                this.showStatus(`Selamat datang ${user.username}!`);
+                this.showStatus(`Selamat datang ${user.username}!`, 'success');
+                this.logDebug(`Login Pi berhasil: ${user.username}`);
 
             } catch (error) {
                 this.logDebug(`Login Pi gagal: ${error.message}`);
-                this.showStatus('Login Pi tidak tersedia, menggunakan mode tamu', 'warning');
-                this.guestLogin();
+                
+                if (error.message.includes('timeout') || error.message.includes('SDK tidak ditemukan')) {
+                    this.showStatus('Pi Browser tidak terdeteksi, beralih ke mode tamu...', 'warning');
+                    setTimeout(() => {
+                        this.guestLogin();
+                    }, 2000);
+                } else {
+                    this.showStatus('Login gagal, menggunakan mode tamu', 'warning');
+                    this.guestLogin();
+                }
             }
         }
 
@@ -2413,14 +2512,21 @@
             }
         }
 
-        // Payment
+        // Payment - PERBAIKAN: Menggunakan initializePiSDK yang baru
         async createPayment() {
             if (this.state.isGuest) {
-                this.showStatus('Login dengan Pi Wallet untuk pembayaran', 'warning');
+                this.showStatus('Login dengan Pi Wallet untuk menggunakan fitur pembayaran', 'warning');
                 return;
             }
 
             try {
+                // Pastikan Pi SDK sudah diinisialisasi
+                const sdkReady = await initializePiSDK();
+                if (!sdkReady) {
+                    this.showStatus('Pi SDK tidak tersedia untuk pembayaran', 'error');
+                    return;
+                }
+
                 const payment = await window.Pi.createPayment({
                     amount: 3.14,
                     memo: 'PI TRACE - Fitur Premium'
@@ -2430,7 +2536,7 @@
                 this.logDebug(`Pembayaran dibuat: ${payment.identifier}`);
                 
             } catch (error) {
-                this.showStatus('Pembayaran gagal', 'error');
+                this.showStatus('Pembayaran gagal: ' + error.message, 'error');
                 this.logDebug(`Error pembayaran: ${error.message}`);
             }
         }
