@@ -1738,37 +1738,38 @@
     // COMPLETE PI TRACE APPLICATION - FIXED VERSION
     // =============================================
     class CompletePiTraceApp {
-        constructor() {
-            this.config = {
-                DEBUG: true,
-                SYNC_INTERVAL: 5000,
-                GUN_PEERS: [
-                    'https://gun-manhattan.herokuapp.com/gun',
-                    'https://gun-us.herokuapp.com/gun', 
-                    'https://gun-eu.herokuapp.com/gun',
-                    'https://mvp-gun.herokuapp.com/gun'
-                ],
-                MAX_PRODUCTS: 1000,
-                MAX_HISTORY: 200
-            };
-            
-            this.state = {
-                currentUser: null,
-                isGuest: false,
-                products: [],
-                activityHistory: [],
-                lastSync: null,
-                syncInterval: null,
-                currentProduct: null,
-                isPiBrowser: false,
-                gun: null,
-                gunUser: null,
-                networkConnected: false,
-                peerCount: 0,
-                isOnline: navigator.onLine,
-                loginAttempts: 0,
-                maxLoginAttempts: 3
-            };
+    constructor() {
+        this.config = {
+            DEBUG: true,
+            SYNC_INTERVAL: 8000,
+            GUN_PEERS: [
+                'https://gun-manhattan.herokuapp.com/gun',
+                'https://mvp-gun.herokuapp.com/gun', 
+                'https://gun-eu.herokuapp.com/gun'
+            ],
+            MAX_PRODUCTS: 200
+        };
+        
+        this.state = {
+            currentUser: null,
+            isGuest: false,
+            products: [],
+            activityHistory: [],
+            lastSync: null,
+            syncInterval: null,
+            currentProduct: null,
+            isPiBrowser: false,
+            gun: null,
+            gunUser: null,
+            networkConnected: false,
+            peerCount: 0,
+            isOnline: navigator.onLine,
+            loginAttempts: 0,
+            maxLoginAttempts: 3
+        };
+        
+        this.initSyncSystem(); // TAMBAH BARIS INI
+        // ... lanjutan constructor tetap sama
             
             this.cache = {
                 products: new Map(),
@@ -1779,12 +1780,13 @@
         }
 
         async init() {
-            console.log('🚀 Initializing Complete PI TRACE App...');
-            await this.checkEnvironment();
-            this.setupEventListeners();
-            this.setupOfflineSupport();
-            this.updateSystemStatus('Sistem siap - Pilih metode login');
-        }
+    console.log('🚀 Initializing Complete PI TRACE App...');
+    await this.checkEnvironment();
+    this.setupEventListeners();
+    this.setupOfflineSupport();
+    this.loadLocalData(); // TAMBAH BARIS INI - load data segera
+    this.updateSystemStatus('Sistem siap - Pilih metode login');
+}
 
         async checkEnvironment() {
             // Check Pi Browser
@@ -1848,7 +1850,215 @@
         updateSystemStatus(message) {
             document.getElementById('systemStatus').textContent = message;
         }
+        
+    updateSystemStatus(message) {
+        document.getElementById('systemStatus').textContent = message;
+    }
 
+    // =============================================
+    // 🎯 NEW SYNC METHODS - ADD THESE RIGHT HERE
+    // =============================================
+
+    initSyncSystem() {
+        try {
+            console.log('🔄 Initializing reliable sync system...');
+            
+            this.state.gun = Gun({
+                peers: this.config.GUN_PEERS,
+                localStorage: false,
+                radisk: false,
+                multicast: false
+            });
+            
+            this.setupGunListeners();
+            this.startSyncLoop();
+            
+        } catch (error) {
+            console.error('Sync system init failed:', error);
+            this.fallbackToLocalStorage();
+        }
+    }
+
+    setupGunListeners() {
+        let peerConnections = 0;
+        
+        this.state.gun.on('hi', (peer) => {
+            peerConnections++;
+            console.log('✅ Connected to peer:', peer);
+            this.updateNetworkStatus(true, peerConnections);
+            
+            if (peerConnections === 1) {
+                this.showStatus('✅ Terhubung ke jaringan P2P', 'success');
+                setTimeout(() => this.startDataCollection(), 1000);
+            }
+        });
+        
+        this.state.gun.on('bye', (peer) => {
+            peerConnections = Math.max(0, peerConnections - 1);
+            console.log('❌ Disconnected from:', peer);
+            this.updateNetworkStatus(peerConnections > 0, peerConnections);
+        });
+    }
+
+    startSyncLoop() {
+        setInterval(() => {
+            if (this.state.networkConnected && this.state.products.length > 0) {
+                this.syncAllData();
+            }
+        }, 30000);
+        
+        setTimeout(() => this.startDataCollection(), 2000);
+    }
+
+    async syncProductToNetwork(product) {
+        return new Promise((resolve) => {
+            if (!this.state.gun || !this.state.networkConnected) {
+                console.log('📦 Offline - saving locally only');
+                resolve(false);
+                return;
+            }
+
+            console.log('🔄 Syncing product to network:', product.id);
+            
+            const productKey = `product_${product.id}`;
+            
+            // Save to multiple paths for redundancy
+            const paths = [
+                `pi-trace/products/${productKey}`,
+                `pi-trace/all-products/${productKey}`
+            ];
+            
+            let successCount = 0;
+            let completed = 0;
+            
+            paths.forEach(path => {
+                this.state.gun.get(path).put(product, (ack) => {
+                    completed++;
+                    
+                    if (ack && ack.err) {
+                        console.warn(`Sync failed for ${path}:`, ack.err);
+                    } else {
+                        successCount++;
+                        console.log(`✅ Synced to ${path}`);
+                    }
+                    
+                    if (completed === paths.length) {
+                        resolve(successCount > 0);
+                    }
+                });
+            });
+            
+            setTimeout(() => {
+                if (completed < paths.length) {
+                    console.log('⏰ Sync timeout');
+                    resolve(successCount > 0);
+                }
+            }, 8000);
+        });
+    }
+
+    startDataCollection() {
+        if (!this.state.gun) return;
+        
+        console.log('👂 Listening for network data...');
+        
+        // Listen for products from network
+        this.state.gun.get('pi-trace').get('products').map().on((data, key) => {
+            if (data && data.id && data.name && !data.isDeleted) {
+                this.handleIncomingProduct(data);
+            }
+        });
+        
+        this.state.gun.get('pi-trace').get('all-products').map().on((data, key) => {
+            if (data && data.id && data.name && !data.isDeleted) {
+                this.handleIncomingProduct(data);
+            }
+        });
+    }
+
+    handleIncomingProduct(incomingProduct) {
+        const existingIndex = this.state.products.findIndex(p => p.id === incomingProduct.id);
+        
+        if (existingIndex === -1) {
+            // New product - add it
+            console.log('📥 New product from network:', incomingProduct.name);
+            incomingProduct.syncStatus = 'synced'; // Mark as synced
+            this.state.products.unshift(incomingProduct);
+            this.updateUI();
+            this.saveLocalData();
+            this.showStatus(`📦 ${incomingProduct.name} - dari ${incomingProduct.owner}`, 'info');
+        }
+    }
+
+    async syncAllData() {
+        if (!this.state.networkConnected) return;
+        
+        console.log('🔄 Background sync running...');
+        this.state.products.forEach(product => {
+            if (product.syncStatus !== 'synced') {
+                this.syncProductToNetwork(product);
+            }
+        });
+    }
+
+    async manualSync() {
+        this.showStatus('🔄 Menyinkronisasi semua data...', 'info');
+        
+        let syncedCount = 0;
+        const totalProducts = this.state.products.length;
+        
+        for (let i = 0; i < this.state.products.length; i++) {
+            const product = this.state.products[i];
+            if (product.syncStatus !== 'synced') {
+                const success = await this.syncProductToNetwork(product);
+                if (success) {
+                    syncedCount++;
+                    this.state.products[i].syncStatus = 'synced';
+                }
+            }
+        }
+        
+        this.updateUI();
+        this.saveLocalData();
+        
+        this.showStatus(
+            `✅ Disinkronisasi: ${syncedCount}/${totalProducts} produk`, 
+            syncedCount > 0 ? 'success' : 'warning'
+        );
+    }
+
+    fallbackToLocalStorage() {
+        console.log('🔄 Falling back to localStorage only');
+        this.loadLocalData();
+        this.showStatus('⚠️ Mode offline - hanya data lokal', 'warning');
+    }
+
+    updateNetworkStatus(connected, peerCount = 0) {
+        this.state.networkConnected = connected;
+        this.state.peerCount = peerCount;
+        
+        const statusElement = document.getElementById('networkStatus');
+        const peerElement = document.getElementById('peerCountNumber');
+        
+        if (statusElement) {
+            statusElement.innerHTML = connected ? 
+                '<div class="network-dot connected"></div><div class="network-info">Terhubung ke jaringan P2P</div>' :
+                '<div class="network-dot disconnected"></div><div class="network-info">Mode offline - data lokal</div>';
+        }
+        
+        if (peerElement) {
+            peerElement.textContent = peerCount;
+        }
+    }
+
+    // 🎯 FIXED LOGIN WITH PI WALLET
+    async loginWithPi() {
+        console.log('🔐 Attempting Pi Wallet login...');
+        
+        if (this.isLoggingIn) {
+            this.showStatus('Login sedang diproses...', 'warning');
+            return;
+        }
         // 🎯 FIXED LOGIN WITH PI WALLET
         async loginWithPi() {
             console.log('🔐 Attempting Pi Wallet login...');
@@ -2076,36 +2286,56 @@
             this.updateUI();
         }
 
-        async initGunJS() {
-            try {
-                this.state.gun = Gun({
-                    peers: this.config.GUN_PEERS,
-                    localStorage: false,
-                    radisk: false
-                });
-                
-                let connectedPeers = 0;
-                
-                this.state.gun.on('hi', (peer) => {
-                    console.log('✅ Connected to peer:', peer);
-                    connectedPeers++;
-                    this.updatePeerCount(connectedPeers);
-                    this.updateNetworkStatus(true);
-                });
-                
-                this.state.gun.on('bye', (peer) => {
-                    console.log('❌ Disconnected from peer:', peer);
-                    connectedPeers = Math.max(0, connectedPeers - 1);
-                    this.updatePeerCount(connectedPeers);
-                    if (connectedPeers === 0) {
-                        this.updateNetworkStatus(false);
-                    }
-                });
-                
-            } catch (error) {
-                console.warn('Gun.js init warning:', error);
-            }
+        initSyncSystem() {
+    try {
+        console.log('🔄 Initializing reliable sync system...');
+        
+        this.state.gun = Gun({
+            peers: this.config.GUN_PEERS,
+            localStorage: false,
+            radisk: false,
+            multicast: false
+        });
+        
+        this.setupGunListeners();
+        this.startSyncLoop();
+        
+    } catch (error) {
+        console.error('Sync system init failed:', error);
+        this.fallbackToLocalStorage();
+    }
+}
+
+setupGunListeners() {
+    let peerConnections = 0;
+    
+    this.state.gun.on('hi', (peer) => {
+        peerConnections++;
+        console.log('✅ Connected to peer:', peer);
+        this.updateNetworkStatus(true, peerConnections);
+        
+        if (peerConnections === 1) {
+            this.showStatus('✅ Terhubung ke jaringan P2P', 'success');
+            setTimeout(() => this.startDataCollection(), 1000);
         }
+    });
+    
+    this.state.gun.on('bye', (peer) => {
+        peerConnections = Math.max(0, peerConnections - 1);
+        console.log('❌ Disconnected from:', peer);
+        this.updateNetworkStatus(peerConnections > 0, peerConnections);
+    });
+}
+
+startSyncLoop() {
+    setInterval(() => {
+        if (this.state.networkConnected && this.state.products.length > 0) {
+            this.syncAllData();
+        }
+    }, 30000);
+    
+    setTimeout(() => this.startDataCollection(), 2000);
+}
 
         updatePeerCount(count) {
             this.state.peerCount = count;
@@ -2322,55 +2552,73 @@
         }
 
         async submitProduct() {
-            const productData = {
-                name: document.getElementById('productName').value,
-                category: document.getElementById('productCategory').value,
-                description: document.getElementById('productDescription').value,
-                quantity: parseInt(document.getElementById('productQuantity').value) || 1,
-                unit: document.getElementById('productUnit').value,
-                price: parseFloat(document.getElementById('productPrice').value) || 0,
-                originCountry: document.getElementById('originCountry').value,
-                originCity: document.getElementById('originCity').value,
-                id: 'prod_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                hash: document.getElementById('hashCodeDisplay').textContent,
-                owner: this.state.currentUser.username,
-                ownerId: this.state.currentUser.uid,
-                timestamp: new Date().toISOString(),
-                dateDisplay: new Date().toLocaleString('id-ID'),
-                status: 'active',
-                isDeleted: false
-            };
+    const productData = {
+        name: document.getElementById('productName').value,
+        category: document.getElementById('productCategory').value,
+        description: document.getElementById('productDescription').value,
+        quantity: parseInt(document.getElementById('productQuantity').value) || 1,
+        unit: document.getElementById('productUnit').value,
+        price: parseFloat(document.getElementById('productPrice').value) || 0,
+        originCountry: document.getElementById('originCountry').value,
+        originCity: document.getElementById('originCity').value,
+        hash: document.getElementById('hashCodeDisplay').textContent,
+        owner: this.state.currentUser.username,
+        ownerId: this.state.currentUser.uid,
+        timestamp: Date.now(),
+        dateDisplay: new Date().toLocaleString('id-ID'),
+        status: 'active',
+        isDeleted: false
+    };
 
-            // Validation
-            if (!productData.name || !productData.category) {
-                this.showStatus('Harap isi nama produk dan kategori', 'error');
-                return;
-            }
+    // Validation
+    if (!productData.name || !productData.category) {
+        this.showStatus('Harap isi nama produk dan kategori', 'error');
+        return;
+    }
 
-            if (!productData.originCountry || !productData.originCity) {
-                this.showStatus('Harap isi negara dan kota asal barang', 'error');
-                return;
-            }
-
-            try {
-                this.state.products.unshift(productData);
-                this.addActivity('Produk ditambahkan', productData.name, productData.id);
-                
-                const gunSuccess = await this.saveToGun();
-                
+    try {
+        // Step 1: Add to local state immediately
+        const product = {
+            ...productData,
+            id: 'prod_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            syncStatus: 'pending'
+        };
+        
+        this.state.products.unshift(product);
+        this.updateUI(); // Update UI immediately
+        
+        // Step 2: Save to localStorage
+        this.saveLocalData();
+        
+        // Step 3: Add activity
+        this.addActivity('Produk ditambahkan', product.name, product.id);
+        
+        // Step 4: Close modal
+        this.closeModal('productModal');
+        
+        // Step 5: Show success message
+        this.showStatus('✅ Produk berhasil ditambahkan!', 'success');
+        
+        // Step 6: Try to sync to network (async - don't wait)
+        this.syncProductToNetwork(product).then(success => {
+            // Update sync status
+            const index = this.state.products.findIndex(p => p.id === product.id);
+            if (index !== -1) {
+                this.state.products[index].syncStatus = success ? 'synced' : 'local';
                 this.updateUI();
-                this.closeModal('productModal');
                 
-                if (gunSuccess) {
-                    this.showStatus('✅ Produk berhasil ditambahkan!', 'success');
+                if (success) {
+                    this.showStatus('✅ Produk tersinkronisasi ke jaringan', 'success');
                 } else {
-                    this.showStatus('✅ Produk berhasil ditambahkan! (Hanya tersimpan lokal sementara)', 'warning');
+                    this.showStatus('⚠️ Produk hanya tersimpan lokal', 'warning');
                 }
-                
-            } catch (error) {
-                this.showStatus('Error menyimpan produk: ' + error.message, 'error');
             }
-        }
+        });
+        
+    } catch (error) {
+        this.showStatus('Error menyimpan produk: ' + error.message, 'error');
+    }
+}
 
         loadUserProducts() {
             const productList = document.getElementById('productList');
