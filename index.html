@@ -1735,7 +1735,7 @@
     <!-- COMPLETE JAVASCRIPT -->
     <script>
     // =============================================
-    // COMPLETE PI TRACE APPLICATION
+    // COMPLETE PI TRACE APPLICATION - FIXED VERSION
     // =============================================
     class CompletePiTraceApp {
         constructor() {
@@ -1816,6 +1816,9 @@
             }
             
             try {
+                // Wait for SDK to be fully loaded
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
                 if (window.Pi && typeof window.Pi.init === 'function') {
                     console.log('✅ Pi SDK is available');
                     return true;
@@ -1846,7 +1849,7 @@
             document.getElementById('systemStatus').textContent = message;
         }
 
-        // 🎯 ENHANCED LOGIN WITH PI WALLET
+        // 🎯 FIXED LOGIN WITH PI WALLET
         async loginWithPi() {
             console.log('🔐 Attempting Pi Wallet login...');
             
@@ -1868,23 +1871,27 @@
             try {
                 this.showLoading('Menginisialisasi Pi SDK...', 'Memastikan koneksi ke Pi Network...');
                 
-                // Step 1: Initialize Pi SDK
-                const sdkInitialized = await this.initializePiSDK();
-                if (!sdkInitialized) {
-                    throw new Error('Gagal menginisialisasi Pi SDK');
+                // Step 1: Check if we're in Pi Browser
+                if (!this.state.isPiBrowser) {
+                    throw new Error('Aplikasi ini hanya dapat diakses melalui Pi Browser. Silakan buka aplikasi ini di Pi Browser.');
                 }
 
-                // Step 2: Authenticate
+                // Step 2: Initialize Pi SDK
+                const sdkInitialized = await this.initializePiSDK();
+                if (!sdkInitialized) {
+                    throw new Error('Gagal menginisialisasi Pi SDK. Pastikan Anda menggunakan Pi Browser versi terbaru.');
+                }
+
+                // Step 3: Authenticate dengan timeout
                 this.updateLoading('Membuka Pi Wallet...', 'Harap konfirmasi di aplikasi Pi Anda...');
                 
-                const scopes = ['username', 'payments', 'wallet_address'];
-                const user = await window.Pi.authenticate(scopes, this.onIncompletePayment);
+                const user = await this.authenticateWithPi();
                 
                 if (!user || !user.username) {
                     throw new Error('Autentikasi gagal - data user tidak valid');
                 }
 
-                // Step 3: Success
+                // Step 4: Success
                 this.handleLoginSuccess(user, 'Pi Wallet');
                 
             } catch (error) {
@@ -1915,7 +1922,7 @@
                     if (window.Pi && typeof window.Pi.init === 'function') {
                         break;
                     }
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    await new Promise(resolve => setTimeout(resolve, 500));
                     attempts++;
                 }
                 
@@ -1924,7 +1931,7 @@
                 }
                 
                 // Initialize SDK
-                await window.Pi.init({ 
+                window.Pi.init({ 
                     version: "2.0", 
                     sandbox: false
                 });
@@ -1939,19 +1946,27 @@
             }
         }
 
-        onIncompletePayment(payment) {
-            console.log('Payment incomplete:', payment);
-            return {
-                onReady: (serverPayment) => {
-                    console.log('Server payment ready:', serverPayment);
-                },
-                onCancel: () => {
-                    console.log('Payment cancelled by user');
-                },
-                onError: (error) => {
-                    console.error('Payment error:', error);
+        async authenticateWithPi() {
+            return new Promise((resolve, reject) => {
+                const scopes = ['username', 'payments', 'wallet_address'];
+                const authCallback = (auth) => {
+                    if (auth && auth.accessToken) {
+                        resolve(auth);
+                    } else {
+                        reject(new Error('Autentikasi dibatalkan oleh pengguna'));
+                    }
+                };
+
+                const errorCallback = (error) => {
+                    reject(error || new Error('Terjadi kesalahan saat autentikasi'));
+                };
+
+                try {
+                    window.Pi.authenticate(scopes, authCallback, errorCallback);
+                } catch (error) {
+                    reject(error);
                 }
-            };
+            });
         }
 
         handleLoginSuccess(user, loginMethod) {
@@ -1983,10 +1998,12 @@
             
             let errorMessage = 'Login gagal';
             
-            if (error.message.includes('SDK')) {
+            if (error.message.includes('Pi Browser')) {
+                errorMessage = 'Aplikasi ini hanya dapat diakses melalui Pi Browser.';
+            } else if (error.message.includes('SDK')) {
                 errorMessage = 'Pi SDK tidak tersedia. Pastikan menggunakan Pi Browser.';
-            } else if (error.message.includes('authentication')) {
-                errorMessage = 'Autentikasi dibatalkan atau gagal.';
+            } else if (error.message.includes('dibatalkan')) {
+                errorMessage = 'Autentikasi dibatalkan.';
             } else if (error.message.includes('timeout')) {
                 errorMessage = 'Timeout - coba lagi.';
             } else {
@@ -2798,12 +2815,17 @@
                     return;
                 }
 
-                const payment = await window.Pi.createPayment({
+                const paymentData = {
                     amount: 3.14,
-                    memo: 'PI TRACE - Fitur Premium'
+                    memo: 'PI TRACE - Fitur Premium',
+                    metadata: { product: "Premium Access" }
+                };
+
+                const payment = await new Promise((resolve, reject) => {
+                    window.Pi.createPayment(paymentData, resolve, reject);
                 });
                 
-                this.showStatus('Pembayaran dimulai! Periksa Pi Wallet.');
+                this.showStatus('Pembayaran berhasil!', 'success');
                 
             } catch (error) {
                 this.showStatus('Pembayaran gagal: ' + error.message, 'error');
