@@ -18,7 +18,7 @@
     
     <style>
     /* ============================================= */
-    /* PI TRACE - Enhanced Secure Version */
+    /* PI TRACE - Enhanced Secure Version - COMPLETE */
     /* ============================================= */
     :root {
         --primary: #4361ee;
@@ -294,6 +294,30 @@
     .btn-disabled:hover {
         transform: none !important;
         box-shadow: none !important;
+    }
+
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 
     /* Enhanced User Welcome */
@@ -800,6 +824,48 @@
         animation: fadeIn 0.5s ease;
     }
 
+    /* Loading States */
+    .login-loading {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .login-loading .loading-spinner {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--white);
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    /* Enhanced Security Features */
+    .security-features {
+        margin: 15px 0;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        border: 1px solid var(--glass-border);
+    }
+
+    .security-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        font-size: 0.75rem;
+        color: var(--light-gray);
+    }
+
+    .security-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .security-item i {
+        color: var(--secure-green);
+    }
+
     /* Enhanced Status Messages */
     .status-container {
         position: fixed;
@@ -855,45 +921,277 @@
         border-color: rgba(67, 97, 238, 0.5);
     }
 
-    /* Enhanced Loading Spinner */
-    .loading-spinner {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: var(--white);
-        animation: spin 1s ease-in-out infinite;
+    /* Empty States */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: rgba(255,255,255,0.7);
     }
 
-    @keyframes spin {
-        to { transform: rotate(360deg); }
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.7;
     }
 
-    /* Enhanced Security Features */
-    .security-features {
-        margin: 15px 0;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
+    .empty-state h3 {
+        color: var(--white);
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+
+    .empty-state p {
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+
+    /* History Styles */
+    .history-section {
+        margin-top: 25px;
+    }
+
+    .history-item {
+        background: rgba(255,255,255,0.05);
         border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        animation: slideInUp 0.5s ease;
     }
 
-    .security-item {
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .history-action {
+        color: var(--white);
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .history-date {
+        color: var(--light-gray);
+        font-size: 0.7rem;
+    }
+
+    .history-product {
+        color: var(--light-gray);
+        font-size: 0.8rem;
+        margin-bottom: 5px;
+    }
+
+    .history-user {
+        color: var(--light-gray);
+        font-size: 0.7rem;
+        font-style: italic;
+    }
+
+    /* Supply Chain Stats */
+    .supply-chain-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .stat-item {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .stat-item h3 {
+        color: var(--white);
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+
+    .stat-item p {
+        color: var(--light-gray);
+        font-size: 0.75rem;
+    }
+
+    /* QR Scanner Styles */
+    .scanner-placeholder {
+        padding: 20px 0;
+        text-align: center;
+    }
+
+    .scanner-placeholder i {
+        font-size: 3rem;
+        color: var(--light-gray);
+        margin-bottom: 15px;
+    }
+
+    .scanner-placeholder h3 {
+        color: var(--white);
+        margin-bottom: 10px;
+    }
+
+    .scanner-placeholder p {
+        color: var(--light-gray);
+        margin-bottom: 20px;
+    }
+
+    .scanner-frame {
+        width: 200px;
+        height: 200px;
+        margin: 0 auto;
+        border: 2px solid var(--primary);
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .scan-line {
+        position: absolute;
+        height: 2px;
+        background: var(--primary);
+        width: 100%;
+        top: 50%;
+        animation: scan 2s linear infinite;
+    }
+
+    @keyframes scan {
+        0% { top: 10%; }
+        50% { top: 90%; }
+        100% { top: 10%; }
+    }
+
+    .manual-input-section {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .manual-input-section h4 {
+        color: var(--white);
+        margin-bottom: 15px;
+        font-size: 1rem;
+    }
+
+    /* Product Detail Styles */
+    .product-detail-modal .modal-content {
+        max-width: 600px;
+    }
+
+    .product-detail-header {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 6px;
-        font-size: 0.75rem;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .product-detail-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary), #764ba2);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .product-detail-icon i {
+        font-size: 1.5rem;
+        color: var(--white);
+    }
+
+    .product-detail-title h2 {
+        color: var(--white);
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+
+    .product-detail-category {
         color: var(--light-gray);
+        font-size: 0.9rem;
     }
 
-    .security-item:last-child {
-        margin-bottom: 0;
+    .product-detail-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
     }
 
-    .security-item i {
-        color: var(--secure-green);
+    .detail-card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 15px;
+    }
+
+    .detail-card h4 {
+        color: var(--white);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .detail-value {
+        color: var(--light-gray);
+        font-size: 0.8rem;
+        word-break: break-all;
+    }
+
+    .detail-price {
+        color: var(--success) !important;
+        font-weight: 600;
+        font-size: 1rem !important;
+    }
+
+    .product-description-card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .product-description-card h4 {
+        color: var(--white);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .product-description-text {
+        color: var(--light-gray);
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    /* Delete Warning */
+    .delete-warning {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .delete-warning i {
+        font-size: 3rem;
+        color: var(--error);
+        margin-bottom: 15px;
+    }
+
+    .delete-warning h3 {
+        color: var(--white);
+        margin-bottom: 10px;
+    }
+
+    .delete-warning p {
+        color: var(--light-gray);
+        margin-bottom: 8px;
+    }
+
+    .warning-text {
+        color: var(--error) !important;
+        font-weight: 600;
     }
 
     /* MOBILE OPTIMIZATIONS */
@@ -936,6 +1234,14 @@
         }
         
         .product-info {
+            grid-template-columns: 1fr;
+        }
+        
+        .product-detail-info {
+            grid-template-columns: 1fr;
+        }
+        
+        .supply-chain-stats {
             grid-template-columns: 1fr;
         }
         
@@ -984,6 +1290,11 @@
         
         .features-grid {
             grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .modal-content {
+            margin: 10px;
+            border-radius: 15px;
         }
     }
 
@@ -1070,17 +1381,31 @@
                 <div class="login-actions">
                     <button class="btn btn-primary btn-large" onclick="loginWithPi()" id="piLoginBtn">
                         <i class="fab fa-raspberry-pi"></i>
-                        Login dengan Pi Wallet
+                        <span id="piLoginText">Login dengan Pi Wallet</span>
                     </button>
                     
                     <button class="btn btn-secondary btn-large" onclick="guestLogin()" id="guestLoginBtn">
                         <i class="fas fa-user"></i>
-                        Lanjut sebagai Tamu
+                        <span id="guestLoginText">Lanjut sebagai Tamu</span>
                     </button>
                 </div>
 
-                <div class="debug-panel" id="debugPanel" style="display: none;">
-                    <div class="debug-item">Sistem siap - Pilih metode login</div>
+                <!-- Debug Info -->
+                <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 0.8rem; color: rgba(255,255,255,0.7);">
+                    <div><strong>Status Sistem:</strong> <span id="systemStatus">Mengecek environment...</span></div>
+                    <div><strong>Pi Browser:</strong> <span id="piBrowserStatus">Mengecek...</span></div>
+                    <div><strong>Pi SDK:</strong> <span id="piSDKStatus">Mengecek...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Section -->
+        <div id="loading-section" class="section-hidden">
+            <div class="glass-card">
+                <div class="login-loading">
+                    <div class="loading-spinner"></div>
+                    <h3 id="loadingMessage">Memproses login...</h3>
+                    <p id="loadingSubMessage">Harap tunggu sebentar</p>
                 </div>
             </div>
         </div>
@@ -1196,7 +1521,7 @@
         </div>
     </div>
 
-    <!-- Modals (same as before but optimized) -->
+    <!-- Product Registration Modal -->
     <div id="productModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1204,7 +1529,94 @@
                 <span class="close-modal" onclick="closeModal('productModal')">&times;</span>
             </div>
             <div class="modal-body">
-                <!-- Form content same as before -->
+                <div class="form-group">
+                    <label>Nama Produk *</label>
+                    <input type="text" id="productName" placeholder="Masukkan nama produk" oninput="updateProductPreview()">
+                </div>
+                <div class="form-group">
+                    <label>Kategori *</label>
+                    <select id="productCategory" onchange="updateProductPreview()">
+                        <option value="">Pilih kategori</option>
+                        <option value="elektronik">Elektronik</option>
+                        <option value="makanan">Makanan & Minuman</option>
+                        <option value="pakaian">Pakaian</option>
+                        <option value="pertanian">Hasil Pertanian</option>
+                        <option value="perikanan">Hasil Perikanan</option>
+                        <option value="peternakan">Hasil Peternakan</option>
+                        <option value="kerajinan">Kerajinan Tangan</option>
+                        <option value="obat">Obat & Farmasi</option>
+                        <option value="kosmetik">Kosmetik</option>
+                        <option value="other">Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi</label>
+                    <textarea id="productDescription" rows="2" placeholder="Deskripsi produk..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Kuantitas</label>
+                        <input type="number" id="productQuantity" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Satuan *</label>
+                        <select id="productUnit">
+                            <option value="pcs">Pieces (pcs)</option>
+                            <option value="ton">Ton (t)</option>
+                            <option value="kg">Kilogram (kg)</option>
+                            <option value="gram">Gram (g)</option>
+                            <option value="liter">Liter (L)</option>
+                            <option value="unit">Unit</option>
+                            <option value="box">Box/Kotak</option>
+                            <option value="pack">Pack</option>
+                            <option value="set">Set</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Harga (π)</label>
+                    <input type="number" id="productPrice" placeholder="0.00" step="0.01">
+                </div>
+                
+                <!-- Asal Barang Section -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Negara Asal *</label>
+                        <select id="originCountry" onchange="updateProductPreview()">
+                            <option value="">Pilih negara</option>
+                            <option value="Indonesia">Indonesia</option>
+                            <option value="Malaysia">Malaysia</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="Thailand">Thailand</option>
+                            <option value="Vietnam">Vietnam</option>
+                            <option value="Other">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Kota Asal *</label>
+                        <input type="text" id="originCity" placeholder="Masukkan kota asal" oninput="updateProductPreview()">
+                    </div>
+                </div>
+                
+                <!-- Preview Info -->
+                <div class="preview-info">
+                    <div class="info-row">
+                        <span class="info-label-preview">Tanggal Upload:</span>
+                        <span class="info-value-preview" id="uploadDateDisplay">Akan digenerate otomatis</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label-preview">Kode Unik:</span>
+                        <span class="info-value-preview" id="hashCodeDisplay">Akan digenerate otomatis</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label-preview">Asal Barang:</span>
+                        <span class="info-value-preview" id="originDisplay">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label-preview">Ditambahkan Oleh:</span>
+                        <span class="info-value-preview" id="ownerDisplay">-</span>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('productModal')">Batal</button>
@@ -1215,22 +1627,121 @@
         </div>
     </div>
 
-    <!-- Other modals (qrScannerModal, supplyChainModal, productDetailModal, deleteConfirmModal) -->
-    <!-- Structure same as before but optimized -->
+    <!-- QR Scanner Modal -->
+    <div id="qrScannerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Pemindai QR Code</h2>
+                <span class="close-modal" onclick="closeModal('qrScannerModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="scanner-placeholder">
+                    <i class="fas fa-camera"></i>
+                    <h3>Pemindai QR Code</h3>
+                    <p>Arahkan kamera ke kode QR untuk melacak produk</p>
+                    <div class="scanner-frame">
+                        <div class="scan-line"></div>
+                    </div>
+                </div>
+                <div class="manual-input-section">
+                    <h4>Atau Masukkan Kode Manual</h4>
+                    <input type="text" id="manualQRInput" class="search-input" placeholder="Masukkan kode QR">
+                    <button class="btn btn-primary" onclick="processManualQR()" style="margin-top: 10px; width: 100%" id="manualQRBtn">
+                        <i class="fas fa-search"></i> Lacak Produk
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supply Chain Modal -->
+    <div id="supplyChainModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ringkasan Rantai Pasok</h2>
+                <span class="close-modal" onclick="closeModal('supplyChainModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="supply-chain-stats">
+                    <div class="stat-item">
+                        <h3 id="totalProductsStat">0</h3>
+                        <p>Total Produk</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 id="activeProductsStat">0</h3>
+                        <p>Aktif</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 id="transitProductsStat">0</h3>
+                        <p>Dihapus</p>
+                    </div>
+                </div>
+                <div id="supplyChainList">
+                    <!-- Supply chain items -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="productDetailModal" class="modal product-detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detail Produk</h2>
+                <span class="close-modal" onclick="closeModal('productDetailModal')">&times;</span>
+            </div>
+            <div class="modal-body" id="productDetailBody">
+                <!-- Product detail will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('productDetailModal')">Tutup</button>
+                <button class="btn btn-danger" id="deleteProductDetailBtn" onclick="deleteCurrentProduct()">
+                    <i class="fas fa-trash"></i> Hapus Produk
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Konfirmasi Hapus</h2>
+                <span class="close-modal" onclick="closeModal('deleteConfirmModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="delete-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Apakah Anda yakin?</h3>
+                    <p>Anda akan menghapus produk: <strong id="deleteProductName">Nama Produk</strong></p>
+                    <p>Ditambahkan oleh: <strong id="deleteProductOwner">-</strong></p>
+                    <p>Asal: <strong id="deleteProductOrigin">-</strong></p>
+                    <p class="warning-text">Semua user akan melihat bahwa Anda menghapus produk ini!</p>
+                    <p class="warning-text">Tindakan ini tidak dapat dibatalkan!</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('deleteConfirmModal')">Batal</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash"></i> Hapus Produk
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Status Container -->
     <div id="statusContainer" class="status-container"></div>
 
-    <!-- Enhanced JavaScript -->
+    <!-- COMPLETE JAVASCRIPT -->
     <script>
     // =============================================
-    // ENHANCED PI TRACE APP WITH SECURITY & PERFORMANCE
+    // COMPLETE PI TRACE APPLICATION
     // =============================================
-    class EnhancedPiTraceApp {
+    class CompletePiTraceApp {
         constructor() {
             this.config = {
-                DEBUG: false, // Disable debug in production
-                SYNC_INTERVAL: 5000, // Increased sync interval
+                DEBUG: true,
+                SYNC_INTERVAL: 5000,
                 GUN_PEERS: [
                     'https://gun-manhattan.herokuapp.com/gun',
                     'https://gun-us.herokuapp.com/gun', 
@@ -1238,8 +1749,7 @@
                     'https://mvp-gun.herokuapp.com/gun'
                 ],
                 MAX_PRODUCTS: 1000,
-                MAX_HISTORY: 200,
-                DATA_RETENTION_DAYS: 365
+                MAX_HISTORY: 200
             };
             
             this.state = {
@@ -1255,7 +1765,9 @@
                 gunUser: null,
                 networkConnected: false,
                 peerCount: 0,
-                isOnline: navigator.onLine
+                isOnline: navigator.onLine,
+                loginAttempts: 0,
+                maxLoginAttempts: 3
             };
             
             this.cache = {
@@ -1267,69 +1779,386 @@
         }
 
         async init() {
-            console.log('🚀 Enhanced PI TRACE App Initializing...');
-            await this.initGunJS();
+            console.log('🚀 Initializing Complete PI TRACE App...');
+            await this.checkEnvironment();
             this.setupEventListeners();
-            this.detectPiBrowser();
             this.setupOfflineSupport();
-            this.startRealTimeSync();
-            this.enableAllButtons();
-            
-            // Show welcome message
-            setTimeout(() => {
-                this.showStatus('Sistem PI TRACE siap!', 'success');
-            }, 1000);
+            this.updateSystemStatus('Sistem siap - Pilih metode login');
         }
 
-        // 🛡️ Enhanced Gun.js Initialization with Error Handling
-        async initGunJS() {
-            return new Promise((resolve) => {
+        async checkEnvironment() {
+            // Check Pi Browser
+            this.state.isPiBrowser = this.detectPiBrowser();
+            document.getElementById('piBrowserStatus').textContent = 
+                this.state.isPiBrowser ? 'Terdeteksi' : 'Tidak terdeteksi';
+            
+            // Check Pi SDK
+            const sdkAvailable = await this.checkPiSDK();
+            document.getElementById('piSDKStatus').textContent = 
+                sdkAvailable ? 'Tersedia' : 'Tidak tersedia';
+            
+            this.updateLoginButtons();
+        }
+
+        detectPiBrowser() {
+            const isPi = /PiBrowser/i.test(navigator.userAgent) || 
+                        navigator.userAgent.includes('Pi') ||
+                        (typeof window.Pi !== 'undefined');
+            
+            console.log('🌐 Pi Browser detected:', isPi);
+            return isPi;
+        }
+
+        async checkPiSDK() {
+            if (typeof window.Pi === 'undefined') {
+                console.log('❌ Pi SDK not loaded');
+                return false;
+            }
+            
+            try {
+                if (window.Pi && typeof window.Pi.init === 'function') {
+                    console.log('✅ Pi SDK is available');
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.log('❌ Pi SDK check failed:', error);
+                return false;
+            }
+        }
+
+        updateLoginButtons() {
+            const piLoginBtn = document.getElementById('piLoginBtn');
+            const piLoginText = document.getElementById('piLoginText');
+            
+            if (!this.state.isPiBrowser) {
+                piLoginBtn.classList.add('btn-disabled');
+                piLoginBtn.disabled = true;
+                piLoginText.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Hanya di Pi Browser';
+            } else {
+                piLoginBtn.classList.remove('btn-disabled');
+                piLoginBtn.disabled = false;
+                piLoginText.innerHTML = '<i class="fab fa-raspberry-pi"></i> Login dengan Pi Wallet';
+            }
+        }
+
+        updateSystemStatus(message) {
+            document.getElementById('systemStatus').textContent = message;
+        }
+
+        // 🎯 ENHANCED LOGIN WITH PI WALLET
+        async loginWithPi() {
+            console.log('🔐 Attempting Pi Wallet login...');
+            
+            if (this.isLoggingIn) {
+                this.showStatus('Login sedang diproses...', 'warning');
+                return;
+            }
+
+            this.isLoggingIn = true;
+            this.state.loginAttempts++;
+            
+            const piLoginBtn = document.getElementById('piLoginBtn');
+            const piLoginText = document.getElementById('piLoginText');
+            
+            // Show loading state
+            piLoginBtn.classList.add('btn-loading');
+            piLoginText.textContent = 'Membuka Pi Wallet...';
+            
+            try {
+                this.showLoading('Menginisialisasi Pi SDK...', 'Memastikan koneksi ke Pi Network...');
+                
+                // Step 1: Initialize Pi SDK
+                const sdkInitialized = await this.initializePiSDK();
+                if (!sdkInitialized) {
+                    throw new Error('Gagal menginisialisasi Pi SDK');
+                }
+
+                // Step 2: Authenticate
+                this.updateLoading('Membuka Pi Wallet...', 'Harap konfirmasi di aplikasi Pi Anda...');
+                
+                const scopes = ['username', 'payments', 'wallet_address'];
+                const user = await window.Pi.authenticate(scopes, this.onIncompletePayment);
+                
+                if (!user || !user.username) {
+                    throw new Error('Autentikasi gagal - data user tidak valid');
+                }
+
+                // Step 3: Success
+                this.handleLoginSuccess(user, 'Pi Wallet');
+                
+            } catch (error) {
+                console.error('❌ Login failed:', error);
+                this.handleLoginError(error);
+                
+            } finally {
+                this.isLoggingIn = false;
+                // Reset button state
+                piLoginBtn.classList.remove('btn-loading');
+                piLoginText.innerHTML = '<i class="fab fa-raspberry-pi"></i> Login dengan Pi Wallet';
+            }
+        }
+
+        async initializePiSDK() {
+            if (this.piSDKInitialized) return true;
+            
+            try {
+                console.log('🔄 Initializing Pi SDK...');
+                
+                if (typeof window.Pi === 'undefined') {
+                    throw new Error('Pi SDK tidak ditemukan. Pastikan Anda menggunakan Pi Browser.');
+                }
+                
+                // Wait for Pi SDK to be ready
+                let attempts = 0;
+                while (attempts < 10) {
+                    if (window.Pi && typeof window.Pi.init === 'function') {
+                        break;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+                
+                if (attempts >= 10) {
+                    throw new Error('Pi SDK timeout - tidak bisa diinisialisasi');
+                }
+                
+                // Initialize SDK
+                await window.Pi.init({ 
+                    version: "2.0", 
+                    sandbox: false
+                });
+                
+                this.piSDKInitialized = true;
+                console.log('✅ Pi SDK initialized successfully');
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Pi SDK initialization failed:', error);
+                throw error;
+            }
+        }
+
+        onIncompletePayment(payment) {
+            console.log('Payment incomplete:', payment);
+            return {
+                onReady: (serverPayment) => {
+                    console.log('Server payment ready:', serverPayment);
+                },
+                onCancel: () => {
+                    console.log('Payment cancelled by user');
+                },
+                onError: (error) => {
+                    console.error('Payment error:', error);
+                }
+            };
+        }
+
+        handleLoginSuccess(user, loginMethod) {
+            console.log('✅ Login successful:', user);
+            
+            this.state.currentUser = {
+                username: user.username,
+                uid: user.uid || `user_${Date.now()}`,
+                walletAddress: user.walletAddress,
+                loginMethod: loginMethod
+            };
+            
+            this.state.isGuest = false;
+            
+            this.hideLoading();
+            this.showMainApp(user.username, loginMethod);
+            
+            this.showStatus(`Selamat datang ${user.username}! 🎉`, 'success');
+            this.updateSystemStatus(`User: ${user.username} - ${loginMethod}`);
+            
+            this.state.loginAttempts = 0;
+            
+            // Initialize app features
+            this.initializeAppFeatures();
+        }
+
+        handleLoginError(error) {
+            console.error('💥 Login error:', error);
+            
+            let errorMessage = 'Login gagal';
+            
+            if (error.message.includes('SDK')) {
+                errorMessage = 'Pi SDK tidak tersedia. Pastikan menggunakan Pi Browser.';
+            } else if (error.message.includes('authentication')) {
+                errorMessage = 'Autentikasi dibatalkan atau gagal.';
+            } else if (error.message.includes('timeout')) {
+                errorMessage = 'Timeout - coba lagi.';
+            } else {
+                errorMessage = `Error: ${error.message}`;
+            }
+            
+            this.hideLoading();
+            this.showStatus(errorMessage, 'error');
+            
+            if (this.state.loginAttempts >= this.state.maxLoginAttempts) {
+                this.showStatus('Terlalu banyak percobaan login. Coba lagi nanti.', 'warning');
+                setTimeout(() => {
+                    this.guestLogin();
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    if (confirm(`${errorMessage}\n\nLanjutkan sebagai tamu?`)) {
+                        this.guestLogin();
+                    }
+                }, 1000);
+            }
+        }
+
+        // 🎯 GUEST LOGIN
+        guestLogin() {
+            console.log('👤 Starting guest login...');
+            
+            const guestBtn = document.getElementById('guestLoginBtn');
+            const guestText = document.getElementById('guestLoginText');
+            
+            guestBtn.classList.add('btn-loading');
+            guestText.textContent = 'Memproses...';
+            
+            setTimeout(() => {
                 try {
-                    console.log('🔗 Initializing Gun.js P2P Network...');
+                    const guestNumber = Math.floor(Math.random() * 9000) + 1000;
+                    const guestUser = {
+                        username: `Guest_${guestNumber}`,
+                        uid: `guest_${Date.now()}`,
+                        loginMethod: 'Mode Tamu'
+                    };
                     
-                    this.state.gun = Gun({
-                        peers: this.config.GUN_PEERS,
-                        localStorage: false,
-                        radisk: false,
-                        retry: 3
-                    });
+                    this.state.currentUser = guestUser;
+                    this.state.isGuest = true;
                     
-                    let connectedPeers = 0;
-                    const connectionTimeout = setTimeout(() => {
-                        if (connectedPeers === 0) {
-                            this.updateNetworkStatus(false);
-                            resolve(false);
-                        }
-                    }, 10000);
-
-                    this.state.gun.on('hi', (peer) => {
-                        console.log(`✅ Connected to peer: ${peer}`);
-                        connectedPeers++;
-                        clearTimeout(connectionTimeout);
-                        this.updatePeerCount(connectedPeers);
-                        this.updateNetworkStatus(true);
-                    });
+                    guestBtn.classList.remove('btn-loading');
+                    guestText.innerHTML = '<i class="fas fa-user"></i> Lanjut sebagai Tamu';
                     
-                    this.state.gun.on('bye', (peer) => {
-                        console.log(`❌ Disconnected from peer: ${peer}`);
-                        connectedPeers = Math.max(0, connectedPeers - 1);
-                        this.updatePeerCount(connectedPeers);
-                        if (connectedPeers === 0) {
-                            this.updateNetworkStatus(false);
-                        }
-                    });
-
-                    setTimeout(() => resolve(true), 2000);
+                    this.showMainApp(guestUser.username, 'Mode Tamu');
+                    this.showStatus(`Selamat datang ${guestUser.username}! (Mode Tamu)`, 'info');
+                    this.updateSystemStatus(`User: ${guestUser.username} - Guest Mode`);
+                    
+                    this.initializeAppFeatures();
                     
                 } catch (error) {
-                    console.error('❌ Gun.js initialization failed:', error);
-                    this.showStatus('Gagal terhubung ke jaringan P2P', 'error');
-                    resolve(false);
+                    console.error('Guest login error:', error);
+                    guestBtn.classList.remove('btn-loading');
+                    guestText.innerHTML = '<i class="fas fa-user"></i> Lanjut sebagai Tamu';
+                    this.showStatus('Error login tamu', 'error');
                 }
-            });
+            }, 500);
         }
 
-        // 🛡️ Enhanced Data Saving with Validation
+        // 🎯 APP FEATURES INITIALIZATION
+        initializeAppFeatures() {
+            console.log('🚀 Initializing app features...');
+            this.initGunJS();
+            this.loadLocalData();
+            this.startRealTimeSync();
+            this.updateUI();
+        }
+
+        async initGunJS() {
+            try {
+                this.state.gun = Gun({
+                    peers: this.config.GUN_PEERS,
+                    localStorage: false,
+                    radisk: false
+                });
+                
+                let connectedPeers = 0;
+                
+                this.state.gun.on('hi', (peer) => {
+                    console.log('✅ Connected to peer:', peer);
+                    connectedPeers++;
+                    this.updatePeerCount(connectedPeers);
+                    this.updateNetworkStatus(true);
+                });
+                
+                this.state.gun.on('bye', (peer) => {
+                    console.log('❌ Disconnected from peer:', peer);
+                    connectedPeers = Math.max(0, connectedPeers - 1);
+                    this.updatePeerCount(connectedPeers);
+                    if (connectedPeers === 0) {
+                        this.updateNetworkStatus(false);
+                    }
+                });
+                
+            } catch (error) {
+                console.warn('Gun.js init warning:', error);
+            }
+        }
+
+        updatePeerCount(count) {
+            this.state.peerCount = count;
+            const element = document.getElementById('peerCountNumber');
+            if (element) element.textContent = count;
+        }
+
+        updateNetworkStatus(connected) {
+            this.state.networkConnected = connected;
+            const element = document.getElementById('networkStatus');
+            if (element) {
+                element.style.display = connected ? 'flex' : 'none';
+            }
+        }
+
+        // 🎯 DATA MANAGEMENT
+        loadLocalData() {
+            try {
+                const savedProducts = localStorage.getItem('pi_trace_products');
+                const savedHistory = localStorage.getItem('pi_trace_history');
+                
+                if (savedProducts) {
+                    this.state.products = JSON.parse(savedProducts);
+                }
+                if (savedHistory) {
+                    this.state.activityHistory = JSON.parse(savedHistory);
+                }
+                
+                console.log(`📦 Loaded ${this.state.products.length} products, ${this.state.activityHistory.length} history items`);
+            } catch (error) {
+                console.error('Error loading local data:', error);
+                this.state.products = [];
+                this.state.activityHistory = [];
+            }
+        }
+
+        saveLocalData() {
+            try {
+                localStorage.setItem('pi_trace_products', JSON.stringify(this.state.products));
+                localStorage.setItem('pi_trace_history', JSON.stringify(this.state.activityHistory));
+            } catch (error) {
+                console.error('Error saving local data:', error);
+            }
+        }
+
+        // 🎯 REAL-TIME SYNC
+        startRealTimeSync() {
+            this.loadFromGun();
+            
+            this.syncInterval = setInterval(async () => {
+                await this.syncData();
+            }, this.config.SYNC_INTERVAL);
+        }
+
+        stopRealTimeSync() {
+            if (this.syncInterval) {
+                clearInterval(this.syncInterval);
+            }
+        }
+
+        async syncData() {
+            try {
+                if (this.state.networkConnected) {
+                    await this.saveToGun();
+                }
+            } catch (error) {
+                console.error('Sync error:', error);
+            }
+        }
+
         async saveToGun() {
             if (!this.state.gun || !this.state.networkConnected) {
                 this.saveLocalData();
@@ -1337,92 +2166,31 @@
             }
             
             try {
-                // Data validation
-                const validatedData = this.validateDataBeforeSave({
+                const dataToSave = {
                     products: this.state.products.slice(0, this.config.MAX_PRODUCTS),
                     history: this.state.activityHistory.slice(0, this.config.MAX_HISTORY),
                     lastUpdated: new Date().toISOString(),
-                    syncCount: (this.lastSyncCount || 0) + 1,
-                    checksum: this.generateChecksum()
-                });
+                    syncCount: (this.lastSyncCount || 0) + 1
+                };
 
                 return new Promise((resolve) => {
-                    this.state.gun.get('pi-trace-global-data').put(validatedData, (ack) => {
+                    this.state.gun.get('pi-trace-global-data').put(dataToSave, (ack) => {
                         if (ack.err) {
-                            console.warn('⚠️ Gun.js save error:', ack.err);
                             this.saveLocalData();
                             resolve(false);
                         } else {
-                            this.lastSyncCount = validatedData.syncCount;
-                            console.log('✅ Data saved to P2P network');
+                            this.lastSyncCount = dataToSave.syncCount;
                             resolve(true);
                         }
                     });
                 });
                 
             } catch (error) {
-                console.error('❌ Save error:', error);
                 this.saveLocalData();
                 return false;
             }
         }
 
-        // 🛡️ Data Validation
-        validateDataBeforeSave(data) {
-            // Clean products data
-            data.products = data.products.map(product => ({
-                id: product.id || `prod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                name: String(product.name || '').substring(0, 100),
-                category: product.category || 'other',
-                description: String(product.description || '').substring(0, 500),
-                quantity: Math.max(1, parseInt(product.quantity) || 1),
-                unit: product.unit || 'pcs',
-                price: Math.max(0, parseFloat(product.price) || 0),
-                originCountry: String(product.originCountry || '').substring(0, 50),
-                originCity: String(product.originCity || '').substring(0, 50),
-                hash: product.hash || this.generateShortHash(),
-                owner: String(product.owner || '').substring(0, 50),
-                ownerId: product.ownerId || 'unknown',
-                timestamp: product.timestamp || new Date().toISOString(),
-                dateDisplay: product.dateDisplay || new Date().toLocaleString('id-ID'),
-                status: product.status || 'active',
-                isDeleted: Boolean(product.isDeleted),
-                deletedBy: product.deletedBy,
-                deletedById: product.deletedById,
-                deletedAt: product.deletedAt,
-                deletedAtDisplay: product.deletedAtDisplay
-            }));
-
-            return data;
-        }
-
-        // 🛡️ Checksum for data integrity
-        generateChecksum() {
-            const dataString = JSON.stringify(this.state.products) + JSON.stringify(this.state.activityHistory);
-            let hash = 0;
-            for (let i = 0; i < dataString.length; i++) {
-                const char = dataString.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
-            }
-            return hash.toString(36);
-        }
-
-        // 🌐 Enhanced Offline Support
-        setupOfflineSupport() {
-            window.addEventListener('online', () => {
-                this.state.isOnline = true;
-                this.showStatus('Koneksi internet pulih', 'success');
-                this.syncData();
-            });
-
-            window.addEventListener('offline', () => {
-                this.state.isOnline = false;
-                this.showStatus('Anda sedang offline', 'warning');
-            });
-        }
-
-        // ⚡ Performance Optimized Data Loading
         async loadFromGun() {
             if (!this.state.gun) {
                 this.loadLocalData();
@@ -1431,43 +2199,482 @@
             
             try {
                 this.state.gun.get('pi-trace-global-data').on((data) => {
-                    if (data && this.validateIncomingData(data)) {
+                    if (data && data.products) {
                         this.mergeData(data);
                         this.state.lastSync = new Date();
                         this.saveLocalData();
                         this.updateUI();
                         
                         if (!this.initialLoad) {
-                            this.showStatus('Data berhasil disinkronisasi', 'success');
+                            this.showStatus('Data berhasil disinkronisasi dari jaringan P2P', 'success');
                             this.initialLoad = true;
                         }
                     }
                 });
                 
             } catch (error) {
-                console.error('❌ Load error:', error);
                 this.loadLocalData();
             }
         }
 
-        // 🛡️ Validate Incoming Data
-        validateIncomingData(data) {
-            if (!data || typeof data !== 'object') return false;
-            if (!Array.isArray(data.products)) return false;
-            if (data.products.length > this.config.MAX_PRODUCTS) return false;
+        mergeData(newData) {
+            if (!newData || !newData.products) return;
             
-            // Basic schema validation
-            const requiredFields = ['id', 'name', 'owner'];
-            return data.products.every(product => 
-                requiredFields.every(field => product[field])
+            const existingProducts = this.state.products;
+            const newProducts = newData.products || [];
+            
+            const existingMap = new Map();
+            existingProducts.forEach(p => existingMap.set(p.id, p));
+            
+            const mergedProducts = [];
+            const allIds = new Set([
+                ...existingProducts.map(p => p.id),
+                ...newProducts.map(p => p.id)
+            ]);
+            
+            allIds.forEach(id => {
+                const existing = existingMap.get(id);
+                const incoming = newProducts.find(p => p.id === id);
+                
+                if (!existing && incoming) {
+                    mergedProducts.push(incoming);
+                } else if (existing && !incoming) {
+                    mergedProducts.push(existing);
+                } else if (existing && incoming) {
+                    const existingTime = new Date(existing.timestamp || 0);
+                    const incomingTime = new Date(incoming.timestamp || 0);
+                    
+                    if (incomingTime > existingTime) {
+                        mergedProducts.push(incoming);
+                    } else {
+                        mergedProducts.push(existing);
+                    }
+                }
+            });
+            
+            mergedProducts.sort((a, b) => 
+                new Date(b.timestamp || 0) - new Date(a.timestamp || 0)
             );
+            
+            this.state.products = mergedProducts;
+            this.state.activityHistory = newData.history || this.state.activityHistory;
         }
 
-        // 🔍 Enhanced Search with Caching
+        // 🎯 PRODUCT MANAGEMENT
+        showProductModal() {
+            // Reset form
+            ['productName', 'productCategory', 'productDescription', 'productQuantity', 'productPrice', 'originCity'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.value = id === 'productQuantity' ? '1' : '';
+            });
+            
+            document.getElementById('originCountry').value = '';
+            document.getElementById('productUnit').value = 'pcs';
+            
+            this.updateProductPreview();
+            this.showModal('productModal');
+        }
+
+        updateProductPreview() {
+            const now = new Date();
+            const country = document.getElementById('originCountry').value;
+            const city = document.getElementById('originCity').value;
+            
+            document.getElementById('uploadDateDisplay').textContent = now.toLocaleString('id-ID');
+            document.getElementById('hashCodeDisplay').textContent = this.generateShortHash();
+            document.getElementById('ownerDisplay').textContent = this.state.currentUser?.username || 'Unknown';
+            
+            if (country && city) {
+                document.getElementById('originDisplay').textContent = `${city}, ${country}`;
+            } else if (country) {
+                document.getElementById('originDisplay').textContent = country;
+            } else if (city) {
+                document.getElementById('originDisplay').textContent = city;
+            } else {
+                document.getElementById('originDisplay').textContent = '-';
+            }
+        }
+
+        generateShortHash() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = 'TRC';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        async submitProduct() {
+            const productData = {
+                name: document.getElementById('productName').value,
+                category: document.getElementById('productCategory').value,
+                description: document.getElementById('productDescription').value,
+                quantity: parseInt(document.getElementById('productQuantity').value) || 1,
+                unit: document.getElementById('productUnit').value,
+                price: parseFloat(document.getElementById('productPrice').value) || 0,
+                originCountry: document.getElementById('originCountry').value,
+                originCity: document.getElementById('originCity').value,
+                id: 'prod_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                hash: document.getElementById('hashCodeDisplay').textContent,
+                owner: this.state.currentUser.username,
+                ownerId: this.state.currentUser.uid,
+                timestamp: new Date().toISOString(),
+                dateDisplay: new Date().toLocaleString('id-ID'),
+                status: 'active',
+                isDeleted: false
+            };
+
+            // Validation
+            if (!productData.name || !productData.category) {
+                this.showStatus('Harap isi nama produk dan kategori', 'error');
+                return;
+            }
+
+            if (!productData.originCountry || !productData.originCity) {
+                this.showStatus('Harap isi negara dan kota asal barang', 'error');
+                return;
+            }
+
+            try {
+                this.state.products.unshift(productData);
+                this.addActivity('Produk ditambahkan', productData.name, productData.id);
+                
+                const gunSuccess = await this.saveToGun();
+                
+                this.updateUI();
+                this.closeModal('productModal');
+                
+                if (gunSuccess) {
+                    this.showStatus('✅ Produk berhasil ditambahkan!', 'success');
+                } else {
+                    this.showStatus('✅ Produk berhasil ditambahkan! (Hanya tersimpan lokal sementara)', 'warning');
+                }
+                
+            } catch (error) {
+                this.showStatus('Error menyimpan produk: ' + error.message, 'error');
+            }
+        }
+
+        loadUserProducts() {
+            const productList = document.getElementById('productList');
+            const productCount = document.getElementById('productCount');
+            
+            if (!productList) return;
+
+            const activeProducts = this.state.products.filter(product => !product.isDeleted);
+
+            if (activeProducts.length === 0) {
+                productList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h3>Belum ada produk</h3>
+                        <p>Mulai dengan menambahkan produk pertama Anda</p>
+                        <button class="btn btn-primary" onclick="app.showProductModal()">
+                            Tambah Produk Pertama
+                        </button>
+                    </div>
+                `;
+            } else {
+                productList.innerHTML = activeProducts.map(product => {
+                    const isOwner = product.ownerId === this.state.currentUser.uid;
+                    const canDelete = isOwner;
+                    
+                    return `
+                    <div class="product-card" onclick="app.showProductDetail('${product.id}')">
+                        <div class="product-header">
+                            <div>
+                                <div class="product-name">${this.escapeHTML(product.name)}</div>
+                                <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${this.getUnitDisplay(product.unit)}</div>
+                                <div class="product-owner">Ditambahkan oleh: ${this.escapeHTML(product.owner)}</div>
+                            </div>
+                            <div class="product-actions">
+                                ${canDelete ? `
+                                <button class="btn btn-danger btn-small" 
+                                    onclick="event.stopPropagation(); app.confirmDelete('${product.id}')"
+                                    title="Hapus produk">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="product-details">
+                            <div class="product-info">
+                                <div class="info-item">
+                                    <span class="info-label">Kode Unik:</span>
+                                    <span class="info-value">${product.hash}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Asal:</span>
+                                    <span class="info-value">${this.escapeHTML(product.originCity)}, ${this.escapeHTML(product.originCountry)}</span>
+                                </div>
+                            </div>
+                            ${product.description ? `
+                                <div class="info-item">
+                                    <span class="info-label">Deskripsi:</span>
+                                    <span class="info-value">${this.escapeHTML(product.description)}</span>
+                                </div>
+                            ` : ''}
+                            ${product.price > 0 ? `
+                                <div class="info-item">
+                                    <span class="info-label">Harga:</span>
+                                    <span class="info-value" style="color: #4cc9a7;">${product.price} π</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            }
+            
+            if (productCount) {
+                productCount.textContent = `${activeProducts.length} produk`;
+            }
+        }
+
+        showProductDetail(productId) {
+            const product = this.state.products.find(p => p.id === productId);
+            if (!product) return;
+
+            this.state.currentProduct = product;
+            const isOwner = product.ownerId === this.state.currentUser.uid;
+            const isDeleted = product.isDeleted;
+            
+            const deleteBtn = document.getElementById('deleteProductDetailBtn');
+            if (isOwner && !isDeleted) {
+                deleteBtn.classList.remove('btn-disabled');
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Hapus Produk';
+            } else if (isDeleted) {
+                deleteBtn.classList.add('btn-disabled');
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="fas fa-ban"></i> Produk Dihapus';
+            } else {
+                deleteBtn.classList.add('btn-disabled');
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Hapus Produk';
+            }
+            
+            const detailBody = document.getElementById('productDetailBody');
+            const statusText = isDeleted ? 
+                `<span style="color: var(--error);">❌ DIHAPUS</span>` : 
+                `<span style="color: var(--success);">✅ AKTIF</span>`;
+                
+            const deletedInfo = isDeleted ? `
+                <div class="detail-value"><strong>Dihapus oleh:</strong> ${product.deletedBy || 'Unknown'}</div>
+                <div class="detail-value"><strong>Dihapus pada:</strong> ${product.deletedAtDisplay || product.dateDisplay}</div>
+            ` : '';
+            
+            detailBody.innerHTML = `
+                <div class="product-detail-header">
+                    <div class="product-detail-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="product-detail-title">
+                        <h2>${this.escapeHTML(product.name)} ${isDeleted ? '(Dihapus)' : ''}</h2>
+                        <div class="product-detail-category">${this.getCategoryDisplay(product.category)} • ${statusText}</div>
+                    </div>
+                </div>
+                
+                <div class="product-detail-info">
+                    <div class="detail-card">
+                        <h4>Informasi Produk</h4>
+                        <div class="detail-value"><strong>Kuantitas:</strong> ${product.quantity} ${this.getUnitDisplay(product.unit)}</div>
+                        <div class="detail-value"><strong>Kategori:</strong> ${this.getCategoryDisplay(product.category)}</div>
+                        <div class="detail-value"><strong>Status:</strong> ${statusText}</div>
+                        <div class="detail-value"><strong>Ditambahkan oleh:</strong> ${this.escapeHTML(product.owner)}</div>
+                        ${deletedInfo}
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h4>Asal Produk</h4>
+                        <div class="detail-value"><strong>Kota:</strong> ${this.escapeHTML(product.originCity)}</div>
+                        <div class="detail-value"><strong>Negara:</strong> ${this.escapeHTML(product.originCountry)}</div>
+                        <div class="detail-value"><strong>Tanggal Upload:</strong> ${product.dateDisplay}</div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h4>Kode Identifikasi</h4>
+                        <div class="detail-value"><strong>Kode Unik:</strong> ${product.hash}</div>
+                        <div class="detail-value"><strong>ID Produk:</strong> ${product.id}</div>
+                    </div>
+                    
+                    ${product.price > 0 ? `
+                    <div class="detail-card">
+                        <h4>Informasi Harga</h4>
+                        <div class="detail-value detail-price"><strong>Harga:</strong> ${product.price} π</div>
+                        <div class="detail-value"><strong>Mata Uang:</strong> Pi Coin</div>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                ${product.description ? `
+                <div class="product-description-card">
+                    <h4>Deskripsi Produk</h4>
+                    <div class="product-description-text">${this.escapeHTML(product.description)}</div>
+                </div>
+                ` : ''}
+            `;
+            
+            this.showModal('productDetailModal');
+        }
+
+        deleteCurrentProduct() {
+            if (this.state.currentProduct && 
+                this.state.currentProduct.ownerId === this.state.currentUser.uid && 
+                !this.state.currentProduct.isDeleted) {
+                this.closeModal('productDetailModal');
+                this.confirmDelete(this.state.currentProduct.id);
+            } else {
+                this.showStatus('Anda tidak memiliki izin untuk menghapus produk ini', 'error');
+            }
+        }
+
+        confirmDelete(productId) {
+            const product = this.state.products.find(p => p.id === productId);
+            if (!product) return;
+
+            this.state.currentProduct = product;
+            
+            document.getElementById('deleteProductName').textContent = product.name;
+            document.getElementById('deleteProductOwner').textContent = product.owner;
+            document.getElementById('deleteProductOrigin').textContent = `${product.originCity}, ${product.originCountry}`;
+            
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            confirmBtn.onclick = () => this.deleteProduct(productId);
+            
+            this.showModal('deleteConfirmModal');
+        }
+
+        async deleteProduct(productId) {
+            const productIndex = this.state.products.findIndex(p => p.id === productId);
+            if (productIndex !== -1) {
+                this.state.products[productIndex].isDeleted = true;
+                this.state.products[productIndex].deletedBy = this.state.currentUser.username;
+                this.state.products[productIndex].deletedById = this.state.currentUser.uid;
+                this.state.products[productIndex].deletedAt = new Date().toISOString();
+                this.state.products[productIndex].deletedAtDisplay = new Date().toLocaleString('id-ID');
+                
+                this.addActivity(
+                    'Produk dihapus', 
+                    this.state.products[productIndex].name, 
+                    productId,
+                    `Dihapus oleh: ${this.state.currentUser.username} | Asal: ${this.state.products[productIndex].originCity}, ${this.state.products[productIndex].originCountry} | Kode: ${this.state.products[productIndex].hash}`
+                );
+                
+                try {
+                    const gunSuccess = await this.saveToGun();
+                    
+                    this.updateUI();
+                    this.closeModal('deleteConfirmModal');
+                    
+                    if (gunSuccess) {
+                        this.showStatus('✅ Produk berhasil dihapus!', 'success');
+                    } else {
+                        this.showStatus('✅ Produk berhasil dihapus! (Hanya tersimpan lokal sementara)', 'warning');
+                    }
+                    
+                } catch (error) {
+                    this.showStatus('Error menghapus produk: ' + error.message, 'error');
+                }
+            }
+        }
+
+        getCategoryDisplay(category) {
+            const categories = {
+                'elektronik': 'Elektronik',
+                'makanan': 'Makanan & Minuman',
+                'pakaian': 'Pakaian',
+                'pertanian': 'Hasil Pertanian',
+                'perikanan': 'Hasil Perikanan',
+                'peternakan': 'Hasil Peternakan',
+                'kerajinan': 'Kerajinan Tangan',
+                'obat': 'Obat & Farmasi',
+                'kosmetik': 'Kosmetik',
+                'other': 'Lainnya'
+            };
+            return categories[category] || category;
+        }
+
+        getUnitDisplay(unit) {
+            const unitDisplay = {
+                'pcs': 'pcs', 
+                'kg': 'kg', 
+                'gram': 'g', 
+                'liter': 'L',
+                'unit': 'unit', 
+                'box': 'box',
+                'pack': 'pack',
+                'set': 'set'
+            };
+            return unitDisplay[unit] || unit;
+        }
+
+        escapeHTML(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // 🎯 ACTIVITY HISTORY
+        addActivity(action, productName, productId = null, additionalInfo = '') {
+            const activity = {
+                id: 'act_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                action: action,
+                productName: productName,
+                productId: productId,
+                user: this.state.currentUser.username,
+                userId: this.state.currentUser.uid,
+                additionalInfo: additionalInfo,
+                timestamp: new Date().toISOString(),
+                dateDisplay: new Date().toLocaleString('id-ID')
+            };
+            
+            this.state.activityHistory.unshift(activity);
+            
+            if (this.state.activityHistory.length > this.config.MAX_HISTORY) {
+                this.state.activityHistory = this.state.activityHistory.slice(0, this.config.MAX_HISTORY);
+            }
+        }
+
+        loadActivityHistory() {
+            const historyList = document.getElementById('historyList');
+            if (!historyList) return;
+
+            if (this.state.activityHistory.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h3>Belum ada riwayat</h3>
+                        <p>Aktivitas akan muncul di sini</p>
+                    </div>
+                `;
+            } else {
+                historyList.innerHTML = this.state.activityHistory.map(activity => `
+                    <div class="history-item">
+                        <div class="history-header">
+                            <span class="history-action">${this.getActivityDisplay(activity.action)}</span>
+                            <span class="history-date">${activity.dateDisplay}</span>
+                        </div>
+                        <div class="history-product">${this.escapeHTML(activity.productName)}</div>
+                        <div class="history-user">Oleh: ${this.escapeHTML(activity.user)} ${activity.additionalInfo ? `| ${activity.additionalInfo}` : ''}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        getActivityDisplay(action) {
+            const actions = {
+                'Produk ditambahkan': '📦 Produk Ditambahkan',
+                'Produk dihapus': '🗑️ Produk Dihapus'
+            };
+            return actions[action] || action;
+        }
+
+        // 🎯 SEARCH FUNCTIONALITY
         searchProducts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
             
-            // Check cache first
             const cacheKey = searchTerm || 'all';
             if (this.cache.searchResults.has(cacheKey)) {
                 this.displaySearchResults(this.cache.searchResults.get(cacheKey), searchTerm);
@@ -1486,10 +2693,8 @@
                 )
             );
 
-            // Cache results
             this.cache.searchResults.set(cacheKey, filteredProducts);
             
-            // Clear cache after 5 minutes
             setTimeout(() => {
                 this.cache.searchResults.delete(cacheKey);
             }, 300000);
@@ -1502,7 +2707,7 @@
             const productCount = document.getElementById('productCount');
             
             if (filteredProducts.length === 0) {
-                productList.innerHTML = this.getEmptyStateHTML(searchTerm);
+                productList.innerHTML = this.getEmptySearchStateHTML(searchTerm);
             } else {
                 productList.innerHTML = filteredProducts.map(product => 
                     this.generateProductCardHTML(product)
@@ -1514,9 +2719,13 @@
                     `${filteredProducts.length} hasil ditemukan` : 
                     `${filteredProducts.length} produk`;
             }
+            
+            if (searchTerm) {
+                this.showStatus(`Menampilkan ${filteredProducts.length} hasil untuk "${searchTerm}"`, 'info');
+            }
         }
 
-        getEmptyStateHTML(searchTerm) {
+        getEmptySearchStateHTML(searchTerm) {
             if (searchTerm) {
                 return `
                     <div class="empty-state">
@@ -1529,86 +2738,129 @@
                     </div>
                 `;
             } else {
-                return `
-                    <div class="empty-state">
-                        <i class="fas fa-box-open"></i>
-                        <h3>Belum ada produk</h3>
-                        <p>Mulai dengan menambahkan produk pertama Anda</p>
-                        <button class="btn btn-primary" onclick="app.showProductModal()">
-                            Tambah Produk Pertama
-                        </button>
-                    </div>
-                `;
+                return this.getEmptyStateHTML();
             }
         }
 
-        generateProductCardHTML(product) {
-            const isOwner = product.ownerId === this.state.currentUser?.uid;
-            
-            return `
-            <div class="product-card" onclick="app.showProductDetail('${product.id}')">
-                <div class="product-header">
-                    <div>
-                        <div class="product-name">${this.escapeHTML(product.name)}</div>
-                        <div class="product-meta">${this.getCategoryDisplay(product.category)} • ${product.quantity} ${this.getUnitDisplay(product.unit)}</div>
-                        <div class="product-owner">Ditambahkan oleh: ${this.escapeHTML(product.owner)}</div>
-                    </div>
-                    <div class="product-actions">
-                        ${isOwner ? `
-                        <button class="btn btn-danger btn-small" 
-                            onclick="event.stopPropagation(); app.confirmDelete('${product.id}')"
-                            title="Hapus produk">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        ` : ''}
-                    </div>
-                </div>
-                <div class="product-details">
-                    <div class="product-info">
-                        <div class="info-item">
-                            <span class="info-label">Kode Unik:</span>
-                            <span class="info-value">${product.hash}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Asal:</span>
-                            <span class="info-value">${this.escapeHTML(product.originCity)}, ${this.escapeHTML(product.originCountry)}</span>
-                        </div>
-                    </div>
-                    ${product.price > 0 ? `
-                        <div class="info-item">
-                            <span class="info-label">Harga:</span>
-                            <span class="info-value" style="color: #4cc9a7;">${product.price} π</span>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-            `;
+        // 🎯 OTHER FEATURES
+        openQRScanner() {
+            this.showModal('qrScannerModal');
         }
 
-        // 🛡️ HTML Escape to prevent XSS
-        escapeHTML(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        // 🔄 Enhanced Sync with Retry Logic
-        async syncData() {
-            if (!this.state.isOnline) return;
+        processManualQR() {
+            const qrCode = document.getElementById('manualQRInput').value;
+            if (!qrCode) {
+                this.showStatus('Harap masukkan kode QR', 'error');
+                return;
+            }
             
-            try {
-                const success = await this.saveToGun();
-                if (success) {
-                    this.showStatus('Data tersinkronisasi dengan jaringan P2P', 'success');
+            this.showStatus(`Melacak produk dengan kode: ${qrCode}`);
+            
+            setTimeout(() => {
+                const matchedProduct = this.state.products.find(product => 
+                    product.hash === qrCode || product.id === qrCode
+                );
+                
+                if (matchedProduct) {
+                    this.closeModal('qrScannerModal');
+                    this.showProductDetail(matchedProduct.id);
+                    this.showStatus('Produk ditemukan!', 'success');
+                } else {
+                    this.showStatus('Produk tidak ditemukan. Pastikan kode QR benar.', 'warning');
                 }
+            }, 1000);
+        }
+
+        openSupplyChain() {
+            this.updateStats();
+            this.showModal('supplyChainModal');
+        }
+
+        updateStats() {
+            const activeProducts = this.state.products.filter(p => !p.isDeleted).length;
+            const deletedProducts = this.state.products.filter(p => p.isDeleted).length;
+            
+            document.getElementById('totalProductsStat').textContent = this.state.products.length;
+            document.getElementById('activeProductsStat').textContent = activeProducts;
+            document.getElementById('transitProductsStat').textContent = deletedProducts;
+        }
+
+        async createPayment() {
+            if (this.state.isGuest) {
+                this.showStatus('Login dengan Pi Wallet untuk menggunakan fitur pembayaran', 'warning');
+                return;
+            }
+
+            try {
+                const sdkReady = await this.initializePiSDK();
+                if (!sdkReady) {
+                    this.showStatus('Pi SDK tidak tersedia untuk pembayaran', 'error');
+                    return;
+                }
+
+                const payment = await window.Pi.createPayment({
+                    amount: 3.14,
+                    memo: 'PI TRACE - Fitur Premium'
+                });
+                
+                this.showStatus('Pembayaran dimulai! Periksa Pi Wallet.');
+                
             } catch (error) {
-                console.warn('Sync failed, will retry...');
-                // Automatic retry after 30 seconds
-                setTimeout(() => this.syncData(), 30000);
+                this.showStatus('Pembayaran gagal: ' + error.message, 'error');
             }
         }
 
-        // 🎯 Enhanced UI Updates with Debouncing
+        manualSync() {
+            this.showStatus('Menyinkronisasi data...', 'info');
+            this.syncData().then(success => {
+                if (success) {
+                    this.showStatus('Data berhasil disinkronisasi', 'success');
+                } else {
+                    this.showStatus('Gagal menyinkronisasi data', 'error');
+                }
+            });
+        }
+
+        // 🎯 UI MANAGEMENT
+        showLoading(message = 'Memproses...', subMessage = 'Harap tunggu') {
+            document.getElementById('loadingMessage').textContent = message;
+            document.getElementById('loadingSubMessage').textContent = subMessage;
+            
+            document.getElementById('login-section').classList.replace('section-active', 'section-hidden');
+            document.getElementById('loading-section').classList.replace('section-hidden', 'section-active');
+        }
+
+        hideLoading() {
+            document.getElementById('loading-section').classList.replace('section-active', 'section-hidden');
+        }
+
+        updateLoading(message, subMessage) {
+            document.getElementById('loadingMessage').textContent = message;
+            document.getElementById('loadingSubMessage').textContent = subMessage;
+        }
+
+        showMainApp(username, loginType) {
+            document.getElementById('username').textContent = username;
+            document.getElementById('login-type').textContent = `Login dengan ${loginType}`;
+            
+            document.getElementById('login-section').classList.replace('section-active', 'section-hidden');
+            document.getElementById('app-section').classList.replace('section-hidden', 'section-active');
+        }
+
+        logout() {
+            this.stopRealTimeSync();
+            this.state.currentUser = null;
+            this.state.isGuest = false;
+            this.isLoggingIn = false;
+            this.state.loginAttempts = 0;
+            
+            document.getElementById('app-section').classList.replace('section-active', 'section-hidden');
+            document.getElementById('login-section').classList.replace('section-hidden', 'section-active');
+            
+            this.showStatus('Berhasil keluar', 'info');
+            this.updateSystemStatus('Siap untuk login');
+        }
+
         updateUI() {
             this.debounce(() => {
                 this.loadUserProducts();
@@ -1629,58 +2881,119 @@
             };
         }
 
-        // 🚀 Rest of the enhanced methods...
-        // [Previous methods like login, product management, etc. with enhancements]
-        
-        enableAllButtons() {
-            document.querySelectorAll('button').forEach(button => {
-                button.disabled = false;
-                button.classList.remove('btn-disabled');
+        // 🎯 MODAL MANAGEMENT
+        showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // 🎯 EVENT LISTENERS & UTILITIES
+        setupEventListeners() {
+            document.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    if (document.getElementById('login-section').classList.contains('section-active')) {
+                        if (this.state.isPiBrowser) {
+                            this.loginWithPi();
+                        } else {
+                            this.guestLogin();
+                        }
+                    } else if (e.target.id === 'searchInput') {
+                        this.searchProducts();
+                    }
+                }
+            });
+
+            document.addEventListener('input', (e) => {
+                if (e.target.id === 'searchInput' && e.target.value === '') {
+                    this.updateUI();
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    this.closeModal(e.target.id);
+                }
+            });
+
+            document.querySelectorAll('.close-modal').forEach(closeBtn => {
+                closeBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const modal = this.closest('.modal');
+                    if (modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+
+            // Touch improvements
+            document.addEventListener('touchstart', function() {}, { passive: true });
+        }
+
+        setupOfflineSupport() {
+            window.addEventListener('online', () => {
+                this.state.isOnline = true;
+                this.showStatus('Koneksi internet pulih', 'success');
+                this.syncData();
+            });
+
+            window.addEventListener('offline', () => {
+                this.state.isOnline = false;
+                this.showStatus('Anda sedang offline', 'warning');
             });
         }
 
-        detectPiBrowser() {
-            this.state.isPiBrowser = /PiBrowser/i.test(navigator.userAgent) || 
-                                   navigator.userAgent.includes('Pi') ||
-                                   (typeof window.Pi !== 'undefined');
+        handleSearchEnter(event) {
+            if (event.key === 'Enter') {
+                this.searchProducts();
+            }
+        }
+
+        handleSearchInput(event) {
+            const searchTerm = event.target.value;
             
-            if (!this.state.isPiBrowser) {
-                const piLoginBtn = document.getElementById('piLoginBtn');
-                if (piLoginBtn) {
-                    piLoginBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Hanya di Pi Browser';
-                    piLoginBtn.classList.add('btn-disabled');
-                    piLoginBtn.disabled = true;
-                }
+            if (searchTerm === '') {
+                this.updateUI();
+            } else {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    this.searchProducts();
+                }, 300);
             }
         }
 
-        updatePeerCount(count) {
-            this.state.peerCount = count;
-            const element = document.getElementById('peerCountNumber');
-            if (element) element.textContent = count;
-        }
-
-        updateNetworkStatus(connected) {
-            this.state.networkConnected = connected;
-            const element = document.getElementById('networkStatus');
-            if (element) {
-                element.style.display = connected ? 'flex' : 'none';
+        // 🎯 STATUS MESSAGES
+        showStatus(message, type = 'info') {
+            const statusContainer = document.getElementById('statusContainer');
+            if (!statusContainer) {
+                const container = document.createElement('div');
+                container.id = 'statusContainer';
+                container.className = 'status-container';
+                document.body.appendChild(container);
             }
-        }
-
-        showStatus(message, type = 'success') {
-            const container = document.getElementById('statusContainer');
-            if (!container) return;
-
-            const status = document.createElement('div');
-            status.className = `status ${type}`;
-            status.innerHTML = `
+            
+            const statusEl = document.createElement('div');
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = `
                 <i class="fas fa-${this.getStatusIcon(type)}"></i>
                 <span>${message}</span>
             `;
-
-            container.appendChild(status);
-            setTimeout(() => status.remove(), 4000);
+            
+            document.getElementById('statusContainer').appendChild(statusEl);
+            
+            setTimeout(() => {
+                if (statusEl.parentNode) {
+                    statusEl.remove();
+                }
+            }, 4000);
         }
 
         getStatusIcon(type) {
@@ -1692,38 +3005,56 @@
             };
             return icons[type] || 'info-circle';
         }
-
-        // ... Continue with other enhanced methods
     }
 
-    // Initialize the enhanced app
+    // 🎯 INITIALIZE APPLICATION
     let app;
-    document.addEventListener('DOMContentLoaded', function() {
-        app = new EnhancedPiTraceApp();
-        
-        // Global functions
-        window.loginWithPi = () => app?.loginWithPi?.();
-        window.guestLogin = () => app?.guestLogin?.();
-        window.logout = () => app?.logout?.();
-        window.showProductModal = () => app?.showProductModal?.();
-        window.submitProduct = () => app?.submitProduct?.();
-        window.openQRScanner = () => app?.openQRScanner?.();
-        window.processManualQR = () => app?.processManualQR?.();
-        window.openSupplyChain = () => app?.openSupplyChain?.();
-        window.searchProducts = () => app?.searchProducts?.();
-        window.handleSearchEnter = (e) => app?.handleSearchEnter?.(e);
-        window.handleSearchInput = (e) => app?.handleSearchInput?.(e);
-        window.createPayment = () => app?.createPayment?.();
-        window.closeModal = (id) => app?.closeModal?.(id);
-        window.updateProductPreview = () => app?.updateProductPreview?.();
-        window.deleteCurrentProduct = () => app?.deleteCurrentProduct?.();
-        window.manualSync = () => app?.manualSync?.();
-    });
 
-    // Service Worker for PWA capabilities (optional)
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(console.error);
+    function initApp() {
+        try {
+            app = new CompletePiTraceApp();
+            console.log('✅ PI TRACE App initialized successfully');
+            
+            // Global functions
+            window.loginWithPi = () => app.loginWithPi();
+            window.guestLogin = () => app.guestLogin();
+            window.logout = () => app.logout();
+            window.showProductModal = () => app.showProductModal();
+            window.submitProduct = () => app.submitProduct();
+            window.openQRScanner = () => app.openQRScanner();
+            window.processManualQR = () => app.processManualQR();
+            window.openSupplyChain = () => app.openSupplyChain();
+            window.searchProducts = () => app.searchProducts();
+            window.handleSearchEnter = (e) => app.handleSearchEnter(e);
+            window.handleSearchInput = (e) => app.handleSearchInput(e);
+            window.createPayment = () => app.createPayment();
+            window.closeModal = (id) => app.closeModal(id);
+            window.updateProductPreview = () => app.updateProductPreview();
+            window.deleteCurrentProduct = () => app.deleteCurrentProduct();
+            window.manualSync = () => app.manualSync();
+            
+        } catch (error) {
+            console.error('💥 App initialization failed:', error);
+            document.getElementById('systemStatus').textContent = 'Error inisialisasi aplikasi';
+        }
     }
+
+    // Start app
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+        initApp();
+    }
+
+    // Fallback
+    setTimeout(() => {
+        if (!app) {
+            console.warn('⚠️ App not initialized, enabling fallback...');
+            window.guestLogin = () => {
+                alert('Fallback guest login - app masih loading...');
+            };
+        }
+    }, 5000);
     </script>
 </body>
 </html>
