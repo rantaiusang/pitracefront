@@ -1559,12 +1559,6 @@
                         <i class="fab fa-google"></i>
                         <span id="googleLoginText">Login dengan Google</span>
                     </button>
-                    
-                    <!-- Guest Login Button -->
-                    <button class="btn btn-secondary btn-large" onclick="loginAsGuest()" id="guestLoginBtn">
-                        <i class="fas fa-user"></i>
-                        <span>Masuk sebagai Tamu</span>
-                    </button>
                 </div>
 
                 <!-- Debug Info -->
@@ -1981,10 +1975,20 @@
     <!-- Status Container -->
     <div id="statusContainer" class="status-container"></div>
 
-    <!-- COMPLETE JAVASCRIPT - FIXED LOGIN & FULLY FUNCTIONAL -->
+    <!-- Google Sign In Button Container -->
+    <div id="g_id_onload"
+         data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+         data-context="signin"
+         data-ux_mode="popup"
+         data-callback="handleGoogleSignIn"
+         data-auto_prompt="false"
+         style="display: none;">
+    </div>
+
+    <!-- COMPLETE JAVASCRIPT - FIXED GOOGLE LOGIN WITH POPUP -->
     <script>
     // =============================================
-    // COMPLETE PI TRACE APPLICATION - FIXED LOGIN
+    // COMPLETE PI TRACE APPLICATION - FIXED GOOGLE LOGIN
     // =============================================
     class CompletePiTraceApp {
         constructor() {
@@ -2118,7 +2122,7 @@
         }
 
         // =============================================
-        // 🎯 GOOGLE LOGIN IMPLEMENTATION - SIMPLIFIED
+        // 🎯 GOOGLE LOGIN IMPLEMENTATION - REAL POPUP
         // =============================================
 
         async loginWithGoogle() {
@@ -2138,11 +2142,8 @@
             try {
                 this.showLoading('Menginisialisasi...', 'Memuat Google Sign-In...');
 
-                // Simplified Google login - using mock for demo
-                // In production, you would implement proper Google OAuth
-                const user = await this.mockGoogleLogin();
-                
-                this.handleLoginSuccess(user, 'Google');
+                // Use Google Identity Services for authentication
+                await this.initializeGoogleSignIn();
                 
             } catch (error) {
                 console.error('❌ Google login failed:', error);
@@ -2154,20 +2155,107 @@
             }
         }
 
-        async mockGoogleLogin() {
-            // Mock Google login for demo purposes
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    const mockUser = {
-                        username: 'Google User',
-                        email: 'user@gmail.com',
-                        uid: `google_${Date.now()}`,
-                        loginMethod: 'Google',
-                        isVerified: true
-                    };
-                    resolve(mockUser);
-                }, 1500);
+        initializeGoogleSignIn() {
+            return new Promise((resolve, reject) => {
+                // Check if Google Identity Services is loaded
+                if (typeof google === 'undefined') {
+                    reject(new Error('Google Identity Services tidak terload'));
+                    return;
+                }
+
+                try {
+                    // Initialize Google Sign-In
+                    google.accounts.id.initialize({
+                        client_id: '1041464961347-4sqop3h6e7s4s6m9n2n2n2n2n2n2n2n.apps.googleusercontent.com', // Replace with your actual client ID
+                        callback: this.handleGoogleSignIn.bind(this),
+                        auto_select: false,
+                        cancel_on_tap_outside: true,
+                        context: 'signin',
+                        ux_mode: 'popup'
+                    });
+
+                    // Show the Google Sign-In prompt
+                    google.accounts.id.prompt((notification) => {
+                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                            // Fallback: render the button
+                            this.renderGoogleSignInButton();
+                        }
+                    });
+
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
             });
+        }
+
+        renderGoogleSignInButton() {
+            // Create a container for the Google button
+            const container = document.createElement('div');
+            container.id = 'googleSignInContainer';
+            container.style.display = 'none'; // Hidden, we'll trigger programmatically
+            
+            // Render the Google button
+            google.accounts.id.renderButton(container, {
+                theme: 'outline',
+                size: 'large',
+                text: 'signin_with',
+                shape: 'rectangular',
+                logo_alignment: 'left',
+                width: '400'
+            });
+
+            document.body.appendChild(container);
+            
+            // Programmatically click the Google button
+            const googleButton = container.querySelector('div[role="button"]');
+            if (googleButton) {
+                googleButton.click();
+            } else {
+                // Fallback: direct prompt
+                google.accounts.id.prompt();
+            }
+        }
+
+        handleGoogleSignIn(response) {
+            console.log('🔐 Google Sign-In response:', response);
+            
+            try {
+                // Decode the JWT credential
+                const responsePayload = this.decodeJWTResponse(response.credential);
+                
+                console.log('✅ Google user info:', responsePayload);
+                
+                const user = {
+                    username: responsePayload.name,
+                    email: responsePayload.email,
+                    picture: responsePayload.picture,
+                    uid: `google_${responsePayload.sub}`,
+                    loginMethod: 'Google',
+                    isVerified: responsePayload.email_verified
+                };
+                
+                // Check if user is super admin
+                const isSuperAdmin = responsePayload.email === this.config.SUPER_ADMIN_EMAIL;
+                
+                this.handleLoginSuccess(user, 'Google', isSuperAdmin);
+                
+            } catch (error) {
+                console.error('❌ Error processing Google Sign-In:', error);
+                this.handleGoogleAuthError(error);
+            }
+        }
+
+        decodeJWTResponse(credential) {
+            // Simple JWT decoding (in production, use a proper JWT library)
+            const parts = credential.split('.');
+            if (parts.length !== 3) {
+                throw new Error('Invalid JWT format');
+            }
+            
+            const payload = parts[1];
+            const decodedPayload = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+            return JSON.parse(decodedPayload);
         }
 
         handleGoogleAuthError(error) {
@@ -2175,64 +2263,16 @@
             
             let errorMessage = 'Login Google gagal';
             
-            if (error.message) {
+            if (error.type === 'popup_closed') {
+                errorMessage = 'Popup login ditutup oleh pengguna';
+            } else if (error.type === 'access_denied') {
+                errorMessage = 'Akses ditolak oleh pengguna';
+            } else if (error.message) {
                 errorMessage = `Error: ${error.message}`;
             }
             
             this.hideLoading();
             this.showStatus(errorMessage, 'error');
-        }
-
-        // =============================================
-        // 🎯 GUEST LOGIN IMPLEMENTATION
-        // =============================================
-
-        async loginAsGuest() {
-            if (this.state.isLoggingIn) {
-                this.showStatus('Login sedang diproses...', 'warning');
-                return;
-            }
-
-            this.state.isLoggingIn = true;
-            
-            const guestBtn = document.getElementById('guestLoginBtn');
-            const guestText = guestBtn.querySelector('span');
-            
-            guestBtn.classList.add('btn-loading');
-            guestText.textContent = 'Masuk sebagai Tamu...';
-
-            try {
-                this.showLoading('Menginisialisasi...', 'Membuat sesi tamu...');
-
-                // Create guest user
-                const guestUser = {
-                    username: `Guest_${Math.floor(Math.random() * 10000)}`,
-                    email: null,
-                    uid: `guest_${Date.now()}`,
-                    loginMethod: 'Guest',
-                    isVerified: false
-                };
-                
-                this.state.currentUser = guestUser;
-                this.state.isGuest = true;
-                this.state.isSuperAdmin = false;
-                
-                this.hideLoading();
-                this.showMainApp(guestUser.username, 'Guest', false);
-                this.showStatus(`Selamat datang ${guestUser.username}! (Mode Tamu)`, 'success');
-                this.updateSystemStatus(`User: ${guestUser.username} - Guest Mode`);
-                
-                this.state.loginAttempts = 0;
-                this.initializeAppFeatures();
-                
-            } catch (error) {
-                console.error('❌ Guest login failed:', error);
-                this.showStatus('Login tamu gagal', 'error');
-            } finally {
-                this.state.isLoggingIn = false;
-                guestBtn.classList.remove('btn-loading');
-                guestText.textContent = 'Masuk sebagai Tamu';
-            }
         }
 
         // =============================================
@@ -3347,7 +3387,6 @@
             // Global functions
             window.loginWithPi = () => app.loginWithPi();
             window.loginWithGoogle = () => app.loginWithGoogle();
-            window.loginAsGuest = () => app.loginAsGuest();
             window.logout = () => app.logout();
             window.showProductModal = () => app.showProductModal();
             window.submitProduct = () => app.submitProduct();
@@ -3365,6 +3404,7 @@
             window.manualSync = () => app.manualSync();
             window.backupToIPFS = () => app.backupToIPFS();
             window.restoreFromIPFS = () => app.restoreFromIPFS();
+            window.handleGoogleSignIn = (response) => app.handleGoogleSignIn(response);
             
         } catch (error) {
             console.error('💥 App initialization failed:', error);
