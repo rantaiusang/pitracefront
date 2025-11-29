@@ -1559,6 +1559,17 @@
                         <i class="fab fa-google"></i>
                         <span id="googleLoginText">Login dengan Google</span>
                     </button>
+                    
+                    <!-- Google Sign In Button Container -->
+                    <div id="g_id_onload"
+                         data-client_id="333544836010-ccla4294qkmc21mvns7m3lmnl27l20ok.apps.googleusercontent.com"
+                         data-context="signin"
+                         data-ux_mode="popup"
+                         data-callback="handleGoogleSignIn"
+                         data-auto_prompt="false">
+                    </div>
+                    
+                    <div id="g_id_container" class="g_id_container" style="display: none;"></div>
                 </div>
 
                 <!-- Debug Info -->
@@ -1567,6 +1578,7 @@
                     <div><strong>Pi Browser:</strong> <span id="piBrowserStatus">Mengecek...</span></div>
                     <div><strong>Pi SDK:</strong> <span id="piSDKStatus">Mengecek...</span></div>
                     <div><strong>IPFS:</strong> <span id="ipfsStatus">Mengecek...</span></div>
+                    <div><strong>Google Auth:</strong> <span id="googleAuthStatus">Mengecek...</span></div>
                 </div>
             </div>
         </div>
@@ -1975,17 +1987,7 @@
     <!-- Status Container -->
     <div id="statusContainer" class="status-container"></div>
 
-    <!-- Google Sign In Button Container -->
-    <div id="g_id_onload"
-         data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
-         data-context="signin"
-         data-ux_mode="popup"
-         data-callback="handleGoogleSignIn"
-         data-auto_prompt="false"
-         style="display: none;">
-    </div>
-
-    <!-- COMPLETE JAVASCRIPT - FIXED GOOGLE LOGIN WITH POPUP -->
+    <!-- COMPLETE JAVASCRIPT - FIXED GOOGLE LOGIN -->
     <script>
     // =============================================
     // COMPLETE PI TRACE APPLICATION - FIXED GOOGLE LOGIN
@@ -1995,9 +1997,7 @@
             this.config = {
                 DEBUG: true,
                 SYNC_INTERVAL: 8000,
-                / 🔧 GANTI DI SINI - Baris 1027
-            GOOGLE_CLIENT_ID: '333544836010-ccla4294qkmc21mvns7m3lmnl27l20ok.apps.googleusercontent.com',
-                
+                GOOGLE_CLIENT_ID: '333544836010-ccla4294qkmc21mvns7m3lmnl27l20ok.apps.googleusercontent.com',
                 GUN_PEERS: [
                     'https://gun-manhattan.herokuapp.com/gun',
                     'https://mvp-gun.herokuapp.com/gun', 
@@ -2038,7 +2038,8 @@
                 ipfsBackups: [],
                 lastBackupCID: null,
                 // Login state
-                isLoggingIn: false
+                isLoggingIn: false,
+                googleAuthLoaded: false
             };
             
             this.cache = {
@@ -2059,6 +2060,9 @@
             this.setupEventListeners();
             this.setupOfflineSupport();
             this.loadLocalData();
+            
+            // Initialize Google Auth
+            this.initializeGoogleAuth();
             
             // Initialize IPFS in background (non-blocking)
             this.initializeIPFSWithFallback();
@@ -2125,8 +2129,36 @@
         }
 
         // =============================================
-        // 🎯 GOOGLE LOGIN IMPLEMENTATION - REAL POPUP
+        // 🎯 GOOGLE LOGIN IMPLEMENTATION - FIXED
         // =============================================
+
+        initializeGoogleAuth() {
+            // Check if Google Identity Services is loaded
+            const checkGoogle = () => {
+                if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+                    console.log('✅ Google Identity Services loaded');
+                    this.state.googleAuthLoaded = true;
+                    document.getElementById('googleAuthStatus').textContent = 'Tersedia';
+                    
+                    // Initialize Google Sign-In
+                    google.accounts.id.initialize({
+                        client_id: this.config.GOOGLE_CLIENT_ID,
+                        callback: this.handleGoogleSignIn.bind(this),
+                        auto_select: false,
+                        cancel_on_tap_outside: true,
+                        context: 'signin',
+                        ux_mode: 'popup'
+                    });
+                    
+                    console.log('✅ Google Sign-In initialized');
+                } else {
+                    console.log('⏳ Waiting for Google Identity Services...');
+                    setTimeout(checkGoogle, 500);
+                }
+            };
+            
+            checkGoogle();
+        }
 
         async loginWithGoogle() {
             if (this.state.isLoggingIn) {
@@ -2145,83 +2177,86 @@
             try {
                 this.showLoading('Menginisialisasi...', 'Memuat Google Sign-In...');
 
-                // Use Google Identity Services for authentication
-                await this.initializeGoogleSignIn();
+                // Wait for Google Auth to be ready
+                if (!this.state.googleAuthLoaded) {
+                    await this.waitForGoogleAuth();
+                }
+
+                // Trigger Google Sign-In
+                this.triggerGoogleSignIn();
                 
             } catch (error) {
                 console.error('❌ Google login failed:', error);
                 this.handleGoogleAuthError(error);
-            } finally {
                 this.state.isLoggingIn = false;
                 googleBtn.classList.remove('btn-loading');
                 googleText.innerHTML = '<i class="fab fa-google"></i> Login dengan Google';
             }
         }
 
-        initializeGoogleSignIn() {
+        waitForGoogleAuth() {
             return new Promise((resolve, reject) => {
-                // Check if Google Identity Services is loaded
-                if (typeof google === 'undefined') {
-                    reject(new Error('Google Identity Services tidak terload'));
-                    return;
-                }
-
-                try {
-                    // Initialize Google Sign-In
-                    google.accounts.id.initialize({
-                        client_id: '333544836010-ccla4294qkmc21mvns7m3lmnl27l20ok.apps.googleusercontent.com', // Replace with your actual client ID
-                        callback: this.handleGoogleSignIn.bind(this),
-                        auto_select: false,
-                        cancel_on_tap_outside: true,
-                        context: 'signin',
-                        ux_mode: 'popup'
-                    });
-
-                    // Show the Google Sign-In prompt
-                    google.accounts.id.prompt((notification) => {
-                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                            // Fallback: render the button
-                            this.renderGoogleSignInButton();
-                        }
-                    });
-
-                    resolve();
-                } catch (error) {
-                    reject(error);
-                }
+                let attempts = 0;
+                const checkAuth = () => {
+                    attempts++;
+                    if (this.state.googleAuthLoaded) {
+                        resolve(true);
+                    } else if (attempts >= 10) {
+                        reject(new Error('Google Authentication tidak dapat dimuat'));
+                    } else {
+                        setTimeout(checkAuth, 500);
+                    }
+                };
+                checkAuth();
             });
         }
 
-        renderGoogleSignInButton() {
-            // Create a container for the Google button
-            const container = document.createElement('div');
-            container.id = 'googleSignInContainer';
-            container.style.display = 'none'; // Hidden, we'll trigger programmatically
-            
-            // Render the Google button
-            google.accounts.id.renderButton(container, {
-                theme: 'outline',
-                size: 'large',
-                text: 'signin_with',
-                shape: 'rectangular',
-                logo_alignment: 'left',
-                width: '400'
-            });
+        triggerGoogleSignIn() {
+            try {
+                // Use Google's prompt method
+                google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed()) {
+                        // If prompt is not displayed, show the button
+                        this.renderGoogleButton();
+                    } else if (notification.isSkippedMoment()) {
+                        // If skipped, show the button
+                        this.renderGoogleButton();
+                    } else if (notification.isDismissedMoment()) {
+                        // If dismissed, show the button
+                        this.renderGoogleButton();
+                    }
+                });
+            } catch (error) {
+                console.error('Error triggering Google Sign-In:', error);
+                this.renderGoogleButton();
+            }
+        }
 
-            document.body.appendChild(container);
-            
-            // Programmatically click the Google button
-            const googleButton = container.querySelector('div[role="button"]');
-            if (googleButton) {
-                googleButton.click();
-            } else {
-                // Fallback: direct prompt
-                google.accounts.id.prompt();
+        renderGoogleButton() {
+            const container = document.getElementById('g_id_container');
+            if (container) {
+                container.style.display = 'block';
+                google.accounts.id.renderButton(container, {
+                    theme: 'filled_blue',
+                    size: 'large',
+                    text: 'signin_with',
+                    shape: 'rectangular',
+                    logo_alignment: 'left',
+                    width: '400'
+                });
+                
+                // Programmatically click the button
+                setTimeout(() => {
+                    const googleButton = container.querySelector('div[role="button"]');
+                    if (googleButton) {
+                        googleButton.click();
+                    }
+                }, 100);
             }
         }
 
         handleGoogleSignIn(response) {
-            console.log('🔐 Google Sign-In response:', response);
+            console.log('🔐 Google Sign-In response received');
             
             try {
                 // Decode the JWT credential
@@ -2230,7 +2265,7 @@
                 console.log('✅ Google user info:', responsePayload);
                 
                 const user = {
-                    username: responsePayload.name,
+                    username: responsePayload.name || responsePayload.email.split('@')[0],
                     email: responsePayload.email,
                     picture: responsePayload.picture,
                     uid: `google_${responsePayload.sub}`,
@@ -2250,15 +2285,26 @@
         }
 
         decodeJWTResponse(credential) {
-            // Simple JWT decoding (in production, use a proper JWT library)
-            const parts = credential.split('.');
-            if (parts.length !== 3) {
-                throw new Error('Invalid JWT format');
+            // Simple JWT decoding
+            try {
+                const parts = credential.split('.');
+                if (parts.length !== 3) {
+                    throw new Error('Invalid JWT format');
+                }
+                
+                const payload = parts[1];
+                // Add padding if necessary
+                let base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+                while (base64.length % 4) {
+                    base64 += '=';
+                }
+                
+                const decodedPayload = atob(base64);
+                return JSON.parse(decodedPayload);
+            } catch (error) {
+                console.error('JWT decoding error:', error);
+                throw new Error('Failed to decode JWT: ' + error.message);
             }
-            
-            const payload = parts[1];
-            const decodedPayload = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-            return JSON.parse(decodedPayload);
         }
 
         handleGoogleAuthError(error) {
@@ -2266,9 +2312,9 @@
             
             let errorMessage = 'Login Google gagal';
             
-            if (error.type === 'popup_closed') {
+            if (error.message.includes('popup')) {
                 errorMessage = 'Popup login ditutup oleh pengguna';
-            } else if (error.type === 'access_denied') {
+            } else if (error.message.includes('ditolak')) {
                 errorMessage = 'Akses ditolak oleh pengguna';
             } else if (error.message) {
                 errorMessage = `Error: ${error.message}`;
@@ -2276,6 +2322,13 @@
             
             this.hideLoading();
             this.showStatus(errorMessage, 'error');
+            
+            // Reset login state
+            this.state.isLoggingIn = false;
+            const googleBtn = document.getElementById('googleLoginBtn');
+            const googleText = document.getElementById('googleLoginText');
+            googleBtn.classList.remove('btn-loading');
+            googleText.innerHTML = '<i class="fab fa-google"></i> Login dengan Google';
         }
 
         // =============================================
