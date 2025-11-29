@@ -11,9 +11,6 @@
     <!-- Pi SDK -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
     <!-- Gun.js untuk P2P Sync -->
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
@@ -1559,17 +1556,12 @@
                         <i class="fab fa-google"></i>
                         <span id="googleLoginText">Login dengan Google</span>
                     </button>
-                    
-                    <!-- Google Sign In Button Container -->
-                    <div id="g_id_onload"
-                         data-client_id="333544836010-ccla4294qkmc21mvns7m3lmnl27l20ok.apps.googleusercontent.com"
-                         data-context="signin"
-                         data-ux_mode="popup"
-                         data-callback="handleGoogleSignIn"
-                         data-auto_prompt="false">
-                    </div>
-                    
-                    <div id="g_id_container" class="g_id_container" style="display: none;"></div>
+
+                    <!-- Demo Login Button -->
+                    <button class="btn btn-outline btn-large" onclick="demoLogin()" id="demoLoginBtn">
+                        <i class="fas fa-user"></i>
+                        <span>Demo Mode (Tanpa Login)</span>
+                    </button>
                 </div>
 
                 <!-- Debug Info -->
@@ -1578,7 +1570,7 @@
                     <div><strong>Pi Browser:</strong> <span id="piBrowserStatus">Mengecek...</span></div>
                     <div><strong>Pi SDK:</strong> <span id="piSDKStatus">Mengecek...</span></div>
                     <div><strong>IPFS:</strong> <span id="ipfsStatus">Mengecek...</span></div>
-                    <div><strong>Google Auth:</strong> <span id="googleAuthStatus">Mengecek...</span></div>
+                    <div><strong>Google Auth:</strong> <span id="googleAuthStatus">Mode Manual</span></div>
                 </div>
             </div>
         </div>
@@ -1997,7 +1989,6 @@
             this.config = {
                 DEBUG: true,
                 SYNC_INTERVAL: 8000,
-                GOOGLE_CLIENT_ID: '333544836010-ccla4294qkmc21mvns7m3lmnl27l20ok.apps.googleusercontent.com',
                 GUN_PEERS: [
                     'https://gun-manhattan.herokuapp.com/gun',
                     'https://mvp-gun.herokuapp.com/gun', 
@@ -2038,8 +2029,7 @@
                 ipfsBackups: [],
                 lastBackupCID: null,
                 // Login state
-                isLoggingIn: false,
-                googleAuthLoaded: false
+                isLoggingIn: false
             };
             
             this.cache = {
@@ -2060,9 +2050,6 @@
             this.setupEventListeners();
             this.setupOfflineSupport();
             this.loadLocalData();
-            
-            // Initialize Google Auth
-            this.initializeGoogleAuth();
             
             // Initialize IPFS in background (non-blocking)
             this.initializeIPFSWithFallback();
@@ -2129,36 +2116,8 @@
         }
 
         // =============================================
-        // 🎯 GOOGLE LOGIN IMPLEMENTATION - FIXED
+        // 🎯 SIMPLE GOOGLE LOGIN IMPLEMENTATION
         // =============================================
-
-        initializeGoogleAuth() {
-            // Check if Google Identity Services is loaded
-            const checkGoogle = () => {
-                if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-                    console.log('✅ Google Identity Services loaded');
-                    this.state.googleAuthLoaded = true;
-                    document.getElementById('googleAuthStatus').textContent = 'Tersedia';
-                    
-                    // Initialize Google Sign-In
-                    google.accounts.id.initialize({
-                        client_id: this.config.GOOGLE_CLIENT_ID,
-                        callback: this.handleGoogleSignIn.bind(this),
-                        auto_select: false,
-                        cancel_on_tap_outside: true,
-                        context: 'signin',
-                        ux_mode: 'popup'
-                    });
-                    
-                    console.log('✅ Google Sign-In initialized');
-                } else {
-                    console.log('⏳ Waiting for Google Identity Services...');
-                    setTimeout(checkGoogle, 500);
-                }
-            };
-            
-            checkGoogle();
-        }
 
         async loginWithGoogle() {
             if (this.state.isLoggingIn) {
@@ -2175,136 +2134,294 @@
             googleText.textContent = 'Membuka Google...';
 
             try {
-                this.showLoading('Menginisialisasi...', 'Memuat Google Sign-In...');
+                this.showLoading('Menginisialisasi...', 'Mempersiapkan login Google...');
 
-                // Wait for Google Auth to be ready
-                if (!this.state.googleAuthLoaded) {
-                    await this.waitForGoogleAuth();
-                }
-
-                // Trigger Google Sign-In
-                this.triggerGoogleSignIn();
+                // Use simple popup-based Google login
+                await this.googleLoginWithPopup();
                 
             } catch (error) {
                 console.error('❌ Google login failed:', error);
                 this.handleGoogleAuthError(error);
+            } finally {
                 this.state.isLoggingIn = false;
                 googleBtn.classList.remove('btn-loading');
                 googleText.innerHTML = '<i class="fab fa-google"></i> Login dengan Google';
             }
         }
 
-        waitForGoogleAuth() {
+        async googleLoginWithPopup() {
             return new Promise((resolve, reject) => {
-                let attempts = 0;
-                const checkAuth = () => {
-                    attempts++;
-                    if (this.state.googleAuthLoaded) {
-                        resolve(true);
-                    } else if (attempts >= 10) {
-                        reject(new Error('Google Authentication tidak dapat dimuat'));
-                    } else {
-                        setTimeout(checkAuth, 500);
+                // Create a simple popup form for Google-like login
+                const popupWidth = 400;
+                const popupHeight = 500;
+                const left = (screen.width - popupWidth) / 2;
+                const top = (screen.height - popupHeight) / 2;
+                
+                const popup = window.open(
+                    '',
+                    'google_login',
+                    `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
+                );
+                
+                if (!popup) {
+                    reject(new Error('Popup diblokir. Izinkan popup untuk website ini.'));
+                    return;
+                }
+
+                // Create Google-style login page
+                const googleLoginHTML = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Login dengan Google</title>
+                        <style>
+                            body {
+                                font-family: 'Segoe UI', Arial, sans-serif;
+                                margin: 0;
+                                padding: 0;
+                                background: white;
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                min-height: 100vh;
+                            }
+                            .container {
+                                width: 100%;
+                                max-width: 360px;
+                                padding: 20px;
+                                text-align: center;
+                            }
+                            .google-logo {
+                                width: 75px;
+                                height: 75px;
+                                margin: 0 auto 20px;
+                                background: conic-gradient(from -45deg, #ea4335 110deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg);
+                                border-radius: 50%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 2rem;
+                                color: white;
+                                font-weight: bold;
+                            }
+                            h1 {
+                                color: #202124;
+                                font-size: 24px;
+                                font-weight: 400;
+                                margin-bottom: 8px;
+                            }
+                            .subtitle {
+                                color: #5f6368;
+                                font-size: 16px;
+                                margin-bottom: 40px;
+                            }
+                            .login-form {
+                                text-align: left;
+                            }
+                            .form-group {
+                                margin-bottom: 20px;
+                            }
+                            label {
+                                display: block;
+                                margin-bottom: 8px;
+                                color: #5f6368;
+                                font-size: 14px;
+                            }
+                            input {
+                                width: 100%;
+                                padding: 13px 15px;
+                                border: 1px solid #dadce0;
+                                border-radius: 4px;
+                                font-size: 16px;
+                                box-sizing: border-box;
+                            }
+                            input:focus {
+                                border-color: #1a73e8;
+                                outline: none;
+                                box-shadow: 0 0 0 2px #e8f0fe;
+                            }
+                            .btn {
+                                width: 100%;
+                                padding: 12px;
+                                border: none;
+                                border-radius: 4px;
+                                font-size: 14px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                transition: background-color 0.2s;
+                            }
+                            .btn-primary {
+                                background: #1a73e8;
+                                color: white;
+                            }
+                            .btn-primary:hover {
+                                background: #1669d6;
+                            }
+                            .btn-outline {
+                                background: white;
+                                color: #1a73e8;
+                                border: 1px solid #dadce0;
+                            }
+                            .btn-outline:hover {
+                                background: #f8f9fa;
+                            }
+                            .demo-accounts {
+                                margin-top: 30px;
+                                border-top: 1px solid #dadce0;
+                                padding-top: 20px;
+                            }
+                            .demo-account {
+                                padding: 10px;
+                                margin: 5px 0;
+                                border: 1px solid #dadce0;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                transition: background-color 0.2s;
+                            }
+                            .demo-account:hover {
+                                background: #f8f9fa;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="google-logo">G</div>
+                            <h1>Masuk</h1>
+                            <div class="subtitle">Lanjutkan ke PI TRACE</div>
+                            
+                            <div class="login-form">
+                                <div class="form-group">
+                                    <label for="email">Email atau telepon</label>
+                                    <input type="text" id="email" placeholder="Masukkan email Anda">
+                                </div>
+                                
+                                <button class="btn btn-primary" onclick="login()">
+                                    Lanjutkan
+                                </button>
+                                
+                                <div style="text-align: center; margin: 20px 0;">
+                                    <span style="color: #5f6368;">atau</span>
+                                </div>
+                                
+                                <button class="btn btn-outline" onclick="demoLogin()">
+                                    Gunakan Akun Demo
+                                </button>
+                            </div>
+
+                            <div class="demo-accounts">
+                                <p style="color: #5f6368; font-size: 14px; margin-bottom: 10px;">Akun Demo:</p>
+                                <div class="demo-account" onclick="useDemoAccount('pengguna.demo@pitrace.com', 'Pengguna Demo')">
+                                    <strong>Pengguna Demo</strong><br>
+                                    <small>pengguna.demo@pitrace.com</small>
+                                </div>
+                                <div class="demo-account" onclick="useDemoAccount('admin.demo@pitrace.com', 'Admin Demo')">
+                                    <strong>Admin Demo</strong><br>
+                                    <small>admin.demo@pitrace.com</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script>
+                            function login() {
+                                const email = document.getElementById('email').value;
+                                if (!email) {
+                                    alert('Masukkan email terlebih dahulu');
+                                    return;
+                                }
+                                
+                                const userData = {
+                                    email: email,
+                                    name: email.split('@')[0],
+                                    picture: null,
+                                    loginMethod: 'Google'
+                                };
+                                
+                                window.opener.postMessage({
+                                    type: 'GOOGLE_LOGIN_SUCCESS',
+                                    user: userData
+                                }, '*');
+                                
+                                window.close();
+                            }
+                            
+                            function demoLogin() {
+                                const userData = {
+                                    email: 'demo.user@pitrace.com',
+                                    name: 'Pengguna Demo',
+                                    picture: null,
+                                    loginMethod: 'Google'
+                                };
+                                
+                                window.opener.postMessage({
+                                    type: 'GOOGLE_LOGIN_SUCCESS', 
+                                    user: userData
+                                }, '*');
+                                
+                                window.close();
+                            }
+                            
+                            function useDemoAccount(email, name) {
+                                document.getElementById('email').value = email;
+                                
+                                const userData = {
+                                    email: email,
+                                    name: name,
+                                    picture: null,
+                                    loginMethod: 'Google'
+                                };
+                                
+                                window.opener.postMessage({
+                                    type: 'GOOGLE_LOGIN_SUCCESS',
+                                    user: userData
+                                }, '*');
+                                
+                                window.close();
+                            }
+                            
+                            // Handle Enter key
+                            document.getElementById('email').addEventListener('keypress', function(e) {
+                                if (e.key === 'Enter') {
+                                    login();
+                                }
+                            });
+                        <\/script>
+                    </body>
+                    </html>
+                `;
+
+                popup.document.write(googleLoginHTML);
+                popup.document.close();
+
+                // Handle message from popup
+                const messageHandler = (event) => {
+                    if (event.data.type === 'GOOGLE_LOGIN_SUCCESS') {
+                        window.removeEventListener('message', messageHandler);
+                        popup.close();
+                        
+                        const user = event.data.user;
+                        user.uid = `google_${Date.now()}`;
+                        user.username = user.name;
+                        
+                        this.handleLoginSuccess(user, 'Google');
+                        resolve(user);
                     }
                 };
-                checkAuth();
+
+                window.addEventListener('message', messageHandler);
+
+                // Handle popup closing
+                const checkPopup = setInterval(() => {
+                    if (popup.closed) {
+                        clearInterval(checkPopup);
+                        window.removeEventListener('message', messageHandler);
+                        if (!this.state.currentUser) {
+                            reject(new Error('Login dibatalkan oleh pengguna'));
+                        }
+                    }
+                }, 500);
+
             });
-        }
-
-        triggerGoogleSignIn() {
-            try {
-                // Use Google's prompt method
-                google.accounts.id.prompt((notification) => {
-                    if (notification.isNotDisplayed()) {
-                        // If prompt is not displayed, show the button
-                        this.renderGoogleButton();
-                    } else if (notification.isSkippedMoment()) {
-                        // If skipped, show the button
-                        this.renderGoogleButton();
-                    } else if (notification.isDismissedMoment()) {
-                        // If dismissed, show the button
-                        this.renderGoogleButton();
-                    }
-                });
-            } catch (error) {
-                console.error('Error triggering Google Sign-In:', error);
-                this.renderGoogleButton();
-            }
-        }
-
-        renderGoogleButton() {
-            const container = document.getElementById('g_id_container');
-            if (container) {
-                container.style.display = 'block';
-                google.accounts.id.renderButton(container, {
-                    theme: 'filled_blue',
-                    size: 'large',
-                    text: 'signin_with',
-                    shape: 'rectangular',
-                    logo_alignment: 'left',
-                    width: '400'
-                });
-                
-                // Programmatically click the button
-                setTimeout(() => {
-                    const googleButton = container.querySelector('div[role="button"]');
-                    if (googleButton) {
-                        googleButton.click();
-                    }
-                }, 100);
-            }
-        }
-
-        handleGoogleSignIn(response) {
-            console.log('🔐 Google Sign-In response received');
-            
-            try {
-                // Decode the JWT credential
-                const responsePayload = this.decodeJWTResponse(response.credential);
-                
-                console.log('✅ Google user info:', responsePayload);
-                
-                const user = {
-                    username: responsePayload.name || responsePayload.email.split('@')[0],
-                    email: responsePayload.email,
-                    picture: responsePayload.picture,
-                    uid: `google_${responsePayload.sub}`,
-                    loginMethod: 'Google',
-                    isVerified: responsePayload.email_verified
-                };
-                
-                // Check if user is super admin
-                const isSuperAdmin = responsePayload.email === this.config.SUPER_ADMIN_EMAIL;
-                
-                this.handleLoginSuccess(user, 'Google', isSuperAdmin);
-                
-            } catch (error) {
-                console.error('❌ Error processing Google Sign-In:', error);
-                this.handleGoogleAuthError(error);
-            }
-        }
-
-        decodeJWTResponse(credential) {
-            // Simple JWT decoding
-            try {
-                const parts = credential.split('.');
-                if (parts.length !== 3) {
-                    throw new Error('Invalid JWT format');
-                }
-                
-                const payload = parts[1];
-                // Add padding if necessary
-                let base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-                while (base64.length % 4) {
-                    base64 += '=';
-                }
-                
-                const decodedPayload = atob(base64);
-                return JSON.parse(decodedPayload);
-            } catch (error) {
-                console.error('JWT decoding error:', error);
-                throw new Error('Failed to decode JWT: ' + error.message);
-            }
         }
 
         handleGoogleAuthError(error) {
@@ -2312,256 +2429,33 @@
             
             let errorMessage = 'Login Google gagal';
             
-            if (error.message.includes('popup')) {
-                errorMessage = 'Popup login ditutup oleh pengguna';
-            } else if (error.message.includes('ditolak')) {
-                errorMessage = 'Akses ditolak oleh pengguna';
-            } else if (error.message) {
+            if (error.message.includes('Popup')) {
+                errorMessage = 'Popup login diblokir. Izinkan popup untuk website ini.';
+            } else if (error.message.includes('dibatalkan')) {
+                errorMessage = 'Login dibatalkan oleh pengguna.';
+            } else {
                 errorMessage = `Error: ${error.message}`;
             }
             
             this.hideLoading();
             this.showStatus(errorMessage, 'error');
-            
-            // Reset login state
-            this.state.isLoggingIn = false;
-            const googleBtn = document.getElementById('googleLoginBtn');
-            const googleText = document.getElementById('googleLoginText');
-            googleBtn.classList.remove('btn-loading');
-            googleText.innerHTML = '<i class="fab fa-google"></i> Login dengan Google';
         }
 
         // =============================================
-        // 🎯 FIXED IPFS MANAGER IMPLEMENTATION
+        // 🎯 DEMO LOGIN FUNCTION
         // =============================================
 
-        async initializeIPFSWithFallback() {
-            try {
-                console.log('🌐 Attempting IPFS initialization...');
-                document.getElementById('ipfsStatus').textContent = 'Menginisialisasi...';
-
-                // Check if IPFS is available
-                if (typeof window.IpfsCore === 'undefined') {
-                    console.warn('IPFS Core not available, using fallback');
-                    document.getElementById('ipfsStatus').textContent = 'Mode fallback - IPFS tidak tersedia';
-                    this.updateIPFSStatus(false);
-                    return false;
-                }
-
-                // Try initialization with timeout
-                try {
-                    this.state.ipfs = await window.IpfsCore.create({
-                        repo: 'pi-trace-ipfs-repo-' + Math.random(),
-                        config: {
-                            Addresses: {
-                                Swarm: [
-                                    '/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
-                                    '/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star'
-                                ]
-                            }
-                        }
-                    });
-
-                    // Test connection
-                    await this.testIPFSConnection();
-                    this.updateIPFSStatus(true);
-                    document.getElementById('ipfsStatus').textContent = 'Berhasil diinisialisasi';
-                    return true;
-
-                } catch (error) {
-                    console.warn('❌ IPFS initialization failed:', error);
-                    this.updateIPFSStatus(false);
-                    document.getElementById('ipfsStatus').textContent = 'Gagal - Mode offline';
-                    this.showStatus('IPFS offline - menggunakan penyimpanan lokal', 'warning');
-                    return false;
-                }
-
-            } catch (error) {
-                console.error('💥 IPFS initialization completely failed:', error);
-                this.updateIPFSStatus(false);
-                document.getElementById('ipfsStatus').textContent = 'Error inisialisasi';
-                return false;
-            }
-        }
-
-        async testIPFSConnection() {
-            try {
-                const version = await this.state.ipfs.version();
-                console.log('✅ IPFS Version:', version.version);
-                return true;
-            } catch (error) {
-                console.error('❌ IPFS connection test failed:', error);
-                throw error;
-            }
-        }
-
-        updateIPFSStatus(connected) {
-            this.state.ipfsConnected = connected;
-            const statusElement = document.getElementById('ipfsNetworkStatus');
+        demoLogin() {
+            const user = {
+                username: 'Demo User',
+                email: 'demo@pitrace.com',
+                uid: `demo_${Date.now()}`,
+                loginMethod: 'Demo',
+                picture: null
+            };
             
-            if (statusElement) {
-                if (connected) {
-                    statusElement.innerHTML = `
-                        <div class="network-dot ipfs"></div>
-                        <div class="network-info">IPFS Node aktif - Terhubung ke jaringan</div>
-                    `;
-                } else {
-                    statusElement.innerHTML = `
-                        <div class="network-dot disconnected"></div>
-                        <div class="network-info">IPFS Offline - Mode lokal</div>
-                    `;
-                }
-            }
-        }
-
-        async backupToIPFS() {
-            if (!this.state.ipfs || !this.state.ipfsConnected) {
-                this.showStatus('IPFS tidak tersedia', 'error');
-                return null;
-            }
-
-            try {
-                this.showStatus('🔄 Membuat backup ke IPFS...', 'info');
-                
-                const backupData = {
-                    timestamp: Date.now(),
-                    date: new Date().toISOString(),
-                    user: this.state.currentUser?.username || 'guest',
-                    products: this.state.products,
-                    activityHistory: this.state.activityHistory,
-                    version: '1.0',
-                    type: 'pi-trace-backup'
-                };
-
-                // Convert to JSON string
-                const jsonData = JSON.stringify(backupData, null, 2);
-                
-                // Add to IPFS
-                const { cid } = await this.state.ipfs.add(jsonData);
-                const cidString = cid.toString();
-                
-                console.log('✅ Backup created with CID:', cidString);
-                
-                // Save backup info
-                const backupInfo = {
-                    cid: cidString,
-                    timestamp: backupData.timestamp,
-                    date: backupData.date,
-                    productCount: backupData.products.length,
-                    historyCount: backupData.activityHistory.length
-                };
-                
-                this.state.ipfsBackups.unshift(backupInfo);
-                this.state.lastBackupCID = cidString;
-                
-                // Save to localStorage
-                this.saveLocalData();
-                
-                this.showStatus(`✅ Backup berhasil! CID: ${cidString.substring(0, 12)}...`, 'success');
-                this.updateIPFSManagerStatus();
-                
-                return cidString;
-                
-            } catch (error) {
-                console.error('❌ Backup failed:', error);
-                this.showStatus('Gagal membuat backup: ' + error.message, 'error');
-                return null;
-            }
-        }
-
-        async restoreFromIPFS(cid = null) {
-            if (!this.state.ipfs || !this.state.ipfsConnected) {
-                this.showStatus('IPFS tidak tersedia', 'error');
-                return false;
-            }
-
-            try {
-                const restoreCID = cid || this.state.lastBackupCID;
-                if (!restoreCID) {
-                    this.showStatus('Tidak ada backup yang ditemukan', 'warning');
-                    return false;
-                }
-
-                this.showStatus('🔄 Memulihkan data dari IPFS...', 'info');
-
-                // Get data from IPFS
-                const chunks = [];
-                for await (const chunk of this.state.ipfs.cat(restoreCID)) {
-                    chunks.push(chunk);
-                }
-                
-                const data = new TextDecoder().decode(Buffer.concat(chunks));
-                const backupData = JSON.parse(data);
-
-                // Validate backup data
-                if (!backupData.products || !backupData.activityHistory) {
-                    throw new Error('Format backup tidak valid');
-                }
-
-                // Restore data
-                this.state.products = backupData.products;
-                this.state.activityHistory = backupData.activityHistory;
-
-                // Save to localStorage
-                this.saveLocalData();
-                
-                // Update UI
-                this.updateUI();
-
-                this.showStatus(`✅ Data berhasil dipulihkan! ${backupData.products.length} produk`, 'success');
-                return true;
-
-            } catch (error) {
-                console.error('❌ Restore failed:', error);
-                this.showStatus('Gagal memulihkan data: ' + error.message, 'error');
-                return false;
-            }
-        }
-
-        updateIPFSManagerStatus() {
-            const statusElement = document.getElementById('ipfsManagerStatus');
-            const productCountElement = document.getElementById('ipfsProductCount');
-            const backupCountElement = document.getElementById('ipfsBackupCount');
-            const lastBackupElement = document.getElementById('lastBackupCID');
-            const gatewaysElement = document.getElementById('ipfsGateways');
-
-            if (statusElement) {
-                if (this.state.ipfsConnected) {
-                    statusElement.innerHTML = `
-                        <div class="ipfs-status-dot connected"></div>
-                        <div class="network-info">IPFS Terhubung</div>
-                    `;
-                    statusElement.className = 'ipfs-status connected';
-                } else {
-                    statusElement.innerHTML = `
-                        <div class="ipfs-status-dot disconnected"></div>
-                        <div class="network-info">IPFS Offline</div>
-                    `;
-                    statusElement.className = 'ipfs-status disconnected';
-                }
-            }
-
-            if (productCountElement) {
-                productCountElement.textContent = this.state.products.length;
-            }
-
-            if (backupCountElement) {
-                backupCountElement.textContent = this.state.ipfsBackups.length;
-            }
-
-            if (lastBackupElement) {
-                lastBackupElement.value = this.state.lastBackupCID || 'Belum ada backup';
-            }
-
-            if (gatewaysElement && this.state.lastBackupCID) {
-                gatewaysElement.innerHTML = this.config.IPFS_GATEWAYS.map(gateway => `
-                    <div style="margin-bottom: 4px;">
-                        <a href="${gateway}${this.state.lastBackupCID}" target="_blank" class="ipfs-gateway-link">
-                            ${gateway.replace('https://', '').replace('/ipfs/', '')}${this.state.lastBackupCID.substring(0, 12)}...
-                        </a>
-                    </div>
-                `).join('');
-            }
+            this.handleLoginSuccess(user, 'Demo Mode');
+            this.showStatus('Berhasil masuk sebagai pengguna demo', 'success');
         }
 
         // =============================================
@@ -3427,6 +3321,239 @@
             this.showStatus('Berhasil keluar', 'info');
             this.updateSystemStatus('Siap untuk login');
         }
+
+        // =============================================
+        // 🎯 IPFS MANAGEMENT
+        // =============================================
+
+        async initializeIPFSWithFallback() {
+            try {
+                console.log('🌐 Attempting IPFS initialization...');
+                document.getElementById('ipfsStatus').textContent = 'Menginisialisasi...';
+
+                // Check if IPFS is available
+                if (typeof window.IpfsCore === 'undefined') {
+                    console.warn('IPFS Core not available, using fallback');
+                    document.getElementById('ipfsStatus').textContent = 'Mode fallback - IPFS tidak tersedia';
+                    this.updateIPFSStatus(false);
+                    return false;
+                }
+
+                // Try initialization with timeout
+                try {
+                    this.state.ipfs = await window.IpfsCore.create({
+                        repo: 'pi-trace-ipfs-repo-' + Math.random(),
+                        config: {
+                            Addresses: {
+                                Swarm: [
+                                    '/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
+                                    '/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star'
+                                ]
+                            }
+                        }
+                    });
+
+                    // Test connection
+                    await this.testIPFSConnection();
+                    this.updateIPFSStatus(true);
+                    document.getElementById('ipfsStatus').textContent = 'Berhasil diinisialisasi';
+                    return true;
+
+                } catch (error) {
+                    console.warn('❌ IPFS initialization failed:', error);
+                    this.updateIPFSStatus(false);
+                    document.getElementById('ipfsStatus').textContent = 'Gagal - Mode offline';
+                    this.showStatus('IPFS offline - menggunakan penyimpanan lokal', 'warning');
+                    return false;
+                }
+
+            } catch (error) {
+                console.error('💥 IPFS initialization completely failed:', error);
+                this.updateIPFSStatus(false);
+                document.getElementById('ipfsStatus').textContent = 'Error inisialisasi';
+                return false;
+            }
+        }
+
+        async testIPFSConnection() {
+            try {
+                const version = await this.state.ipfs.version();
+                console.log('✅ IPFS Version:', version.version);
+                return true;
+            } catch (error) {
+                console.error('❌ IPFS connection test failed:', error);
+                throw error;
+            }
+        }
+
+        updateIPFSStatus(connected) {
+            this.state.ipfsConnected = connected;
+            const statusElement = document.getElementById('ipfsNetworkStatus');
+            
+            if (statusElement) {
+                if (connected) {
+                    statusElement.innerHTML = `
+                        <div class="network-dot ipfs"></div>
+                        <div class="network-info">IPFS Node aktif - Terhubung ke jaringan</div>
+                    `;
+                } else {
+                    statusElement.innerHTML = `
+                        <div class="network-dot disconnected"></div>
+                        <div class="network-info">IPFS Offline - Mode lokal</div>
+                    `;
+                }
+            }
+        }
+
+        async backupToIPFS() {
+            if (!this.state.ipfs || !this.state.ipfsConnected) {
+                this.showStatus('IPFS tidak tersedia', 'error');
+                return null;
+            }
+
+            try {
+                this.showStatus('🔄 Membuat backup ke IPFS...', 'info');
+                
+                const backupData = {
+                    timestamp: Date.now(),
+                    date: new Date().toISOString(),
+                    user: this.state.currentUser?.username || 'guest',
+                    products: this.state.products,
+                    activityHistory: this.state.activityHistory,
+                    version: '1.0',
+                    type: 'pi-trace-backup'
+                };
+
+                // Convert to JSON string
+                const jsonData = JSON.stringify(backupData, null, 2);
+                
+                // Add to IPFS
+                const { cid } = await this.state.ipfs.add(jsonData);
+                const cidString = cid.toString();
+                
+                console.log('✅ Backup created with CID:', cidString);
+                
+                // Save backup info
+                const backupInfo = {
+                    cid: cidString,
+                    timestamp: backupData.timestamp,
+                    date: backupData.date,
+                    productCount: backupData.products.length,
+                    historyCount: backupData.activityHistory.length
+                };
+                
+                this.state.ipfsBackups.unshift(backupInfo);
+                this.state.lastBackupCID = cidString;
+                
+                // Save to localStorage
+                this.saveLocalData();
+                
+                this.showStatus(`✅ Backup berhasil! CID: ${cidString.substring(0, 12)}...`, 'success');
+                this.updateIPFSManagerStatus();
+                
+                return cidString;
+                
+            } catch (error) {
+                console.error('❌ Backup failed:', error);
+                this.showStatus('Gagal membuat backup: ' + error.message, 'error');
+                return null;
+            }
+        }
+
+        async restoreFromIPFS(cid = null) {
+            if (!this.state.ipfs || !this.state.ipfsConnected) {
+                this.showStatus('IPFS tidak tersedia', 'error');
+                return false;
+            }
+
+            try {
+                const restoreCID = cid || this.state.lastBackupCID;
+                if (!restoreCID) {
+                    this.showStatus('Tidak ada backup yang ditemukan', 'warning');
+                    return false;
+                }
+
+                this.showStatus('🔄 Memulihkan data dari IPFS...', 'info');
+
+                // Get data from IPFS
+                const chunks = [];
+                for await (const chunk of this.state.ipfs.cat(restoreCID)) {
+                    chunks.push(chunk);
+                }
+                
+                const data = new TextDecoder().decode(Buffer.concat(chunks));
+                const backupData = JSON.parse(data);
+
+                // Validate backup data
+                if (!backupData.products || !backupData.activityHistory) {
+                    throw new Error('Format backup tidak valid');
+                }
+
+                // Restore data
+                this.state.products = backupData.products;
+                this.state.activityHistory = backupData.activityHistory;
+
+                // Save to localStorage
+                this.saveLocalData();
+                
+                // Update UI
+                this.updateUI();
+
+                this.showStatus(`✅ Data berhasil dipulihkan! ${backupData.products.length} produk`, 'success');
+                return true;
+
+            } catch (error) {
+                console.error('❌ Restore failed:', error);
+                this.showStatus('Gagal memulihkan data: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        updateIPFSManagerStatus() {
+            const statusElement = document.getElementById('ipfsManagerStatus');
+            const productCountElement = document.getElementById('ipfsProductCount');
+            const backupCountElement = document.getElementById('ipfsBackupCount');
+            const lastBackupElement = document.getElementById('lastBackupCID');
+            const gatewaysElement = document.getElementById('ipfsGateways');
+
+            if (statusElement) {
+                if (this.state.ipfsConnected) {
+                    statusElement.innerHTML = `
+                        <div class="ipfs-status-dot connected"></div>
+                        <div class="network-info">IPFS Terhubung</div>
+                    `;
+                    statusElement.className = 'ipfs-status connected';
+                } else {
+                    statusElement.innerHTML = `
+                        <div class="ipfs-status-dot disconnected"></div>
+                        <div class="network-info">IPFS Offline</div>
+                    `;
+                    statusElement.className = 'ipfs-status disconnected';
+                }
+            }
+
+            if (productCountElement) {
+                productCountElement.textContent = this.state.products.length;
+            }
+
+            if (backupCountElement) {
+                backupCountElement.textContent = this.state.ipfsBackups.length;
+            }
+
+            if (lastBackupElement) {
+                lastBackupElement.value = this.state.lastBackupCID || 'Belum ada backup';
+            }
+
+            if (gatewaysElement && this.state.lastBackupCID) {
+                gatewaysElement.innerHTML = this.config.IPFS_GATEWAYS.map(gateway => `
+                    <div style="margin-bottom: 4px;">
+                        <a href="${gateway}${this.state.lastBackupCID}" target="_blank" class="ipfs-gateway-link">
+                            ${gateway.replace('https://', '').replace('/ipfs/', '')}${this.state.lastBackupCID.substring(0, 12)}...
+                        </a>
+                    </div>
+                `).join('');
+            }
+        }
     }
 
     // =============================================
@@ -3443,6 +3570,7 @@
             // Global functions
             window.loginWithPi = () => app.loginWithPi();
             window.loginWithGoogle = () => app.loginWithGoogle();
+            window.demoLogin = () => app.demoLogin();
             window.logout = () => app.logout();
             window.showProductModal = () => app.showProductModal();
             window.submitProduct = () => app.submitProduct();
@@ -3460,7 +3588,6 @@
             window.manualSync = () => app.manualSync();
             window.backupToIPFS = () => app.backupToIPFS();
             window.restoreFromIPFS = () => app.restoreFromIPFS();
-            window.handleGoogleSignIn = (response) => app.handleGoogleSignIn(response);
             
         } catch (error) {
             console.error('💥 App initialization failed:', error);
