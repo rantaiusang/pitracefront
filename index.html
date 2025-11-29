@@ -1954,10 +1954,10 @@
     <!-- Status Container -->
     <div id="statusContainer" class="status-container"></div>
 
-    <!-- COMPLETE JAVASCRIPT - FULL VERSION WITH IPFS -->
+    <!-- COMPLETE JAVASCRIPT - FULL VERSION WITH FIXED IPFS -->
     <script>
     // =============================================
-    // COMPLETE PI TRACE APPLICATION - FULL VERSION WITH IPFS
+    // COMPLETE PI TRACE APPLICATION - FIXED IPFS VERSION
     // =============================================
     class CompletePiTraceApp {
         constructor() {
@@ -2025,7 +2025,7 @@
             this.loadLocalData();
             
             // Initialize IPFS in background (non-blocking)
-            this.initializeIPFSBackground();
+            this.initializeIPFSWithFallback();
             
             this.updateSystemStatus('Sistem siap - Pilih metode login');
         }
@@ -2085,6 +2085,367 @@
                 piLoginBtn.classList.remove('btn-disabled');
                 piLoginBtn.disabled = false;
                 piLoginText.innerHTML = '<i class="fab fa-raspberry-pi"></i> Login dengan Pi Wallet';
+            }
+        }
+
+        // =============================================
+        // 🎯 IPFS FIXED IMPLEMENTATION
+        // =============================================
+
+        async initializeIPFSWithFallback() {
+            try {
+                console.log('🌐 Attempting IPFS initialization...');
+                document.getElementById('ipfsStatus').textContent = 'Menginisialisasi...';
+
+                // Check if IPFS is available
+                if (typeof window.IpfsCore === 'undefined') {
+                    console.warn('IPFS Core not available, using fallback');
+                    document.getElementById('ipfsStatus').textContent = 'Mode fallback - IPFS tidak tersedia';
+                    this.updateIPFSStatus(false);
+                    return false;
+                }
+
+                // Method 1: Try standard initialization with better config
+                try {
+                    this.state.ipfs = await window.IpfsCore.create({
+                        repo: 'pi-trace-ipfs-repo-' + Math.random().toString(36).substring(2, 15),
+                        config: {
+                            Addresses: {
+                                Swarm: [
+                                    '/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
+                                    '/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
+                                    '/dns4/webrtc-star.discovery.libp2p.io/tcp/443/wss/p2p-webrtc-star/',
+                                    '/dns6/webrtc-star.discovery.libp2p.io/tcp/443/wss/p2p-webrtc-star/'
+                                ]
+                            },
+                            Bootstrap: [
+                                '/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN',
+                                '/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa'
+                            ]
+                        },
+                        EXPERIMENTAL: {
+                            pubsub: true
+                        }
+                    });
+
+                    // Test connection
+                    const success = await this.testIPFSConnection();
+                    if (success) {
+                        this.updateIPFSStatus(true);
+                        document.getElementById('ipfsStatus').textContent = 'Berhasil diinisialisasi';
+                        this.startEnhancedIPFSMonitoring();
+                        this.loadIPFSBackups();
+                        return true;
+                    } else {
+                        throw new Error('Connection test failed');
+                    }
+
+                } catch (standardError) {
+                    console.warn('❌ Standard IPFS failed, trying fallback...', standardError);
+                    
+                    // Method 2: Minimal configuration
+                    try {
+                        this.state.ipfs = await window.IpfsCore.create({
+                            repo: false, // Disable persistence for better compatibility
+                            config: {
+                                Addresses: {
+                                    Swarm: []
+                                }
+                            }
+                        });
+                        
+                        this.updateIPFSStatus(true);
+                        document.getElementById('ipfsStatus').textContent = 'Berhasil (mode terbatas)';
+                        this.showStatus('IPFS berjalan dalam mode terbatas', 'warning');
+                        return true;
+                        
+                    } catch (fallbackError) {
+                        console.error('❌ All IPFS methods failed:', fallbackError);
+                        this.updateIPFSStatus(false);
+                        document.getElementById('ipfsStatus').textContent = 'Gagal - Mode offline';
+                        this.showStatus('IPFS offline - menggunakan penyimpanan lokal', 'error');
+                        return false;
+                    }
+                }
+
+            } catch (error) {
+                console.error('💥 IPFS initialization completely failed:', error);
+                this.updateIPFSStatus(false);
+                document.getElementById('ipfsStatus').textContent = 'Error inisialisasi';
+                return false;
+            }
+        }
+
+        async testIPFSConnection() {
+            try {
+                const version = await this.state.ipfs.version();
+                console.log('✅ IPFS Version:', version.version);
+                
+                // Try to get node ID
+                const id = await this.state.ipfs.id();
+                console.log('✅ IPFS Node ID:', id.id);
+                
+                // Try to connect to bootstrap nodes in background
+                setTimeout(async () => {
+                    try {
+                        const peers = await this.state.ipfs.swarm.peers();
+                        console.log(`✅ Connected to ${peers.length} IPFS peers`);
+                        this.state.ipfsPeers = peers.length;
+                        
+                        if (peers.length === 0) {
+                            console.warn('⚠️ No IPFS peers connected, node might be isolated');
+                        }
+                    } catch (peerError) {
+                        console.warn('⚠️ No IPFS peers connected:', peerError);
+                    }
+                }, 2000);
+                
+                return true;
+            } catch (error) {
+                console.error('❌ IPFS connection test failed:', error);
+                throw error;
+            }
+        }
+
+        startEnhancedIPFSMonitoring() {
+            if (!this.state.ipfs || !this.state.ipfsConnected) return;
+            
+            // Monitor IPFS peers every 15 seconds
+            this.ipfsMonitorInterval = setInterval(async () => {
+                try {
+                    const peers = await this.state.ipfs.swarm.peers();
+                    this.state.ipfsPeers = peers.length;
+                    
+                    // Update UI if in app section
+                    if (document.getElementById('app-section').classList.contains('section-active')) {
+                        this.updateIPFSManagerStatus();
+                    }
+                    
+                    // If no peers for a while, try to reconnect
+                    if (peers.length === 0 && this.state.isOnline) {
+                        console.log('🔄 No IPFS peers, attempting to reconnect...');
+                        this.tryReconnectIPFS();
+                    }
+                } catch (error) {
+                    console.warn('Error getting IPFS peers:', error);
+                }
+            }, 15000);
+        }
+
+        async tryReconnectIPFS() {
+            try {
+                // Try to connect to bootstrap nodes
+                const bootstrapNodes = [
+                    '/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN',
+                    '/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa'
+                ];
+                
+                for (const node of bootstrapNodes) {
+                    try {
+                        await this.state.ipfs.swarm.connect(node);
+                        console.log('✅ Connected to bootstrap node:', node);
+                    } catch (e) {
+                        console.warn('Failed to connect to bootstrap node:', node);
+                    }
+                }
+            } catch (error) {
+                console.warn('Reconnection attempt failed:', error);
+            }
+        }
+
+        updateIPFSStatus(connected) {
+            this.state.ipfsConnected = connected;
+            const statusElement = document.getElementById('ipfsNetworkStatus');
+            
+            if (statusElement) {
+                if (connected) {
+                    statusElement.innerHTML = `
+                        <div class="network-dot ipfs"></div>
+                        <div class="network-info">IPFS Node aktif - Terhubung ke jaringan</div>
+                    `;
+                } else {
+                    statusElement.innerHTML = `
+                        <div class="network-dot disconnected"></div>
+                        <div class="network-info">IPFS Offline - Mode lokal</div>
+                    `;
+                }
+            }
+        }
+
+        async backupToIPFS() {
+            if (!this.state.ipfs || !this.state.ipfsConnected) {
+                this.showStatus('IPFS tidak tersedia. Pastikan koneksi internet.', 'error');
+                return null;
+            }
+
+            try {
+                this.showStatus('🔄 Membuat backup ke IPFS...', 'info');
+                
+                const backupData = {
+                    timestamp: Date.now(),
+                    date: new Date().toISOString(),
+                    user: this.state.currentUser?.username || 'guest',
+                    products: this.state.products,
+                    activityHistory: this.state.activityHistory,
+                    version: '1.0',
+                    type: 'pi-trace-backup'
+                };
+
+                // Convert to JSON string
+                const jsonData = JSON.stringify(backupData, null, 2);
+                
+                // Add to IPFS
+                const { cid } = await this.state.ipfs.add(jsonData);
+                const cidString = cid.toString();
+                
+                console.log('✅ Backup created with CID:', cidString);
+                
+                // Save backup info locally
+                const backupInfo = {
+                    cid: cidString,
+                    timestamp: backupData.timestamp,
+                    date: backupData.date,
+                    productCount: backupData.products.length,
+                    historyCount: backupData.activityHistory.length
+                };
+                
+                this.state.ipfsBackups.unshift(backupInfo);
+                this.state.lastBackupCID = cidString;
+                
+                // Save to localStorage
+                this.saveLocalData();
+                
+                this.showStatus(`✅ Backup berhasil! CID: ${cidString.substring(0, 12)}...`, 'success');
+                this.updateIPFSManagerStatus();
+                
+                return cidString;
+                
+            } catch (error) {
+                console.error('❌ Backup failed:', error);
+                this.showStatus('Gagal membuat backup: ' + error.message, 'error');
+                return null;
+            }
+        }
+
+        async restoreFromIPFS(cid = null) {
+            if (!this.state.ipfs || !this.state.ipfsConnected) {
+                this.showStatus('IPFS tidak tersedia', 'error');
+                return false;
+            }
+
+            try {
+                const restoreCID = cid || this.state.lastBackupCID;
+                if (!restoreCID) {
+                    this.showStatus('Tidak ada backup yang ditemukan', 'warning');
+                    return false;
+                }
+
+                this.showStatus('🔄 Memulihkan data dari IPFS...', 'info');
+
+                // Get data from IPFS
+                const chunks = [];
+                for await (const chunk of this.state.ipfs.cat(restoreCID)) {
+                    chunks.push(chunk);
+                }
+                
+                const data = new TextDecoder().decode(Buffer.concat(chunks));
+                const backupData = JSON.parse(data);
+
+                // Validate backup data
+                if (!backupData.products || !backupData.activityHistory) {
+                    throw new Error('Format backup tidak valid');
+                }
+
+                // Restore data
+                this.state.products = backupData.products;
+                this.state.activityHistory = backupData.activityHistory;
+
+                // Save to localStorage
+                this.saveLocalData();
+                
+                // Update UI
+                this.updateUI();
+
+                this.showStatus(`✅ Data berhasil dipulihkan! ${backupData.products.length} produk`, 'success');
+                return true;
+
+            } catch (error) {
+                console.error('❌ Restore failed:', error);
+                this.showStatus('Gagal memulihkan data: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        updateIPFSManagerStatus() {
+            const statusElement = document.getElementById('ipfsManagerStatus');
+            const productCountElement = document.getElementById('ipfsProductCount');
+            const backupCountElement = document.getElementById('ipfsBackupCount');
+            const lastBackupElement = document.getElementById('lastBackupCID');
+            const gatewaysElement = document.getElementById('ipfsGateways');
+
+            if (statusElement) {
+                if (this.state.ipfsConnected) {
+                    statusElement.innerHTML = `
+                        <div class="ipfs-status-dot"></div>
+                        <div class="network-info">IPFS Terhubung - ${this.state.ipfsPeers} peers</div>
+                    `;
+                    statusElement.className = 'ipfs-status connected';
+                } else {
+                    statusElement.innerHTML = `
+                        <div class="ipfs-status-dot"></div>
+                        <div class="network-info">IPFS Offline</div>
+                    `;
+                    statusElement.className = 'ipfs-status disconnected';
+                }
+            }
+
+            if (productCountElement) {
+                productCountElement.textContent = this.state.products.length;
+            }
+
+            if (backupCountElement) {
+                backupCountElement.textContent = this.state.ipfsBackups.length;
+            }
+
+            if (lastBackupElement) {
+                lastBackupElement.value = this.state.lastBackupCID || 'Belum ada backup';
+            }
+
+            if (gatewaysElement && this.state.lastBackupCID) {
+                gatewaysElement.innerHTML = this.config.IPFS_GATEWAYS.map(gateway => `
+                    <div style="margin-bottom: 4px;">
+                        <a href="${gateway}${this.state.lastBackupCID}" target="_blank" class="ipfs-gateway-link">
+                            ${gateway.replace('https://', '').replace('/ipfs/', '')}...
+                        </a>
+                    </div>
+                `).join('');
+            }
+        }
+
+        loadIPFSBackups() {
+            try {
+                const savedBackups = localStorage.getItem('pi_trace_ipfs_backups');
+                if (savedBackups) {
+                    this.state.ipfsBackups = JSON.parse(savedBackups);
+                }
+                
+                const lastCID = localStorage.getItem('pi_trace_last_backup_cid');
+                if (lastCID) {
+                    this.state.lastBackupCID = lastCID;
+                }
+            } catch (error) {
+                console.warn('Error loading IPFS backups:', error);
+            }
+        }
+
+        saveIPFSBackups() {
+            try {
+                localStorage.setItem('pi_trace_ipfs_backups', JSON.stringify(this.state.ipfsBackups));
+                if (this.state.lastBackupCID) {
+                    localStorage.setItem('pi_trace_last_backup_cid', this.state.lastBackupCID);
+                }
+            } catch (error) {
+                console.warn('Error saving IPFS backups:', error);
             }
         }
 
@@ -2295,279 +2656,6 @@
                     this.state.isLoggingIn = false;
                 }
             }, 500);
-        }
-
-        // =============================================
-        // 🎯 IPFS INTEGRATION - COMPLETE
-        // =============================================
-
-        async initializeIPFSBackground() {
-            try {
-                console.log('🌐 Initializing IPFS in background...');
-                document.getElementById('ipfsStatus').textContent = 'Menginisialisasi...';
-
-                // Check if IPFS is available
-                if (typeof window.IpfsCore === 'undefined') {
-                    console.warn('IPFS Core not available, using fallback');
-                    document.getElementById('ipfsStatus').textContent = 'Mode fallback - IPFS tidak tersedia';
-                    return false;
-                }
-
-                // Initialize IPFS with timeout
-                const ipfsInitPromise = window.IpfsCore.create({
-                    repo: 'pi-trace-ipfs-repo',
-                    config: {
-                        Addresses: {
-                            Swarm: [
-                                '/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star',
-                                '/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star'
-                            ]
-                        }
-                    }
-                });
-
-                // Set timeout for IPFS initialization
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('IPFS initialization timeout')), 10000)
-                );
-
-                this.state.ipfs = await Promise.race([ipfsInitPromise, timeoutPromise]);
-
-                console.log('✅ IPFS initialized successfully');
-                document.getElementById('ipfsStatus').textContent = 'Berhasil diinisialisasi';
-
-                // Update IPFS status
-                this.updateIPFSStatus(true);
-                
-                // Start monitoring IPFS
-                this.startIPFSMonitoring();
-                
-                // Load existing backups
-                this.loadIPFSBackups();
-
-                return true;
-
-            } catch (error) {
-                console.error('❌ IPFS initialization failed:', error);
-                document.getElementById('ipfsStatus').textContent = 'Gagal - Mode offline';
-                this.updateIPFSStatus(false);
-                return false;
-            }
-        }
-
-        updateIPFSStatus(connected) {
-            this.state.ipfsConnected = connected;
-            const statusElement = document.getElementById('ipfsNetworkStatus');
-            
-            if (statusElement) {
-                if (connected) {
-                    statusElement.innerHTML = `
-                        <div class="network-dot ipfs"></div>
-                        <div class="network-info">IPFS Node aktif - Terhubung ke jaringan</div>
-                    `;
-                } else {
-                    statusElement.innerHTML = `
-                        <div class="network-dot disconnected"></div>
-                        <div class="network-info">IPFS Offline - Mode lokal</div>
-                    `;
-                }
-            }
-        }
-
-        startIPFSMonitoring() {
-            // Monitor IPFS peers in background
-            if (this.state.ipfs && this.state.ipfsConnected) {
-                setInterval(async () => {
-                    try {
-                        const peers = await this.state.ipfs.swarm.peers();
-                        this.state.ipfsPeers = peers.length;
-                        
-                        // Update UI if in app section
-                        if (document.getElementById('app-section').classList.contains('section-active')) {
-                            this.updateIPFSManagerStatus();
-                        }
-                    } catch (error) {
-                        console.warn('Error getting IPFS peers:', error);
-                    }
-                }, 15000);
-            }
-        }
-
-        async backupToIPFS() {
-            if (!this.state.ipfs || !this.state.ipfsConnected) {
-                this.showStatus('IPFS tidak tersedia. Pastikan koneksi internet.', 'error');
-                return null;
-            }
-
-            try {
-                this.showStatus('🔄 Membuat backup ke IPFS...', 'info');
-                
-                const backupData = {
-                    timestamp: Date.now(),
-                    date: new Date().toISOString(),
-                    user: this.state.currentUser?.username || 'guest',
-                    products: this.state.products,
-                    activityHistory: this.state.activityHistory,
-                    version: '1.0',
-                    type: 'pi-trace-backup'
-                };
-
-                // Convert to JSON string
-                const jsonData = JSON.stringify(backupData, null, 2);
-                
-                // Add to IPFS
-                const { cid } = await this.state.ipfs.add(jsonData);
-                const cidString = cid.toString();
-                
-                console.log('✅ Backup created with CID:', cidString);
-                
-                // Save backup info locally
-                const backupInfo = {
-                    cid: cidString,
-                    timestamp: backupData.timestamp,
-                    date: backupData.date,
-                    productCount: backupData.products.length,
-                    historyCount: backupData.activityHistory.length
-                };
-                
-                this.state.ipfsBackups.unshift(backupInfo);
-                this.state.lastBackupCID = cidString;
-                
-                // Save to localStorage
-                this.saveLocalData();
-                
-                this.showStatus(`✅ Backup berhasil! CID: ${cidString.substring(0, 12)}...`, 'success');
-                this.updateIPFSManagerStatus();
-                
-                return cidString;
-                
-            } catch (error) {
-                console.error('❌ Backup failed:', error);
-                this.showStatus('Gagal membuat backup: ' + error.message, 'error');
-                return null;
-            }
-        }
-
-        async restoreFromIPFS(cid = null) {
-            if (!this.state.ipfs || !this.state.ipfsConnected) {
-                this.showStatus('IPFS tidak tersedia', 'error');
-                return false;
-            }
-
-            try {
-                const restoreCID = cid || this.state.lastBackupCID;
-                if (!restoreCID) {
-                    this.showStatus('Tidak ada backup yang ditemukan', 'warning');
-                    return false;
-                }
-
-                this.showStatus('🔄 Memulihkan data dari IPFS...', 'info');
-
-                // Get data from IPFS
-                const chunks = [];
-                for await (const chunk of this.state.ipfs.cat(restoreCID)) {
-                    chunks.push(chunk);
-                }
-                
-                const data = new TextDecoder().decode(Buffer.concat(chunks));
-                const backupData = JSON.parse(data);
-
-                // Validate backup data
-                if (!backupData.products || !backupData.activityHistory) {
-                    throw new Error('Format backup tidak valid');
-                }
-
-                // Restore data
-                this.state.products = backupData.products;
-                this.state.activityHistory = backupData.activityHistory;
-
-                // Save to localStorage
-                this.saveLocalData();
-                
-                // Update UI
-                this.updateUI();
-
-                this.showStatus(`✅ Data berhasil dipulihkan! ${backupData.products.length} produk`, 'success');
-                return true;
-
-            } catch (error) {
-                console.error('❌ Restore failed:', error);
-                this.showStatus('Gagal memulihkan data: ' + error.message, 'error');
-                return false;
-            }
-        }
-
-        updateIPFSManagerStatus() {
-            const statusElement = document.getElementById('ipfsManagerStatus');
-            const productCountElement = document.getElementById('ipfsProductCount');
-            const backupCountElement = document.getElementById('ipfsBackupCount');
-            const lastBackupElement = document.getElementById('lastBackupCID');
-            const gatewaysElement = document.getElementById('ipfsGateways');
-
-            if (statusElement) {
-                if (this.state.ipfsConnected) {
-                    statusElement.innerHTML = `
-                        <div class="ipfs-status-dot"></div>
-                        <div class="network-info">IPFS Terhubung - ${this.state.ipfsPeers} peers</div>
-                    `;
-                    statusElement.className = 'ipfs-status connected';
-                } else {
-                    statusElement.innerHTML = `
-                        <div class="ipfs-status-dot"></div>
-                        <div class="network-info">IPFS Offline</div>
-                    `;
-                    statusElement.className = 'ipfs-status disconnected';
-                }
-            }
-
-            if (productCountElement) {
-                productCountElement.textContent = this.state.products.length;
-            }
-
-            if (backupCountElement) {
-                backupCountElement.textContent = this.state.ipfsBackups.length;
-            }
-
-            if (lastBackupElement) {
-                lastBackupElement.value = this.state.lastBackupCID || 'Belum ada backup';
-            }
-
-            if (gatewaysElement && this.state.lastBackupCID) {
-                gatewaysElement.innerHTML = this.config.IPFS_GATEWAYS.map(gateway => `
-                    <div style="margin-bottom: 4px;">
-                        <a href="${gateway}${this.state.lastBackupCID}" target="_blank" class="ipfs-gateway-link">
-                            ${gateway.replace('https://', '').replace('/ipfs/', '')}...
-                        </a>
-                    </div>
-                `).join('');
-            }
-        }
-
-        loadIPFSBackups() {
-            try {
-                const savedBackups = localStorage.getItem('pi_trace_ipfs_backups');
-                if (savedBackups) {
-                    this.state.ipfsBackups = JSON.parse(savedBackups);
-                }
-                
-                const lastCID = localStorage.getItem('pi_trace_last_backup_cid');
-                if (lastCID) {
-                    this.state.lastBackupCID = lastCID;
-                }
-            } catch (error) {
-                console.warn('Error loading IPFS backups:', error);
-            }
-        }
-
-        saveIPFSBackups() {
-            try {
-                localStorage.setItem('pi_trace_ipfs_backups', JSON.stringify(this.state.ipfsBackups));
-                if (this.state.lastBackupCID) {
-                    localStorage.setItem('pi_trace_last_backup_cid', this.state.lastBackupCID);
-                }
-            } catch (error) {
-                console.warn('Error saving IPFS backups:', error);
-            }
         }
 
         // =============================================
@@ -3430,6 +3518,10 @@
         logout() {
             if (this.state.syncInterval) {
                 clearInterval(this.state.syncInterval);
+            }
+            
+            if (this.ipfsMonitorInterval) {
+                clearInterval(this.ipfsMonitorInterval);
             }
             
             this.state.currentUser = null;
