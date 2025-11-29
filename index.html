@@ -1557,7 +1557,10 @@
                         <span id="googleLoginText">Login dengan Google</span>
                     </button>
 
-                  
+                    <button class="btn btn-secondary btn-large" onclick="loginAsGuest()" id="guestLoginBtn">
+                        <i class="fas fa-user"></i>
+                        <span>Masuk sebagai Guest</span>
+                    </button>
                 </div>
 
                 <!-- Debug Info -->
@@ -2303,8 +2306,17 @@
                                 <button class="btn btn-outline" onclick="demoLogin()">
                                     Gunakan Akun Demo
                                 </button>
-                            </div>
 
+                                <div class="demo-accounts">
+                                    <p style="color: #5f6368; font-size: 14px; margin-bottom: 10px;">Akun Demo:</p>
+                                    <div class="demo-account" onclick="useDemoAccount('user@gmail.com', 'Demo User')">
+                                        user@gmail.com (Demo User)
+                                    </div>
+                                    <div class="demo-account" onclick="useDemoAccount('admin@gmail.com', 'Admin Demo')">
+                                        admin@gmail.com (Admin Demo)
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <script>
@@ -2328,16 +2340,30 @@
                                 }, '*');
                                 
                                 window.close();
-                            
-                            
-                            function useDemoAccount(email, name) {
-                                document.getElementById('email').value = email;
+                            }
+
+                            function demoLogin() {
+                                const userData = {
+                                    email: 'demo@example.com',
+                                    name: 'Demo User',
+                                    picture: null,
+                                    loginMethod: 'Google Demo'
+                                };
                                 
+                                window.opener.postMessage({
+                                    type: 'GOOGLE_LOGIN_SUCCESS',
+                                    user: userData
+                                }, '*');
+                                
+                                window.close();
+                            }
+
+                            function useDemoAccount(email, name) {
                                 const userData = {
                                     email: email,
                                     name: name,
                                     picture: null,
-                                    loginMethod: 'Google'
+                                    loginMethod: 'Google Demo'
                                 };
                                 
                                 window.opener.postMessage({
@@ -2410,6 +2436,21 @@
             this.showStatus(errorMessage, 'error');
         }
 
+        // =============================================
+        // 🎯 GUEST LOGIN
+        // =============================================
+
+        loginAsGuest() {
+            const guestUser = {
+                username: 'Guest User',
+                email: 'guest@example.com',
+                uid: `guest_${Date.now()}`,
+                loginMethod: 'Guest',
+                picture: null
+            };
+            
+            this.handleLoginSuccess(guestUser, 'Guest', false);
+        }
 
         // =============================================
         // 🎯 PI WALLET LOGIN SYSTEM
@@ -2528,7 +2569,7 @@
                 picture: user.picture
             };
             
-            this.state.isGuest = false;
+            this.state.isGuest = loginMethod === 'Guest';
             this.state.isSuperAdmin = isSuperAdmin;
             
             this.hideLoading();
@@ -3523,7 +3564,7 @@
             // Global functions
             window.loginWithPi = () => app.loginWithPi();
             window.loginWithGoogle = () => app.loginWithGoogle();
-          
+            window.loginAsGuest = () => app.loginAsGuest();
             window.logout = () => app.logout();
             window.showProductModal = () => app.showProductModal();
             window.submitProduct = () => app.submitProduct();
