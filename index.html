@@ -1557,11 +1557,7 @@
                         <span id="googleLoginText">Login dengan Google</span>
                     </button>
 
-                    <!-- Demo Login Button -->
-                    <button class="btn btn-outline btn-large" onclick="demoLogin()" id="demoLoginBtn">
-                        <i class="fas fa-user"></i>
-                        <span>Demo Mode (Tanpa Login)</span>
-                    </button>
+                  
                 </div>
 
                 <!-- Debug Info -->
@@ -2309,17 +2305,6 @@
                                 </button>
                             </div>
 
-                            <div class="demo-accounts">
-                                <p style="color: #5f6368; font-size: 14px; margin-bottom: 10px;">Akun Demo:</p>
-                                <div class="demo-account" onclick="useDemoAccount('pengguna.demo@pitrace.com', 'Pengguna Demo')">
-                                    <strong>Pengguna Demo</strong><br>
-                                    <small>pengguna.demo@pitrace.com</small>
-                                </div>
-                                <div class="demo-account" onclick="useDemoAccount('admin.demo@pitrace.com', 'Admin Demo')">
-                                    <strong>Admin Demo</strong><br>
-                                    <small>admin.demo@pitrace.com</small>
-                                </div>
-                            </div>
                         </div>
 
                         <script>
@@ -2343,23 +2328,7 @@
                                 }, '*');
                                 
                                 window.close();
-                            }
                             
-                            function demoLogin() {
-                                const userData = {
-                                    email: 'demo.user@pitrace.com',
-                                    name: 'Pengguna Demo',
-                                    picture: null,
-                                    loginMethod: 'Google'
-                                };
-                                
-                                window.opener.postMessage({
-                                    type: 'GOOGLE_LOGIN_SUCCESS', 
-                                    user: userData
-                                }, '*');
-                                
-                                window.close();
-                            }
                             
                             function useDemoAccount(email, name) {
                                 document.getElementById('email').value = email;
@@ -2441,22 +2410,6 @@
             this.showStatus(errorMessage, 'error');
         }
 
-        // =============================================
-        // 🎯 DEMO LOGIN FUNCTION
-        // =============================================
-
-        demoLogin() {
-            const user = {
-                username: 'Demo User',
-                email: 'demo@pitrace.com',
-                uid: `demo_${Date.now()}`,
-                loginMethod: 'Demo',
-                picture: null
-            };
-            
-            this.handleLoginSuccess(user, 'Demo Mode');
-            this.showStatus('Berhasil masuk sebagai pengguna demo', 'success');
-        }
 
         // =============================================
         // 🎯 PI WALLET LOGIN SYSTEM
@@ -3570,7 +3523,7 @@
             // Global functions
             window.loginWithPi = () => app.loginWithPi();
             window.loginWithGoogle = () => app.loginWithGoogle();
-            window.demoLogin = () => app.demoLogin();
+          
             window.logout = () => app.logout();
             window.showProductModal = () => app.showProductModal();
             window.submitProduct = () => app.submitProduct();
