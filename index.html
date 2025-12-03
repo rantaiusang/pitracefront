@@ -1613,10 +1613,7 @@
                         <span id="googleLoginText">Login dengan Google</span>
                     </button>
 
-                    <button class="btn btn-secondary btn-large" onclick="loginAsGuest()" id="guestLoginBtn">
-                        <i class="fas fa-user"></i>
-                        <span>Masuk sebagai Guest</span>
-                    </button>
+        
                 </div>
 
                 <!-- Debug Info -->
@@ -2062,7 +2059,7 @@
             
             this.state = {
                 currentUser: null,
-                isGuest: false,
+            
                 isSuperAdmin: false,
                 products: [],
                 activityHistory: [],
@@ -2423,21 +2420,8 @@
             });
         }
 
-        // =============================================
-        // 🎯 GUEST LOGIN
-        // =============================================
-
-        loginAsGuest() {
-            const guestUser = {
-                username: 'Guest User',
-                email: 'guest@example.com',
-                uid: `guest_${Date.now()}`,
-                loginMethod: 'Guest',
-                picture: null
-            };
-            
-            this.handleLoginSuccess(guestUser, 'Guest', false);
-        }
+    
+    
 
         // =============================================
         // 🎯 PI WALLET LOGIN SYSTEM - DIPERBAIKI
@@ -2574,7 +2558,7 @@
                 picture: user.picture
             };
             
-            this.state.isGuest = loginMethod === 'Guest';
+
             this.state.isSuperAdmin = isSuperAdmin || 
                 (user.email === this.config.SUPER_ADMIN_EMAIL) ||
                 user.email?.includes('superadmin');
@@ -2641,10 +2625,8 @@
             this.loadProducts();
             this.updateUI();
             
-            // Start sync if not guest
-            if (!this.state.isGuest) {
-                this.startSync();
-            }
+          // SELALU start sync (tidak ada lagi pengecekan guest):
+    this.startSync();
             
             // Update IPFS manager status
             setTimeout(() => {
@@ -3061,11 +3043,7 @@
         // 🎯 PAYMENT SYSTEM
         // =============================================
 
-        createPayment() {
-            if (this.state.isGuest) {
-                this.showStatus('Fitur pembayaran tidak tersedia untuk guest', 'warning');
-                return;
-            }
+     
 
             if (!this.state.isPiBrowser || !this.state.piSDKReady) {
                 this.showStatus('Pembayaran Pi hanya tersedia di Pi Browser dengan SDK aktif', 'warning');
@@ -3332,7 +3310,7 @@
             }
             
             this.state.currentUser = null;
-            this.state.isGuest = false;
+            
             this.state.isSuperAdmin = false;
             this.state.isLoggingIn = false;
             this.state.loginAttempts = 0;
