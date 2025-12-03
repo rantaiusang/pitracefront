@@ -1578,6 +1578,31 @@
             transition-duration: 0.01ms !important;
         }
     }
+      /* ============================================= */
+/* FIX FOR DOUBLE ICONS - ADD THIS AT THE END */
+/* ============================================= */
+
+/* Remove all pseudo-elements causing duplicate icons */
+.btn::before,
+.btn::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+}
+
+/* Ensure only one icon is visible */
+#piLoginBtn i,
+#googleLoginBtn i {
+    display: block !important;
+    position: relative;
+    z-index: 10;
+}
+
+/* Simple clean buttons */
+.btn-primary,
+.btn-google {
+    background-image: none !important;
+}  
     </style>
 </head>
 <body>
