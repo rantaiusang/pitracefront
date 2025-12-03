@@ -8,62 +8,49 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Pi SDK - DIPERBAIKI -->
+    <!-- Pi SDK - SIMPLIFIED -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-    // Inisialisasi Pi SDK yang lebih robust
+    // Simple Pi SDK initialization
     (function() {
-      let piSDKInitialized = false;
-      let initializationAttempts = 0;
-      const MAX_ATTEMPTS = 5;
-      
-      function initializePiSDK() {
-        initializationAttempts++;
-        
-        if (typeof window.Pi === 'undefined') {
-          console.warn(`❌ Pi SDK not available (attempt ${initializationAttempts}/${MAX_ATTEMPTS})`);
-          
-          if (initializationAttempts < MAX_ATTEMPTS) {
-            setTimeout(initializePiSDK, 1000);
-            return;
-          }
-          
-          console.error('💥 Pi SDK failed to load after maximum attempts');
-          window.Pi = {
-            init: function() { console.warn('Pi SDK mock: SDK not available'); },
-            authenticate: function() { 
-              return Promise.reject(new Error('Pi SDK not available. Use Pi Browser.')); 
+        function initializePi() {
+            if (typeof window.Pi !== 'undefined') {
+                try {
+                    window.Pi.init({ 
+                        version: "2.0",
+                        sandbox: false 
+                    });
+                    console.log('✅ Pi SDK initialized');
+                    updateLoginButton(true);
+                } catch (error) {
+                    console.warn('Pi SDK init error:', error);
+                    updateLoginButton(false);
+                }
+            } else {
+                console.warn('Pi SDK not loaded');
+                updateLoginButton(false);
             }
-          };
-          return;
         }
         
-        try {
-          window.Pi.init({ 
-            version: "2.0",
-            sandbox: false
-          });
-          
-          piSDKInitialized = true;
-          console.log('✅ Pi SDK initialized successfully');
-          
-          // Dispatch event untuk memberi tahu aplikasi bahwa SDK siap
-          const event = new CustomEvent('pi-sdk-ready', { 
-            detail: { initialized: true } 
-          });
-          window.dispatchEvent(event);
-          
-        } catch (error) {
-          console.error('❌ Pi SDK initialization error:', error);
-          
-          if (initializationAttempts < MAX_ATTEMPTS) {
-            setTimeout(initializePiSDK, 1000);
-          }
+        function updateLoginButton(isAvailable) {
+            const piLoginBtn = document.getElementById('piLoginBtn');
+            const piLoginText = document.getElementById('piLoginText');
+            
+            if (isAvailable) {
+                piLoginBtn.disabled = false;
+                piLoginBtn.classList.remove('btn-disabled');
+                piLoginBtn.classList.add('btn-enabled');
+                piLoginText.innerHTML = '<i class="fab fa-raspberry-pi"></i> Login dengan Pi Wallet';
+            } else {
+                piLoginBtn.disabled = true;
+                piLoginBtn.classList.add('btn-disabled');
+                piLoginBtn.classList.remove('btn-enabled');
+                piLoginText.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Hanya di Pi Browser';
+            }
         }
-      }
-      
-      // Mulai inisialisasi
-      setTimeout(initializePiSDK, 500);
+        
+        // Try initialization
+        setTimeout(initializePi, 1000);
     })();
     </script>
     
@@ -368,17 +355,16 @@
         border-radius: 8px;
     }
 
-    .btn-disabled {
-        background: rgba(255, 255, 255, 0.1) !important;
-        color: rgba(255, 255, 255, 0.5) !important;
-        cursor: not-allowed !important;
+    /* PERBAIKAN: Hapus .btn-disabled yang terlalu strict */
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
         transform: none !important;
-        box-shadow: none !important;
     }
 
-    .btn-disabled:hover {
+    .btn:disabled:hover {
         transform: none !important;
-        box-shadow: none !important;
+        box-shadow: 0 6px 20px rgba(67, 97, 238, 0.3) !important;
     }
 
     .btn-loading {
@@ -403,6 +389,14 @@
 
     @keyframes spin {
         to { transform: rotate(360deg); }
+    }
+
+    /* Class untuk tombol enabled */
+    .btn-enabled {
+        background: linear-gradient(135deg, var(--primary), #764ba2) !important;
+        color: var(--white) !important;
+        cursor: pointer !important;
+        box-shadow: 0 6px 20px rgba(67, 97, 238, 0.3) !important;
     }
 
     /* IPFS Button */
@@ -1612,8 +1606,6 @@
                         <i class="fab fa-google"></i>
                         <span id="googleLoginText">Login dengan Google</span>
                     </button>
-
-        
                 </div>
 
                 <!-- Debug Info -->
@@ -2031,10 +2023,10 @@
     <!-- Status Container -->
     <div id="statusContainer" class="status-container"></div>
 
-    <!-- FIXED JAVASCRIPT - PI SDK IMPROVED -->
+    <!-- FIXED JAVASCRIPT -->
     <script>
     // =============================================
-    // FIXED PI TRACE APPLICATION - IMPROVED PI SDK
+    // FIXED PI TRACE APPLICATION - SIMPLIFIED
     // =============================================
     class FixedPiTraceApp {
         constructor() {
@@ -2059,7 +2051,6 @@
             
             this.state = {
                 currentUser: null,
-            
                 isSuperAdmin: false,
                 products: [],
                 activityHistory: [],
@@ -2081,28 +2072,14 @@
                 ipfsBackups: [],
                 lastBackupCID: null,
                 // Login state
-                isLoggingIn: false,
-                // Pi SDK state
-                piSDKReady: false
-            };
-            
-            this.cache = {
-                products: new Map(),
-                searchResults: new Map()
+                isLoggingIn: false
             };
             
             this.init();
         }
 
         async init() {
-            console.log('🚀 Initializing Fixed PI TRACE App...');
-            
-            // Listen for Pi SDK ready event
-            window.addEventListener('pi-sdk-ready', (event) => {
-                this.state.piSDKReady = true;
-                console.log('✅ Pi SDK ready event received');
-                this.updatePiSDKStatus('Tersedia');
-            });
+            console.log('🚀 Initializing PI TRACE App...');
             
             // Initialize basic environment
             await this.checkEnvironment();
@@ -2124,16 +2101,14 @@
             const browserStatus = this.state.isPiBrowser ? 'Terdeteksi' : 'Tidak terdeteksi';
             document.getElementById('piBrowserStatus').textContent = browserStatus;
             
-            // Update Pi SDK status
+            // Check Pi SDK
             setTimeout(() => {
-                if (typeof window.Pi !== 'undefined' && window.Pi.init) {
-                    this.updatePiSDKStatus('Tersedia');
+                if (typeof window.Pi !== 'undefined') {
+                    document.getElementById('piSDKStatus').textContent = 'Tersedia';
                 } else {
-                    this.updatePiSDKStatus('Tidak tersedia');
+                    document.getElementById('piSDKStatus').textContent = 'Tidak tersedia';
                 }
-            }, 2000);
-            
-            this.updateLoginButtons();
+            }, 1500);
         }
 
         detectPiBrowser() {
@@ -2149,32 +2124,8 @@
             return isPi;
         }
 
-        updatePiSDKStatus(status) {
-            document.getElementById('piSDKStatus').textContent = status;
-        }
-
-        updateLoginButtons() {
-            const piLoginBtn = document.getElementById('piLoginBtn');
-            const piLoginText = document.getElementById('piLoginText');
-            
-            if (!this.state.isPiBrowser) {
-                piLoginBtn.classList.add('btn-disabled');
-                piLoginBtn.disabled = true;
-                piLoginText.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Hanya di Pi Browser';
-                this.showStatus('Aplikasi memerlukan Pi Browser untuk fitur lengkap', 'warning');
-            } else if (!this.state.piSDKReady) {
-                piLoginBtn.classList.add('btn-disabled');
-                piLoginBtn.disabled = true;
-                piLoginText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menunggu SDK...';
-            } else {
-                piLoginBtn.classList.remove('btn-disabled');
-                piLoginBtn.disabled = false;
-                piLoginText.innerHTML = '<i class="fab fa-raspberry-pi"></i> Login dengan Pi Wallet';
-            }
-        }
-
         // =============================================
-        // 🎯 SIMPLE GOOGLE LOGIN IMPLEMENTATION
+        // 🎯 SIMPLE GOOGLE LOGIN
         // =============================================
 
         async loginWithGoogle() {
@@ -2188,243 +2139,56 @@
             const googleBtn = document.getElementById('googleLoginBtn');
             const googleText = document.getElementById('googleLoginText');
             
-            googleBtn.classList.add('btn-loading');
-            googleText.textContent = 'Membuka Google...';
+            googleBtn.disabled = true;
+            googleText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuka...';
 
             try {
                 this.showLoading('Menginisialisasi...', 'Mempersiapkan login Google...');
                 
-                // Use popup for Google login
-                const user = await this.googleLoginWithPopup();
-                this.handleLoginSuccess(user, 'Google', false);
+                // Simple Google login simulation
+                const user = await this.simpleGoogleLogin();
+                this.handleLoginSuccess(user, 'Google');
                 
             } catch (error) {
                 console.error('❌ Google login failed:', error);
                 this.handleAuthError(error, 'Google');
             } finally {
                 this.state.isLoggingIn = false;
-                googleBtn.classList.remove('btn-loading');
+                googleBtn.disabled = false;
                 googleText.innerHTML = '<i class="fab fa-google"></i> Login dengan Google';
             }
         }
 
-        async googleLoginWithPopup() {
-            return new Promise((resolve, reject) => {
-                // Create popup for Google-like login
-                const popupWidth = 400;
-                const popupHeight = 500;
-                const left = (screen.width - popupWidth) / 2;
-                const top = (screen.height - popupHeight) / 2;
-                
-                const popup = window.open(
-                    '',
-                    'google_login',
-                    `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
-                );
-                
-                if (!popup) {
-                    reject(new Error('Popup diblokir. Izinkan popup untuk website ini.'));
-                    return;
-                }
-
-                // Create simple login form
-                const googleLoginHTML = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Login dengan Google</title>
-                        <style>
-                            body {
-                                font-family: 'Segoe UI', Arial, sans-serif;
-                                margin: 0;
-                                padding: 0;
-                                background: white;
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                justify-content: center;
-                                min-height: 100vh;
-                            }
-                            .container {
-                                width: 100%;
-                                max-width: 360px;
-                                padding: 20px;
-                                text-align: center;
-                            }
-                            .google-logo {
-                                width: 75px;
-                                height: 75px;
-                                margin: 0 auto 20px;
-                                background: conic-gradient(from -45deg, #ea4335 110deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg);
-                                border-radius: 50%;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                font-size: 2rem;
-                                color: white;
-                                font-weight: bold;
-                            }
-                            h1 {
-                                color: #202124;
-                                font-size: 24px;
-                                font-weight: 400;
-                                margin-bottom: 8px;
-                            }
-                            .subtitle {
-                                color: #5f6368;
-                                font-size: 16px;
-                                margin-bottom: 40px;
-                            }
-                            .demo-accounts {
-                                margin-top: 30px;
-                                border-top: 1px solid #dadce0;
-                                padding-top: 20px;
-                            }
-                            .demo-account {
-                                padding: 12px;
-                                margin: 8px 0;
-                                border: 1px solid #dadce0;
-                                border-radius: 8px;
-                                cursor: pointer;
-                                transition: background-color 0.2s;
-                                text-align: center;
-                            }
-                            .demo-account:hover {
-                                background: #f8f9fa;
-                            }
-                            .demo-account.selected {
-                                background: #e8f0fe;
-                                border-color: #1a73e8;
-                            }
-                            .btn {
-                                width: 100%;
-                                padding: 12px;
-                                border: none;
-                                border-radius: 4px;
-                                font-size: 14px;
-                                font-weight: 500;
-                                cursor: pointer;
-                                transition: background-color 0.2s;
-                                margin-top: 20px;
-                            }
-                            .btn-primary {
-                                background: #1a73e8;
-                                color: white;
-                            }
-                            .btn-primary:hover {
-                                background: #1669d6;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <div class="google-logo">G</div>
-                            <h1>Pilih Akun Demo</h1>
-                            <div class="subtitle">Lanjutkan ke PI TRACE</div>
-                            
-                            <div class="demo-accounts">
-                                <div class="demo-account" data-email="user@gmail.com" data-name="Demo User" onclick="selectAccount(this)">
-                                    <strong>Demo User</strong><br>
-                                    <small>user@gmail.com</small>
-                                </div>
-                                <div class="demo-account" data-email="admin@gmail.com" data-name="Admin Demo" onclick="selectAccount(this)">
-                                    <strong>Admin Demo</strong><br>
-                                    <small>admin@gmail.com</small>
-                                </div>
-                                <div class="demo-account" data-email="superadmin@pi.network" data-name="Super Admin" onclick="selectAccount(this)">
-                                    <strong>Super Admin</strong><br>
-                                    <small>superadmin@pi.network</small>
-                                </div>
-                            </div>
-                            
-                            <button class="btn btn-primary" onclick="login()" id="loginBtn" disabled>
-                                Lanjutkan dengan akun yang dipilih
-                            </button>
-                        </div>
-
-                        <script>
-                            let selectedAccount = null;
-                            
-                            function selectAccount(element) {
-                                // Remove previous selection
-                                document.querySelectorAll('.demo-account').forEach(el => {
-                                    el.classList.remove('selected');
-                                });
-                                
-                                // Set new selection
-                                element.classList.add('selected');
-                                selectedAccount = {
-                                    email: element.dataset.email,
-                                    name: element.dataset.name
-                                };
-                                
-                                // Enable login button
-                                document.getElementById('loginBtn').disabled = false;
-                            }
-                            
-                            function login() {
-                                if (!selectedAccount) {
-                                    alert('Pilih akun terlebih dahulu');
-                                    return;
-                                }
-                                
-                                const userData = {
-                                    email: selectedAccount.email,
-                                    name: selectedAccount.name,
-                                    picture: null,
-                                    loginMethod: 'Google Demo'
-                                };
-                                
-                                window.opener.postMessage({
-                                    type: 'GOOGLE_LOGIN_SUCCESS',
-                                    user: userData
-                                }, '*');
-                                
-                                window.close();
-                            }
-                        <\/script>
-                    </body>
-                    </html>
-                `;
-
-                popup.document.write(googleLoginHTML);
-                popup.document.close();
-
-                // Handle message from popup
-                const messageHandler = (event) => {
-                    if (event.data.type === 'GOOGLE_LOGIN_SUCCESS') {
-                        window.removeEventListener('message', messageHandler);
-                        popup.close();
-                        
-                        const user = event.data.user;
-                        user.uid = `google_${Date.now()}`;
-                        user.username = user.name;
-                        
-                        resolve(user);
-                    }
-                };
-
-                window.addEventListener('message', messageHandler);
-
-                // Handle popup closing
-                const checkPopup = setInterval(() => {
-                    if (popup.closed) {
-                        clearInterval(checkPopup);
-                        window.removeEventListener('message', messageHandler);
-                        if (!this.state.currentUser) {
-                            reject(new Error('Login dibatalkan oleh pengguna'));
+        async simpleGoogleLogin() {
+            // Simulate Google login with demo accounts
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const demoAccounts = [
+                        {
+                            username: 'Google User',
+                            email: 'user@gmail.com',
+                            uid: `google_${Date.now()}`,
+                            picture: null,
+                            loginMethod: 'Google'
+                        },
+                        {
+                            username: 'Admin Google',
+                            email: 'admin@gmail.com',
+                            uid: `google_admin_${Date.now()}`,
+                            picture: null,
+                            loginMethod: 'Google'
                         }
-                    }
-                }, 500);
-
+                    ];
+                    
+                    // Pick random demo account
+                    const user = demoAccounts[Math.floor(Math.random() * demoAccounts.length)];
+                    resolve(user);
+                }, 1000);
             });
         }
 
-    
-    
-
         // =============================================
-        // 🎯 PI WALLET LOGIN SYSTEM - DIPERBAIKI
+        // 🎯 PI WALLET LOGIN
         // =============================================
 
         async loginWithPi() {
@@ -2441,14 +2205,14 @@
             const piLoginBtn = document.getElementById('piLoginBtn');
             const piLoginText = document.getElementById('piLoginText');
             
-            piLoginBtn.classList.add('btn-loading');
-            piLoginText.textContent = 'Membuka Pi Wallet...';
+            piLoginBtn.disabled = true;
+            piLoginText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuka...';
             
             try {
                 this.showLoading('Menginisialisasi...', 'Memeriksa Pi Browser...');
                 
                 if (!this.state.isPiBrowser) {
-                    throw new Error('Aplikasi ini hanya dapat diakses melalui Pi Browser. Silakan buka aplikasi ini di Pi Browser.');
+                    throw new Error('Aplikasi ini hanya dapat diakses melalui Pi Browser.');
                 }
 
                 // Wait for Pi SDK
@@ -2469,7 +2233,7 @@
                 
             } finally {
                 this.state.isLoggingIn = false;
-                piLoginBtn.classList.remove('btn-loading');
+                piLoginBtn.disabled = false;
                 piLoginText.innerHTML = '<i class="fab fa-raspberry-pi"></i> Login dengan Pi Wallet';
             }
         }
@@ -2477,12 +2241,10 @@
         async waitForPiSDK() {
             return new Promise((resolve, reject) => {
                 let attempts = 0;
-                const maxAttempts = 10;
+                const maxAttempts = 5;
                 
                 const checkSDK = () => {
                     attempts++;
-                    
-                    console.log(`⏳ Checking Pi SDK (attempt ${attempts}/${maxAttempts})...`);
                     
                     if (typeof window.Pi !== 'undefined' && typeof window.Pi.init === 'function') {
                         console.log('✅ Pi SDK is available');
@@ -2491,7 +2253,7 @@
                     }
                     
                     if (attempts >= maxAttempts) {
-                        reject(new Error('Pi SDK tidak dapat dimuat. Pastikan Anda menggunakan Pi Browser terbaru.'));
+                        reject(new Error('Pi SDK tidak dapat dimuat.'));
                         return;
                     }
                     
@@ -2504,14 +2266,12 @@
 
         async authenticateWithPi() {
             return new Promise((resolve, reject) => {
-                // Set timeout untuk mencegah hanging
                 const authTimeout = setTimeout(() => {
                     reject(new Error('Authentication timeout. Please try again.'));
-                }, 45000); // 45 detik timeout
+                }, 30000);
                 
                 const scopes = ['username', 'payments', 'wallet_address'];
                 
-                // Gunakan callback API seperti di dokumentasi resmi
                 window.Pi.authenticate(scopes, (auth) => {
                     clearTimeout(authTimeout);
                     
@@ -2536,18 +2296,13 @@
                 }, (error) => {
                     clearTimeout(authTimeout);
                     console.error('❌ Pi authentication error:', error);
-                    
-                    if (error && error.message) {
-                        reject(new Error(error.message));
-                    } else {
-                        reject(new Error('Authentication failed'));
-                    }
+                    reject(new Error(error.message || 'Authentication failed'));
                 });
             });
         }
 
         handleLoginSuccess(user, loginMethod, isSuperAdmin = false) {
-            console.log('✅ Login successful:', { user, loginMethod, isSuperAdmin });
+            console.log('✅ Login successful:', { user, loginMethod });
             
             this.state.currentUser = {
                 username: user.username,
@@ -2557,12 +2312,10 @@
                 loginMethod: loginMethod,
                 picture: user.picture
             };
-            
 
             this.state.isSuperAdmin = isSuperAdmin || 
-                (user.email === this.config.SUPER_ADMIN_EMAIL) ||
-                user.email?.includes('superadmin');
-            
+                (user.email === this.config.SUPER_ADMIN_EMAIL);
+
             this.hideLoading();
             this.showMainApp(user.username, loginMethod, this.state.isSuperAdmin);
             
@@ -2572,7 +2325,7 @@
             }
             
             this.showStatus(welcomeMessage, 'success');
-            this.updateSystemStatus(`User: ${user.username} - ${loginMethod}${this.state.isSuperAdmin ? ' - Super Admin' : ''}`);
+            this.updateSystemStatus(`User: ${user.username} - ${loginMethod}`);
             
             this.state.loginAttempts = 0;
             this.initializeAppFeatures();
@@ -2586,13 +2339,11 @@
             if (error.message.includes('Pi Browser')) {
                 errorMessage = 'Aplikasi ini hanya dapat diakses melalui Pi Browser.';
             } else if (error.message.includes('SDK')) {
-                errorMessage = 'Pi SDK tidak tersedia. Pastikan menggunakan Pi Browser.';
+                errorMessage = 'Pi SDK tidak tersedia.';
             } else if (error.message.includes('dibatalkan')) {
                 errorMessage = 'Autentikasi dibatalkan.';
             } else if (error.message.includes('timeout')) {
                 errorMessage = 'Timeout - coba lagi.';
-            } else if (error.message.includes('Popup')) {
-                errorMessage = 'Popup diblokir. Izinkan popup untuk website ini.';
             } else {
                 errorMessage = `Error: ${error.message}`;
             }
@@ -2625,8 +2376,8 @@
             this.loadProducts();
             this.updateUI();
             
-          // SELALU start sync (tidak ada lagi pengecekan guest):
-    this.startSync();
+            // Start sync
+            this.startSync();
             
             // Update IPFS manager status
             setTimeout(() => {
@@ -3043,10 +2794,9 @@
         // 🎯 PAYMENT SYSTEM
         // =============================================
 
-     
-
-            if (!this.state.isPiBrowser || !this.state.piSDKReady) {
-                this.showStatus('Pembayaran Pi hanya tersedia di Pi Browser dengan SDK aktif', 'warning');
+        createPayment() {
+            if (!this.state.isPiBrowser) {
+                this.showStatus('Pembayaran Pi hanya tersedia di Pi Browser', 'warning');
                 return;
             }
 
@@ -3232,16 +2982,6 @@
             document.addEventListener('click', (e) => {
                 if (e.target.classList.contains('modal')) {
                     e.target.style.display = 'none';
-                }
-            });
-            
-            // Handle Google login messages
-            window.addEventListener('message', (event) => {
-                if (event.data.type === 'GOOGLE_LOGIN_SUCCESS') {
-                    const user = event.data.user;
-                    user.uid = `google_${Date.now()}`;
-                    user.username = user.name;
-                    this.handleLoginSuccess(user, 'Google');
                 }
             });
         }
@@ -3570,7 +3310,6 @@
             // Global functions
             window.loginWithPi = () => app.loginWithPi();
             window.loginWithGoogle = () => app.loginWithGoogle();
-            window.loginAsGuest = () => app.loginAsGuest();
             window.logout = () => app.logout();
             window.showProductModal = () => app.showProductModal();
             window.submitProduct = () => app.submitProduct();
